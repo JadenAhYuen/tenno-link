@@ -47,7 +47,7 @@ function normalizeProfile(profile) {
 
   return {
     identity: {
-      displayName: result?.DisplayName ?? "Tenno",
+      displayName: cleanDisplayName(result?.DisplayName),
       masteryRank: result?.PlayerLevel ?? stats?.PlayerLevel ?? null
     },
 
@@ -67,7 +67,13 @@ function normalizeProfile(profile) {
       secondary: arr(loadoutInventory?.Pistols),
       melee: arr(loadoutInventory?.Melee),
       xpInfo: arr(loadoutInventory?.XPInfo),
-      weaponStats: arr(stats?.Weapons)
+      weaponStats: arr(stats?.Weapons),
+      current: {
+        warframe: equipmentName(arr(loadoutInventory?.Suits)[0]?.ItemType),
+        primary: equipmentName(arr(loadoutInventory?.LongGuns)[0]?.ItemType),
+        secondary: equipmentName(arr(loadoutInventory?.Pistols)[0]?.ItemType),
+        melee: equipmentName(arr(loadoutInventory?.Melee)[0]?.ItemType)
+      }
     },
 
     progression: {
