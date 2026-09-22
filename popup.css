@@ -1134,3 +1134,164 @@ footer{
   from{transform:rotate(-7deg) scale(.96)}
   to{transform:rotate(8deg) scale(1.04)}
 }
+
+
+/* Adaptive popup sizing: each page determines its height, capped below Chrome's popup limit */
+html,body{
+  height:auto;
+  min-height:0;
+  max-height:600px;
+  overflow:hidden;
+}
+
+main{
+  height:auto;
+  min-height:0;
+  max-height:600px;
+  overflow:hidden;
+}
+
+.ai-panel{
+  height:auto;
+  min-height:0;
+  overflow:visible;
+}
+
+footer{
+  position:static;
+  margin-top:8px;
+}
+
+/* Keep AI page compact enough to remain fully visible without scrolling */
+body[data-page="ai"] .topbar{
+  margin-bottom:6px;
+}
+
+body[data-page="ai"] .hero-panel{
+  height:72px;
+  min-height:72px;
+  padding-top:10px;
+  padding-bottom:10px;
+}
+
+body[data-page="ai"] .name{
+  font-size:21px;
+}
+
+body[data-page="ai"] .profile-meta{
+  margin-top:3px;
+}
+
+body[data-page="ai"] .primary-nav{
+  margin:7px 0;
+}
+
+body[data-page="ai"] .ai-panel{
+  padding:12px 14px;
+}
+
+body[data-page="ai"] .section-title{
+  margin-bottom:8px;
+}
+
+body[data-page="ai"] .prompt-shell{
+  padding:9px 11px;
+}
+
+body[data-page="ai"] .prompt-shell .muted{
+  margin:5px 0 0;
+  font-size:9.5px;
+  line-height:1.35;
+}
+
+body[data-page="ai"] select{
+  padding:8px 10px;
+}
+
+body[data-page="ai"] .ai-options-grid{
+  margin-top:7px;
+  gap:7px;
+}
+
+body[data-page="ai"] .option-panel{
+  min-height:76px;
+  padding:9px 10px;
+}
+
+body[data-page="ai"] .toggles{
+  margin-top:6px;
+  gap:5px;
+  font-size:9.5px;
+}
+
+body[data-page="ai"] .format{
+  margin-top:6px;
+}
+
+body[data-page="ai"] .format button{
+  padding:7px 6px;
+  font-size:9.5px;
+}
+
+body[data-page="ai"] .copy-grid{
+  margin-top:7px;
+  gap:6px;
+}
+
+body[data-page="ai"] .copy-action,
+body[data-page="ai"] .gold{
+  min-height:45px;
+  padding:7px 9px;
+}
+
+body[data-page="ai"] .copy-action strong,
+body[data-page="ai"] .gold strong{
+  font-size:9px;
+}
+
+body[data-page="ai"] .copy-action small,
+body[data-page="ai"] .gold small{
+  font-size:8px;
+  margin-top:2px;
+}
+
+/* Warframe-style header refinement */
+.brand-icon img{
+  transform-origin:center;
+}
+
+.brand-icon::after{
+  content:"";
+  position:absolute;
+  width:44px;
+  height:14px;
+  border:1px solid rgba(217,184,117,.28);
+  border-left-color:transparent;
+  border-right-color:transparent;
+  border-radius:50%;
+  transform:rotate(-18deg);
+  animation:ringSpinReverse 9s linear infinite;
+}
+
+.hero-panel{
+  border-color:rgba(118,242,239,.23);
+  background:
+    radial-gradient(circle at 92% 30%,rgba(217,184,117,.035),transparent 22%),
+    linear-gradient(180deg,rgba(10,34,44,.92),rgba(7,23,31,.80));
+}
+
+.hero-panel::before{
+  left:20px;
+  right:20px;
+  background:linear-gradient(90deg,var(--cyan),rgba(118,242,239,.08) 32%,transparent 68%,rgba(217,184,117,.35));
+}
+
+.primary-nav button.active::after{
+  content:"";
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:var(--cyan);
+  box-shadow:0 0 8px rgba(118,242,239,.55);
+  margin-left:4px;
+}
