@@ -39,6 +39,33 @@ function arr(value) {
   return Array.isArray(value) ? value : [];
 }
 
+function cleanDisplayName(value) {
+  return String(value ?? "Tenno")
+    .replace(/[\uE000-\uF8FF]/g, "")
+    .replace(/[\u0000-\u001F]/g, "")
+    .trim() || "Tenno";
+}
+
+function equipmentName(uniqueName) {
+  const known = {
+    "/Lotus/Powersuits/Mag/Mag": "Mag",
+    "/Lotus/Weapons/Tenno/LongGuns/TnWispRifle/TnWispRifle": "Fulmin",
+    "/Lotus/Weapons/Tenno/Pistol/AutoPistol": "Furis",
+    "/Lotus/Weapons/MK1Series/MK1Furax": "MK1-Furax"
+  };
+
+  if (!uniqueName) return "—";
+  if (known[uniqueName]) return known[uniqueName];
+
+  const tail = String(uniqueName).split("/").filter(Boolean).pop() || String(uniqueName);
+
+  return tail
+    .replace(/^Tn/, "")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/_/g, " ")
+    .trim() || "—";
+}
+
 function normalizeProfile(profile) {
   const result = arr(profile?.Results)[0] || {};
   const loadoutInventory = result?.LoadOutInventory || {};
