@@ -1,7 +1,9 @@
 const $ = id => document.getElementById(id);
 
 let state = {};
-let format = "recommended";\nlet inventoryQuery = "";\nlet inventoryCategory = "all";
+let format = "recommended";
+let inventoryQuery = "";
+let inventoryCategory = "all";
 let prompt =
   typeof PROMPTS !== "undefined" && PROMPTS.length
     ? PROMPTS[0]
