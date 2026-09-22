@@ -1,7 +1,7 @@
 const $ = id => document.getElementById(id);
 
 let state = {};
-let format = "recommended";
+let format = "recommended";\nlet inventoryQuery = "";\nlet inventoryCategory = "all";
 let prompt =
   typeof PROMPTS !== "undefined" && PROMPTS.length
     ? PROMPTS[0]
@@ -191,38 +191,147 @@ function rewardText(invasion) {
   );
 }
 
-function renderResources() {
-  const w = world();
+function formatQuantity(value) {
+  if (value == null || Number.isNaN(Number(value))) return "—";
+  return Number(value).toLocaleString();
+}
 
-  const invasions = (w?.invasions || [])
-    .filter(entry => !entry.completed)
-    .slice(0, 6);
+function inventoryItems() {
+  return profile()?.inventory?.items || [];
+}
+
+function filteredInventoryItems() {
+  const query = inventoryQuery.trim().toLowerCase();
+
+  return inventoryItems()
+    .filter(entry => {
+      if (inventoryCategory !== "all" && entry.category !== inventoryCategory) {
+        return false;
+      }
+
+      if (!query) return true;
+
+      return [
+        entry.name,
+        entry.uniqueName,
+        entry.category
+      ]
+        .filter(Boolean)
+        .some(value => String(value).toLowerCase().includes(query));
+    })
+    .sort((a, b) => {
+      if (a.category !== b.category) return a.category.localeCompare(b.category);
+      return a.name.localeCompare(b.name);
+    });
+}
+
+function inventoryRow(entry) {
+  return `
+    <div class="inventory-row">
+      <div class="inventory-main">
+        <div class="inventory-glyph" aria-hidden="true">◇</div>
+        <div>
+          <b>${entry.name}</b>
+          <small>${entry.category.toUpperCase()}</small>
+        </div>
+      </div>
+      <strong>${formatQuantity(entry.quantity)}</strong>
+    </div>
+  `;
+}
+
+function renderResources() {
+  const inventory = profile()?.inventory;
+  const items = filteredInventoryItems();
+  const categories = ["all", "currency", "resources", "parts", "blueprints", "relics", "mods", "gear", "other"];
+  const ready = state?.crafting?.materialsReady || [];
 
   $("resources").innerHTML = `
-    <div class="panel">
+    <div class="panel inventory-panel">
       <div class="section-title">
-        <span>RESOURCE OPPORTUNITIES</span>
-        <small>Live rewards</small>
+        <span>INVENTORY</span>
+        <small>${inventory?.summary?.totalEntries ?? 0} detected entries</small>
+      </div>
+
+      <div class="inventory-search-wrap">
+        <span class="search-icon">⌕</span>
+        <input id="inventorySearch" class="inventory-search" type="search"
+          placeholder="Search inventory..." value="${inventoryQuery.replace(/"/g, "&quot;")}">
+      </div>
+
+      <div class="inventory-filters">
+        ${categories.map(category => `
+          <button data-inventory-category="${category}" class="${inventoryCategory === category ? "active" : ""}">
+            ${category === "all" ? "ALL" : category.toUpperCase()}
+          </button>
+        `).join("")}
+      </div>
+
+      <div class="inventory-meta">
+        <span>${items.length} shown</span>
+        <span>Profile-derived balances only</span>
+      </div>
+
+      <div class="inventory-list">
+        ${items.length
+          ? items.slice(0, 100).map(inventoryRow).join("")
+          : `
+            <div class="inventory-empty">
+              <b>No matching inventory entries</b>
+              <span>Tenno Link only displays quantity-bearing data actually found in your profile JSON.</span>
+            </div>
+          `
+        }
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:8px">
+      <div class="section-title">
+        <span>MATERIALS READY</span>
+        <small>Derived from WFCD recipes</small>
       </div>
 
       <p class="muted">
-        The public profile endpoint does not currently expose a verified
-        complete material inventory, so Tenno Link will not invent resource
-        counts. This page surfaces real live reward opportunities instead.
+        This means your detected material balances meet the recipe component counts.
+        It does not guarantee blueprint ownership, Mastery Rank, quest, clan, or other build requirements.
       </p>
 
       <div class="list">
-        ${
-          invasions
-            .map(entry =>
-              item(entry.node || "Invasion", rewardText(entry))
+        ${ready.length
+          ? ready.slice(0, 8).map(entry =>
+              item(
+                entry.name || "Unknown craftable",
+                `${entry.components?.length ?? 0} materials ready`
+              )
+            ).join("")
+          : item(
+              "No verified material-ready recipes yet",
+              inventory?.summary?.totalEntries
+                ? "Recipe catalog may still be syncing"
+                : "No quantity-bearing inventory data detected"
             )
-            .join("") ||
-          item("No current invasion rewards loaded", "Refresh live data")
         }
       </div>
     </div>
   `;
+
+  const search = $("inventorySearch");
+  if (search) {
+    search.addEventListener("input", event => {
+      inventoryQuery = event.target.value;
+      renderResources();
+      $("inventorySearch")?.focus();
+      const input = $("inventorySearch");
+      if (input) input.setSelectionRange(input.value.length, input.value.length);
+    });
+  }
+
+  document.querySelectorAll("[data-inventory-category]").forEach(button => {
+    button.addEventListener("click", () => {
+      inventoryCategory = button.dataset.inventoryCategory;
+      renderResources();
+    });
+  });
 }
 
 function timeLeft(expiry) {
