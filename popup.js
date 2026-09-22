@@ -14,7 +14,11 @@ let prompt =
       };
 
 function fmtHours(sec) {
-  return sec == null ? "—" : `${Math.floor(sec / 3600)}h`;
+  if (sec == null) return "—";
+  const totalMinutes = Math.floor(Number(sec) / 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return hours ? `${hours}h ${minutes}m` : `${minutes}m`;
 }
 
 function showToast(text) {
@@ -66,27 +70,28 @@ function renderHome() {
   const p = profile();
   const summary = p?.summary || {};
   const arsenal = p?.arsenal || {};
+  const current = arsenal.current || {};
 
   $("home").innerHTML = `
-    <div class="stats-grid">
+    <div class="stats-grid home-stats">
       ${card("MISSIONS COMPLETED", summary.missionsCompleted)}
       ${card("TIME PLAYED", fmtHours(summary.timePlayedSec))}
-      ${card("CURRENT FRAME", arsenal.warframes?.length ? "LINKED" : "—")}
-      ${card("PRIMARY SLOT", arsenal.primary?.length ? "LINKED" : "—")}
-      ${card("SECONDARY SLOT", arsenal.secondary?.length ? "LINKED" : "—")}
-      ${card("MELEE SLOT", arsenal.melee?.length ? "LINKED" : "—")}
+      ${card("WARFRAME", current.warframe || "—")}
+      ${card("PRIMARY", current.primary || "—")}
+      ${card("SECONDARY", current.secondary || "—")}
+      ${card("MELEE", current.melee || "—")}
     </div>
 
     <div class="home-split">
-      <div class="panel">
+      <div class="panel career-panel">
         <div class="section-title">
           <div>
             <span>CAREER SNAPSHOT</span>
-            <small>Profile statistics from your latest sync</small>
+            <small>Latest account statistics</small>
           </div>
         </div>
 
-        <div class="list">
+        <div class="career-grid">
           ${item("Missions quit", summary.missionsQuit)}
           ${item("Deaths", summary.deaths)}
           ${item("Revives", summary.revives)}
@@ -95,7 +100,15 @@ function renderHome() {
       </div>
 
       <div class="panel status-orbit">
-        <div class="orbit-core">LINKED</div>
+        <div class="orbiter-mark" aria-hidden="true">
+          <span class="orbiter-blade b1"></span>
+          <span class="orbiter-blade b2"></span>
+          <span class="orbiter-blade b3"></span>
+        </div>
+        <div class="orbit-core">
+          <strong>LINKED</strong>
+          <small>PROFILE ONLINE</small>
+        </div>
       </div>
     </div>
   `;
