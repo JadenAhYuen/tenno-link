@@ -1,7 +1,12 @@
+importScripts("inventory.js");
+
 const PROFILE_ENDPOINT = "https://api.warframe.com/cdn/getProfileViewingData.php";
 const WORLDSTATE_ENDPOINT = "https://api.warframestat.us/pc?language=en";
+const ITEMS_ENDPOINT = "https://api.warframestat.us/items";
+
 const PROFILE_MIN_REFRESH_MS = 5 * 60 * 1000;
 const WORLDSTATE_MIN_REFRESH_MS = 60 * 1000;
+const ITEMS_REFRESH_MS = 24 * 60 * 60 * 1000;
 
 async function getGid() {
   for (const url of ["https://www.warframe.com/", "https://warframe.com/"]) {
@@ -17,6 +22,7 @@ async function getGid() {
   });
 
   const cookie = cookies.find(c => c?.value);
+
   if (!cookie) {
     throw new Error("Warframe GID cookie not found. Sign in to warframe.com.");
   }
@@ -35,14 +41,16 @@ function arr(value) {
 
 function normalizeProfile(profile) {
   const result = arr(profile?.Results)[0] || {};
-  const inventory = result?.LoadOutInventory || {};
+  const loadoutInventory = result?.LoadOutInventory || {};
   const stats = profile?.Stats || {};
+  const inventory = TennoInventory.build(profile);
 
   return {
     identity: {
       displayName: result?.DisplayName ?? "Tenno",
       masteryRank: result?.PlayerLevel ?? stats?.PlayerLevel ?? null
     },
+
     summary: {
       missionsCompleted: stats?.MissionsCompleted ?? null,
       missionsQuit: stats?.MissionsQuit ?? null,
@@ -52,14 +60,16 @@ function normalizeProfile(profile) {
       meleeKills: stats?.MeleeKills ?? null,
       ciphersSolved: stats?.CiphersSolved ?? null
     },
+
     arsenal: {
-      warframes: arr(inventory?.Suits),
-      primary: arr(inventory?.LongGuns),
-      secondary: arr(inventory?.Pistols),
-      melee: arr(inventory?.Melee),
-      xpInfo: arr(inventory?.XPInfo),
+      warframes: arr(loadoutInventory?.Suits),
+      primary: arr(loadoutInventory?.LongGuns),
+      secondary: arr(loadoutInventory?.Pistols),
+      melee: arr(loadoutInventory?.Melee),
+      xpInfo: arr(loadoutInventory?.XPInfo),
       weaponStats: arr(stats?.Weapons)
     },
+
     progression: {
       missions: arr(result?.Missions),
       challenges: arr(result?.ChallengeProgress),
@@ -69,7 +79,9 @@ function normalizeProfile(profile) {
       dailyStanding: Object.fromEntries(
         Object.entries(result).filter(([key]) => key.startsWith("DailyAffiliation"))
       )
-    }
+    },
+
+    inventory
   };
 }
 
@@ -98,6 +110,15 @@ function sanitizeProfile(profile, mode = "recommended") {
         challenges: normalized.progression.challenges,
         affiliations: normalized.progression.affiliations,
         operatorLoadouts: normalized.progression.operatorLoadouts
+      },
+      inventory: {
+        items: normalized.inventory.items.map(item => ({
+          name: item.name,
+          uniqueName: item.uniqueName,
+          quantity: item.quantity,
+          category: item.category
+        })),
+        summary: normalized.inventory.summary
       }
     };
   }
@@ -215,6 +236,59 @@ async function syncWorldState(force = false) {
   return { cached: false, world: worldState };
 }
 
+async function syncItemCatalog(force = false) {
+  const state = await getStore();
+  const now = Date.now();
+
+  if (!force && state.items?.nextAllowedSyncAt > now && state.items?.craftables?.length) {
+    return { cached: true, items: state.items };
+  }
+
+  const response = await fetch(ITEMS_ENDPOINT, {
+    headers: { Accept: "application/json" },
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error(`Warframe item API returned HTTP ${response.status}.`);
+  }
+
+  const raw = await response.json();
+  const craftables = TennoInventory.compactCatalog(raw);
+
+  const itemState = {
+    craftables,
+    lastSyncAt: now,
+    nextAllowedSyncAt: now + ITEMS_REFRESH_MS,
+    source: ITEMS_ENDPOINT
+  };
+
+  await setStore({ items: itemState });
+
+  return { cached: false, items: itemState };
+}
+
+async function recomputeCraftingReadiness() {
+  const state = await getStore();
+  const inventoryItems = state.profile?.normalized?.inventory?.items || [];
+  const craftables = state.items?.craftables || [];
+
+  const materialsReady = TennoInventory.readiness(
+    inventoryItems,
+    craftables,
+    20
+  );
+
+  await setStore({
+    crafting: {
+      materialsReady,
+      generatedAt: Date.now()
+    }
+  });
+
+  return materialsReady;
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   (async () => {
     try {
@@ -230,10 +304,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       }
 
       if (message?.type === "SYNC_PROFILE") {
-        sendResponse({
-          ok: true,
-          result: await syncProfile(Boolean(message.force))
-        });
+        const result = await syncProfile(Boolean(message.force));
+        await recomputeCraftingReadiness();
+        sendResponse({ ok: true, result });
         return;
       }
 
@@ -245,11 +318,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return;
       }
 
+      if (message?.type === "SYNC_ITEMS") {
+        const result = await syncItemCatalog(Boolean(message.force));
+        await recomputeCraftingReadiness();
+        sendResponse({ ok: true, result });
+        return;
+      }
+
       if (message?.type === "SYNC_ALL") {
-        const [profile, world] = await Promise.allSettled([
+        const [profile, world, items] = await Promise.allSettled([
           syncProfile(Boolean(message.force)),
-          syncWorldState(Boolean(message.force))
+          syncWorldState(Boolean(message.force)),
+          syncItemCatalog(Boolean(message.force))
         ]);
+
+        await recomputeCraftingReadiness();
 
         sendResponse({
           ok: true,
@@ -261,7 +344,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             world:
               world.status === "fulfilled"
                 ? world.value
-                : { error: world.reason?.message }
+                : { error: world.reason?.message },
+            items:
+              items.status === "fulfilled"
+                ? items.value
+                : { error: items.reason?.message }
           }
         });
         return;
