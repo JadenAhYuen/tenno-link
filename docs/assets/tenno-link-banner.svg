@@ -53,7 +53,7 @@
     <rect x="165" width="142" height="40" rx="20" fill="#0a202a" stroke="#76f2ef" stroke-opacity=".2"/>
     <text x="236" y="26" text-anchor="middle" fill="#b8cfd2">OPEN SOURCE</text>
     <rect x="324" width="126" height="40" rx="20" fill="#17160f" stroke="#d9b875" stroke-opacity=".32"/>
-    <text x="387" y="26" text-anchor="middle" fill="#d9b875">MIT LICENSED</text>
+    <text x="387" y="26" text-anchor="middle" fill="#d9b875">COMMUNITY</text>
   </g>
   <text x="0" y="286" fill="#607980" font-family="Segoe UI,Inter,sans-serif" font-size="15" letter-spacing="2">UNOFFICIAL COMMUNITY PASSION PROJECT</text>
 </g>
