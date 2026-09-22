@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tenno Link</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="bg">
+    <div class="orb o1"></div>
+    <div class="orb o2"></div>
+    <div class="scan"></div>
+  </div>
+
+  <main>
+    <header>
+      <img src="assets/icon48.png" class="brand-icon" alt="">
+      <div class="brand">
+        <div class="eyebrow">TENNO PROFILE LINK</div>
+        <h1>Tenno Link</h1>
+      </div>
+      <button id="syncAll" class="round" title="Sync">↻</button>
+    </header>
+
+    <section class="identity panel">
+      <div>
+        <div class="label">PROFILE</div>
+        <div id="name" class="name">Awaiting link…</div>
+      </div>
+      <div class="mr">
+        <div class="label">MASTERY</div>
+        <strong id="mr">—</strong>
+      </div>
+    </section>
+
+    <nav id="nav">
+      <button data-page="home" class="active">HOME</button>
+      <button data-page="progress">PROGRESS</button>
+      <button data-page="arsenal">ARSENAL</button>
+      <button data-page="resources">RESOURCES</button>
+      <button data-page="live">LIVE</button>
+      <button data-page="ai">AI</button>
+    </nav>
+
+    <section id="home" class="page active"></section>
+    <section id="progress" class="page"></section>
+    <section id="arsenal" class="page"></section>
+    <section id="resources" class="page"></section>
+    <section id="live" class="page"></section>
+
+    <section id="ai" class="page">
+      <div class="panel">
+        <div class="section-title">
+          <span>AI BRIDGE</span>
+          <small>Prepare a profile package for any AI</small>
+        </div>
+
+        <select id="promptSelect"></select>
+        <p id="promptDesc" class="muted"></p>
+
+        <div class="toggles">
+          <label><input type="checkbox" id="includeProfile" checked> Profile</label>
+          <label><input type="checkbox" id="includeLive" checked> Live world state</label>
+          <label><input type="checkbox" id="includeStats" checked> Career stats</label>
+        </div>
+
+        <div class="format">
+          <button data-format="recommended" class="active">Recommended</button>
+          <button data-format="compact">Compact</button>
+          <button data-format="raw">Raw</button>
+        </div>
+
+        <div class="copy-grid">
+          <button id="copyPrompt">COPY PROMPT</button>
+          <button id="copyProfile">COPY PROFILE</button>
+          <button id="copyBoth" class="gold">COPY PROMPT + PROFILE</button>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <span id="status">Local-first • Unofficial passion project</span>
+    </footer>
+
+    <div id="toast" class="toast"></div>
+  </main>
+
+  <script src="prompts.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
