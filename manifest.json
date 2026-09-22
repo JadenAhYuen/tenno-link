@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Tenno Link",
+  "version": "1.1.0",
+  "version_name": "1.1.0 Preview",
+  "description": "Unofficial Warframe profile and AI bridge with live world-state data.",
+  "permissions": [
+    "cookies",
+    "storage",
+    "clipboardWrite"
+  ],
+  "host_permissions": [
+    "https://*.warframe.com/*",
+    "https://api.warframe.com/*",
+    "https://api.warframestat.us/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Tenno Link",
+    "default_icon": {
+      "16": "assets/icon16.png",
+      "32": "assets/icon32.png",
+      "48": "assets/icon48.png",
+      "128": "assets/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "assets/icon16.png",
+    "32": "assets/icon32.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  }
+}
