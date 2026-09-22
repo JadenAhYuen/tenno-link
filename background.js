@@ -132,6 +132,19 @@ function sanitizeProfile(profile, mode = "recommended") {
   return normalized;
 }
 
+function rebuildProfileState(profileState) {
+  if (!profileState?.raw) return profileState;
+
+  const normalized = normalizeProfile(profileState.raw);
+
+  return {
+    ...profileState,
+    normalized,
+    recommended: sanitizeProfile(profileState.raw, "recommended"),
+    compact: sanitizeProfile(profileState.raw, "compact")
+  };
+}
+
 async function getStore() {
   const { tennoLinkState } = await chrome.storage.local.get("tennoLinkState");
   return tennoLinkState || {};
@@ -150,7 +163,9 @@ async function syncProfile(force = false) {
   const now = Date.now();
 
   if (!force && state.profile?.nextAllowedSyncAt > now && state.profile?.raw) {
-    return { cached: true, profile: state.profile };
+    const rebuilt = rebuildProfileState(state.profile);
+    await setStore({ profile: rebuilt });
+    return { cached: true, profile: rebuilt };
   }
 
   const response = await fetch(
@@ -299,7 +314,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   (async () => {
     try {
       if (message?.type === "GET_STATE") {
-        sendResponse({ ok: true, state: await getStore() });
+        const state = await getStore();
+
+        if (state.profile?.raw) {
+          state.profile = rebuildProfileState(state.profile);
+          await setStore({ profile: state.profile });
+        }
+
+        sendResponse({ ok: true, state });
         return;
       }
 
