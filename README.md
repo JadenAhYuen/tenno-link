@@ -124,6 +124,14 @@ The [Tenno Link tutorial](docs/TUTORIAL.md) covers:
 - 📡 live world-state data
 - 🤖 AI export
 
+## 🤖 AI Bridge
+
+<p align="center">
+  <img src="docs/assets/ai-bridge-preview.svg" alt="Tenno Link AI Bridge preview" width="92%">
+</p>
+
+Tenno Link does not require an AI API key. It prepares a prompt and selected profile package locally, then you choose where to paste it.
+
 ## 🌐 Data sources
 
 - 🎮 Digital Extremes Warframe profile-view endpoint for player profile data
