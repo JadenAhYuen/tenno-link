@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#07131b"/><stop offset="1" stop-color="#050b10"/></linearGradient>
+  <linearGradient id="p" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0e2732"/><stop offset="1" stop-color="#091820"/></linearGradient>
+</defs>
+<rect width="1200" height="720" fill="#020609"/>
+<rect x="45" y="35" width="1110" height="650" rx="24" fill="url(#bg)" stroke="#214751"/>
+<rect x="70" y="62" width="1060" height="70" rx="15" fill="#091922" stroke="#1f4650"/>
+<circle cx="110" cy="97" r="22" fill="#0a202a" stroke="#76f2ef"/><path d="M110 79L120 97L110 116L100 97Z" fill="none" stroke="#76f2ef" stroke-width="3"/>
+<text x="148" y="92" fill="#eefafa" font-family="Segoe UI,sans-serif" font-size="27" font-weight="600">Tenno Link</text>
+<text x="148" y="114" fill="#65848a" font-family="Segoe UI,sans-serif" font-size="11" letter-spacing="2">INVENTORY PREVIEW</text>
+<rect x="946" y="78" width="146" height="40" rx="9" fill="#0b222c" stroke="#76f2ef" stroke-opacity=".42"/><text x="1019" y="103" text-anchor="middle" fill="#76f2ef" font-family="Segoe UI,sans-serif" font-size="13">SYNC</text>
+
+<rect x="70" y="151" width="1060" height="52" rx="12" fill="#081821" stroke="#1d4049"/>
+<g font-family="Segoe UI,sans-serif" font-size="13">
+<text x="94" y="183" fill="#5c7b81">HOME</text><text x="188" y="183" fill="#5c7b81">PROGRESS</text><text x="316" y="183" fill="#5c7b81">ARSENAL</text><text x="438" y="183" fill="#76f2ef" font-weight="700">RESOURCES</text><text x="580" y="183" fill="#5c7b81">LIVE</text><text x="657" y="183" fill="#5c7b81">AI</text>
+</g>
+<rect x="430" y="198" width="96" height="3" fill="#76f2ef"/>
+
+<rect x="70" y="220" width="680" height="440" rx="18" fill="url(#p)" stroke="#214751"/>
+<text x="96" y="262" fill="#76f2ef" font-family="Segoe UI,sans-serif" font-size="24" font-weight="700" letter-spacing="2">INVENTORY</text>
+<text x="718" y="262" text-anchor="end" fill="#68878d" font-family="Segoe UI,sans-serif" font-size="11">PROFILE-DERIVED BALANCES</text>
+<rect x="96" y="284" width="628" height="46" rx="10" fill="#07161e" stroke="#2b5c67"/><text x="118" y="313" fill="#67868c" font-family="Segoe UI,sans-serif" font-size="14">⌕  Search inventory...</text>
+
+<g font-family="Segoe UI,sans-serif" font-size="10" font-weight="700">
+<rect x="96" y="346" width="56" height="29" rx="15" fill="#10313b" stroke="#76f2ef"/><text x="124" y="365" text-anchor="middle" fill="#76f2ef">ALL</text>
+<rect x="160" y="346" width="90" height="29" rx="15" fill="#091922" stroke="#294a53"/><text x="205" y="365" text-anchor="middle" fill="#78969b">CURRENCY</text>
+<rect x="258" y="346" width="94" height="29" rx="15" fill="#091922" stroke="#294a53"/><text x="305" y="365" text-anchor="middle" fill="#78969b">RESOURCES</text>
+<rect x="360" y="346" width="62" height="29" rx="15" fill="#091922" stroke="#294a53"/><text x="391" y="365" text-anchor="middle" fill="#78969b">PARTS</text>
+<rect x="430" y="346" width="63" height="29" rx="15" fill="#091922" stroke="#294a53"/><text x="461" y="365" text-anchor="middle" fill="#78969b">RELICS</text>
+</g>
+
+<g font-family="Segoe UI,sans-serif">
+  <g transform="translate(96 397)"><rect width="628" height="52" rx="10" fill="#091b24" stroke="#173b44"/><circle cx="26" cy="26" r="13" fill="#0d2832" stroke="#4fc7d0"/><text x="50" y="22" fill="#eaf7f7" font-size="14" font-weight="600">Credits</text><text x="50" y="38" fill="#58777d" font-size="9" letter-spacing="1">CURRENCY</text><text x="600" y="31" text-anchor="end" fill="#eefafa" font-size="14">1,284,530</text></g>
+  <g transform="translate(96 457)"><rect width="628" height="52" rx="10" fill="#091b24" stroke="#173b44"/><circle cx="26" cy="26" r="13" fill="#0d2832" stroke="#4fc7d0"/><text x="50" y="22" fill="#eaf7f7" font-size="14" font-weight="600">Orokin Cell</text><text x="50" y="38" fill="#58777d" font-size="9" letter-spacing="1">RESOURCES</text><text x="600" y="31" text-anchor="end" fill="#eefafa" font-size="14">14</text></g>
+  <g transform="translate(96 517)"><rect width="628" height="52" rx="10" fill="#091b24" stroke="#173b44"/><circle cx="26" cy="26" r="13" fill="#0d2832" stroke="#4fc7d0"/><text x="50" y="22" fill="#eaf7f7" font-size="14" font-weight="600">Neural Sensors</text><text x="50" y="38" fill="#58777d" font-size="9" letter-spacing="1">RESOURCES</text><text x="600" y="31" text-anchor="end" fill="#eefafa" font-size="14">7</text></g>
+</g>
+
+<rect x="770" y="220" width="360" height="440" rx="18" fill="url(#p)" stroke="#214751"/>
+<text x="798" y="262" fill="#d9b875" font-family="Segoe UI,sans-serif" font-size="20" font-weight="700" letter-spacing="1">MATERIALS READY</text>
+<text x="798" y="287" fill="#66858b" font-family="Segoe UI,sans-serif" font-size="11">DERIVED FROM CURRENT RECIPE DATA</text>
+<text x="798" y="330" fill="#91aeb2" font-family="Segoe UI,sans-serif" font-size="12">Readiness means detected resources</text><text x="798" y="349" fill="#91aeb2" font-family="Segoe UI,sans-serif" font-size="12">meet recipe material counts.</text>
+
+<g font-family="Segoe UI,sans-serif">
+<rect x="798" y="384" width="304" height="60" rx="10" fill="#091b24" stroke="#3c3424"/><text x="820" y="410" fill="#edf7f7" font-size="15" font-weight="600">Forma</text><text x="820" y="429" fill="#806f4c" font-size="10">MATERIALS READY</text><text x="1078" y="417" text-anchor="end" fill="#d9b875" font-size="13">READY</text>
+<rect x="798" y="455" width="304" height="60" rx="10" fill="#091b24" stroke="#3c3424"/><text x="820" y="481" fill="#edf7f7" font-size="15" font-weight="600">Boltor</text><text x="820" y="500" fill="#806f4c" font-size="10">MATERIALS READY</text><text x="1078" y="488" text-anchor="end" fill="#d9b875" font-size="13">READY</text>
+</g>
+<text x="798" y="585" fill="#5d777d" font-family="Segoe UI,sans-serif" font-size="10">Blueprint ownership and other requirements</text><text x="798" y="602" fill="#5d777d" font-family="Segoe UI,sans-serif" font-size="10">are intentionally evaluated separately.</text>
+</svg>
