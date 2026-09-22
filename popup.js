@@ -51,6 +51,13 @@ function item(label, value) {
   `;
 }
 
+function cleanUiText(value) {
+  return String(value ?? "")
+    .replace(/[\uE000-\uF8FF]/g, "")
+    .replace(/[\u0000-\u001F]/g, "")
+    .trim();
+}
+
 function profile() {
   return state?.profile?.normalized || null;
 }
@@ -62,7 +69,7 @@ function world() {
 function renderIdentity() {
   const p = profile();
 
-  $("name").textContent = p?.identity?.displayName || "Tenno";
+  $("name").textContent = cleanUiText(p?.identity?.displayName) || "Tenno";
   $("mr").textContent = p?.identity?.masteryRank ?? "—";
 }
 
@@ -577,6 +584,10 @@ function renderAll() {
   updateSyncMeta();
 }
 
+function setActivePage(page) {
+  document.body.dataset.page = page;
+}
+
 document.querySelectorAll("#nav button").forEach(button => {
   button.onclick = () => {
     document
@@ -589,6 +600,7 @@ document.querySelectorAll("#nav button").forEach(button => {
 
     button.classList.add("active");
     $(button.dataset.page).classList.add("active");
+    setActivePage(button.dataset.page);
   };
 });
 
@@ -641,6 +653,7 @@ ${JSON.stringify(
   });
 
   state = response?.state || {};
+  setActivePage("home");
   renderAll();
 
   if (!state?.profile?.raw) {
