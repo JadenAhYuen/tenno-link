@@ -69,25 +69,33 @@ function renderHome() {
 
   $("home").innerHTML = `
     <div class="stats-grid">
-      ${card("MISSIONS", summary.missionsCompleted)}
+      ${card("MISSIONS COMPLETED", summary.missionsCompleted)}
       ${card("TIME PLAYED", fmtHours(summary.timePlayedSec))}
-      ${card("WARFRAMES", arsenal.warframes?.length ?? 0)}
-      ${card("PRIMARY", arsenal.primary?.length ?? 0)}
-      ${card("SECONDARY", arsenal.secondary?.length ?? 0)}
-      ${card("MELEE", arsenal.melee?.length ?? 0)}
+      ${card("CURRENT FRAME", arsenal.warframes?.length ? "LINKED" : "—")}
+      ${card("PRIMARY SLOT", arsenal.primary?.length ? "LINKED" : "—")}
+      ${card("SECONDARY SLOT", arsenal.secondary?.length ? "LINKED" : "—")}
+      ${card("MELEE SLOT", arsenal.melee?.length ? "LINKED" : "—")}
     </div>
 
-    <div class="panel" style="margin-top:8px">
-      <div class="section-title">
-        <span>CAREER SNAPSHOT</span>
-        <small>Account profile</small>
+    <div class="home-split">
+      <div class="panel">
+        <div class="section-title">
+          <div>
+            <span>CAREER SNAPSHOT</span>
+            <small>Profile statistics from your latest sync</small>
+          </div>
+        </div>
+
+        <div class="list">
+          ${item("Missions quit", summary.missionsQuit)}
+          ${item("Deaths", summary.deaths)}
+          ${item("Revives", summary.revives)}
+          ${item("Ciphers solved", summary.ciphersSolved)}
+        </div>
       </div>
 
-      <div class="list">
-        ${item("Missions quit", summary.missionsQuit)}
-        ${item("Deaths", summary.deaths)}
-        ${item("Revives", summary.revives)}
-        ${item("Ciphers solved", summary.ciphersSolved)}
+      <div class="panel status-orbit">
+        <div class="orbit-core">LINKED</div>
       </div>
     </div>
   `;
@@ -511,7 +519,7 @@ async function copy(text, message) {
 }
 
 async function syncAll() {
-  $("status").textContent = "Synchronizing profile + world state…";
+  $("status").textContent = "Synchronizing Tenno profile…";
 
   const response = await chrome.runtime.sendMessage({
     type: "SYNC_ALL"
@@ -534,13 +542,26 @@ async function syncAll() {
     "Local-first • Unofficial passion project";
 }
 
+function updateSyncMeta() {
+  const lastSyncAt = state?.profile?.lastSyncAt;
+  const syncAge = $("syncAge");
+  const linkState = $("linkState");
+
+  if (!lastSyncAt) {
+    if (syncAge) syncAge.textContent = "No sync yet";
+    if (linkState) linkState.textContent = "Local link ready";
+    return;
+  }
+
+  const mins = Math.max(0, Math.floor((Date.now() - lastSyncAt) / 60000));
+  if (syncAge) syncAge.textContent = mins < 1 ? "Synced just now" : `Synced ${mins}m ago`;
+  if (linkState) linkState.textContent = "Profile synchronized";
+}
+
 function renderAll() {
   renderIdentity();
   renderHome();
-  renderProgress();
-  renderArsenal();
-  renderResources();
-  renderLive();
+  updateSyncMeta();
 }
 
 document.querySelectorAll("#nav button").forEach(button => {
@@ -609,7 +630,7 @@ ${JSON.stringify(
   state = response?.state || {};
   renderAll();
 
-  if (!state?.profile?.raw || !state?.world?.raw) {
+  if (!state?.profile?.raw) {
     await syncAll();
   }
 })();
