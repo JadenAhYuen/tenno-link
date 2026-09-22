@@ -276,7 +276,7 @@
       .slice(0, limit);
   }
 
-  self.TennoInventory = {
+  globalThis.TennoInventory = {
     build,
     compactCatalog,
     readiness,
