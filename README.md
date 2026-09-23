@@ -2,41 +2,51 @@
   <img src="assets/tenno-link-logo.svg" alt="Tenno Link logo" width="112">
 </p>
 
-# ✨ Tenno Link
+# ✨ Tenno Link — Warframe profile dashboard and Star Chart companion
 
-**Tenno Link** is an unofficial, local-first Warframe profile and AI bridge.
+**Tenno Link** is an unofficial, local-first Warframe Chrome extension for viewing profile progression, exploring Star Chart missions, tracking equipment history and preparing AI-ready exports.
 
 It links your Warframe profile to a compact browser dashboard, combines account data with public world-state information, and prepares privacy-conscious profile packages that you can copy into the AI assistant of your choice.
 
 > 🚧 **Status:** active preview development. Tenno Link is not affiliated with or endorsed by Digital Extremes.
+
+<p align="center">
+  <img src="docs/assets/screenshots/tenno-link-banner.gif" alt="Animated Tenno Link preview showing the profile dashboard, Star Chart mission search and export interface" width="100%">
+</p>
 
 ## 🌌 What Tenno Link does
 
 - 🏠 **Overview** — Mastery Rank, career stats, profile loadout and missions to explore
 - 🧭 **Standing** — reported affiliations and standing
 - 🔫 **Equipment** — profile history grouped by WFCD category, searchable and sortable by usage, kills or affinity
-- 🌌 **Star Chart** — illustrated planets, mission checklists, cleared junction evidence and profile-based exploration suggestions
+- 🌌 **Star Chart** — illustrated planets, searchable mission nodes, an unplayed filter, cleared junction evidence and profile-based exploration suggestions
 - 📡 **Live** — current PC activities, countdowns and a pinned farming goal
 - 🤖 **AI Bridge** — 12 prompt presets with Recommended, Compact and Raw export modes
 - 💾 Cache-aware syncing and local storage
 - 🔐 No Tenno Link recommendation backend required
 
 <p align="center">
-  <img src="docs/assets/screenshots/overview.png" alt="Actual Tenno Link Overview interface with sample profile data" width="560">
+  <img src="docs/assets/screenshots/overview.gif" alt="Animated Overview dashboard with synthetic Preview Tenno profile data" width="560">
 </p>
 
-### Interface screenshots
+### Interface previews
 
-Actual browser captures of the running interface, taken September 23, 2026 with the local preview's synthetic **Preview Tenno** data. These show the implemented UI, not a design mockup or a live account. Planet artwork is original illustration. See [capture notes](docs/assets/screenshots/README.md).
+Animated browser captures of the running interface use the local preview's synthetic **Preview Tenno** data. These show the implemented UI, not a design mockup or a live account. Planet artwork is original illustration. See [capture notes](docs/assets/screenshots/README.md).
 
 <p align="center">
-  <img src="docs/assets/screenshots/star-chart.png" alt="Star Chart with compact mission rows and planet illustrations" width="48%">
-  <img src="docs/assets/screenshots/export.png" alt="Export with responsive profile-copy actions" width="48%">
+  <img src="docs/assets/screenshots/star-chart.gif" alt="Animated Star Chart node search and unplayed mission filter" width="48%">
+  <img src="docs/assets/screenshots/export.gif" alt="Animated AI Bridge export mode selection" width="48%">
 </p>
 
 ## Read your profile in the tool
 
 Overview explains lifetime mission pace and career counters. Equipment offers local search, sorting by time/kills/affinity, expandable details and incremental loading. Standing exposes reported affiliations, including negative standing. Live and Export remain available.
+
+Star Chart lets you search nodes by name, planet or mission type and show only nodes without a recorded completion. Filtered planets open to reveal matching missions. An unplayed result does not establish that the route is unlocked; confirm access in game.
+
+<p align="center">
+  <img src="docs/assets/screenshots/mission-filter-banner.gif" alt="Animated Tenno Link mission search and unplayed filter banner" width="100%">
+</p>
 
 The popup uses an original dark glass treatment with Warframe-inspired cyan and gold accents. The logo beacon, page transitions, and control feedback use short CSS animations; reduced-motion and increased-contrast preferences are supported.
 
@@ -114,7 +124,7 @@ The [Tenno Link tutorial](docs/TUTORIAL.md) covers:
 ## 🤖 AI Bridge
 
 <p align="center">
-  <img src="docs/assets/screenshots/export.png" alt="Actual Tenno Link Export interface with sample profile data" width="560">
+  <img src="docs/assets/screenshots/export.gif" alt="Animated Tenno Link Export interface with synthetic sample profile data" width="560">
 </p>
 
 Tenno Link does not require an AI API key. It prepares a prompt and selected profile package locally, then you choose where to paste it.

@@ -107,6 +107,12 @@ footer { color:var(--muted); font-size:12px; padding:12px 0 0; overflow-wrap:any
 .loadout-card .item-art { width:72px; height:72px; flex-basis:72px; }
 .loadout-card img { width:72px; height:72px; }
 .planet-row > summary { display:flex; justify-content:space-between; align-items:center; gap:12px; cursor:pointer; min-height:44px; }
+.mission-filter-controls { display:flex; flex-wrap:wrap; align-items:end; gap:12px 18px; }
+.mission-filter-controls > label:first-child { flex:1 1 220px; min-width:0; font-size:13px; }
+.mission-filter-controls input[type="search"] { display:block; width:100%; margin-top:6px; }
+.mission-filter-toggle { display:inline-flex; align-items:center; gap:8px; min-height:44px; cursor:pointer; font-size:13px; }
+.mission-filter-toggle input { margin:0; accent-color:var(--accent); }
+.mission-filter-panel > p { margin:8px 0 0; }
 .planet-row > summary small { color:var(--muted); font-size:12px; font-weight:400; margin-top:4px; }
 .planet-row progress { width:100%; height:8px; margin-top:12px; accent-color:var(--accent); }
 

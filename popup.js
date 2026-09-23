@@ -15,6 +15,8 @@ let equipmentLimit = 50;
 let includeOtherCombat = false;
 let equipmentCategory = "all";
 let catalogSyncing = false;
+let missionQuery = "";
+let onlyUnplayedMissions = false;
 const categoryLabel = category => TennoCatalog.labels[category] || "Unclassified";
 function catalogIndex() { return state.items?.index || {}; }
 function itemImage(entry) {
@@ -224,12 +226,27 @@ function renderChart() {
   $("chart").innerHTML = `<div class="panel"><h2>Your Star Chart</h2><p>See where you have played and which junctions you have cleared.</p><p class="muted">This profile reports completions, not a current unlock list. Activity can include missions joined with other players. No record does not mean locked. Counts combine reported tiers and compare against the cached game data, not Steel Path or Arbitration eligibility.</p></div>
     <div class="stats-grid">${card('Nodes with completions', `${data.completed} / ${data.total}`)}${card('Junctions cleared',data.junctions.length)}</div>
     <button id="refreshGameData" ${catalogSyncing ? 'disabled' : ''}>${catalogSyncing ? 'Updating…' : 'Update planet and equipment data'}</button>
-    <div class="list">${data.planets.map(planet => `<details class="panel planet-row"><summary>${planetArt(planet.name,planet.order)}<span><b>${escapeHtml(planet.name)}</b><small>${planet.junctions.length ? 'Incoming junction cleared' : planet.completed ? 'Activity recorded' : 'Access unconfirmed'}</small></span><span>${planet.completed} / ${planet.nodes.length}<small>nodes recorded</small></span></summary><progress value="${planet.completed}" max="${planet.nodes.length}" aria-label="${escapeHtml(planet.name)} nodes with completions"></progress>
-      ${planet.junctions.map(j=>`<p>${escapeHtml(j.from)} → ${escapeHtml(j.to)} junction cleared</p>`).join('')}
-      <p class="muted">Use nodes without a completion record as a checklist; check access and requirements in game.</p>
-      <div class="list">${planet.nodes.map(missionCard).join('')}</div></details>`).join('')}</div>
+    <div class="panel mission-filter-panel"><div class="mission-filter-controls"><label for="missionSearch">Search nodes<input id="missionSearch" type="search" placeholder="Node, planet or mission type" value="${escapeHtml(missionQuery)}" autocomplete="off"></label><label class="mission-filter-toggle"><input id="onlyUnplayedMissions" type="checkbox" ${onlyUnplayedMissions ? 'checked' : ''}> Show only unplayed missions</label></div><p id="missionFilterCount" class="muted" role="status" aria-live="polite"></p></div>
+    <div id="missionResults" class="list"></div>
     ${data.unmatched.length ? `<details class="panel"><summary>${data.unmatched.length} other mission records</summary><p class="muted">These identifiers have no destination match in the current game data. They may include hubs, events or retired missions; they are excluded from the node counts above.</p><p class="source-path">${data.unmatched.map(escapeHtml).join(' · ')}</p></details>` : ''}`;
   $("refreshGameData").onclick = () => syncCatalog(true);
+  $("missionSearch").oninput = event => { missionQuery = event.target.value; renderMissionResults(data); };
+  $("onlyUnplayedMissions").onchange = event => { onlyUnplayedMissions = event.target.checked; renderMissionResults(data); };
+  renderMissionResults(data);
+}
+
+function renderMissionResults(data) {
+  const query = missionQuery.trim().toLocaleLowerCase();
+  const filtered = data.planets.map(planet => ({planet, nodes:planet.nodes.filter(node =>
+    (!onlyUnplayedMissions || !node.completed) &&
+    (!query || `${node.name} ${planet.name} ${missionInfo(node).title}`.toLocaleLowerCase().includes(query))
+  )})).filter(entry => entry.nodes.length);
+  const count = filtered.reduce((sum,entry) => sum + entry.nodes.length, 0);
+  $("missionFilterCount").textContent = `${count} of ${data.total} nodes shown${onlyUnplayedMissions ? ' · no completion recorded' : ''}`;
+  $("missionResults").innerHTML = count ? filtered.map(({planet,nodes}) => `<details class="panel planet-row" ${query || onlyUnplayedMissions ? 'open' : ''}><summary>${planetArt(planet.name,planet.order)}<span><b>${escapeHtml(planet.name)}</b><small>${planet.junctions.length ? 'Incoming junction cleared' : planet.completed ? 'Activity recorded' : 'Access unconfirmed'}</small></span><span>${nodes.length} shown<small>${planet.completed} / ${planet.nodes.length} recorded</small></span></summary><progress value="${planet.completed}" max="${planet.nodes.length}" aria-label="${escapeHtml(planet.name)} nodes with completions"></progress>
+    ${planet.junctions.map(j=>`<p>${escapeHtml(j.from)} → ${escapeHtml(j.to)} junction cleared</p>`).join('')}
+    <p class="muted">Use nodes without a completion record as a checklist; check access and requirements in game.</p>
+    <div class="list">${nodes.map(missionCard).join('')}</div></details>`).join('') : '<div class="panel"><p class="muted">No nodes match these filters. Try another search or turn off the unplayed filter.</p></div>';
 }
 
 async function syncCatalog(force = false) {
