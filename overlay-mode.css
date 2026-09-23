@@ -25,6 +25,7 @@ html.overlay-mode .stat { padding:13px; }
 html.overlay-mode .stat strong { font-size:23px; }
 html.overlay-mode .stat p { font-size:12px; }
 html.overlay-mode .item { padding:9px 0; }
+html.overlay-mode .mission-facts .item { padding:8px 10px; }
 html.overlay-mode .equipment-controls { margin:13px 0 10px; gap:8px; }
 html.overlay-mode .copy-grid { margin-top:12px; }
 html.overlay-mode .copy-grid button { min-height:54px; padding-top:10px; padding-bottom:10px; }

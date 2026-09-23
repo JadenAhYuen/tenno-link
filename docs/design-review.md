@@ -107,3 +107,11 @@ The original emblem now has a lightweight SVG animation: a slow gold orbit, a tr
 Section entries, opened disclosures, artwork hover, export hover glints, and the disabled sync control now provide motion feedback. Existing glass materials and cyan/gold colors remain. CSS and SVG both include reduced-motion overrides.
 
 Validation: all eight existing test files pass; content.js syntax and git diff whitespace checks pass. Local browser previews at 680px and 320px show no horizontal overflow or clipped copy buttons. The animated SVG loads successfully and all three loops were observed running. The floating launcher opens the full interface in the local preview. This pass does not verify the updated unpacked extension on the live Warframe website.
+
+## Compact mission rows and ambient motion
+
+Scoped planet-header selectors to direct children: previously those rules stretched nested mission thumbnails into wide banners. Mission rows now use 28px icons, put status on its own line below 420px, and give enemy-level details a full-width padded row. Removed the nested planet mission scrollbar so navigation uses the section scroll surface. Mission recommendations now render their respective original planet illustrations, with a regression check for Mercury and Venus.
+
+The overlay expands from its lower-right origin over 600ms, and tabs use a stronger sliding, scaling, and blur reveal. Eight noninteractive cyan/gold motes and outlined fragments drift behind the glass surfaces. All new motion follows the existing reduced-motion overrides.
+
+Validation: eight test files pass; syntax and whitespace checks pass. Local browser inspection covered planet recommendation artwork at 680px, mission details at 320px (28px icons, no horizontal overflow, no nested scroll, 8px/10px fact padding), and launcher opening. Live installed-extension verification remains separate.

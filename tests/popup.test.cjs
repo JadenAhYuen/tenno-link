@@ -32,6 +32,17 @@ setImmediate(()=>{(async()=>{
   assert.ok(!element('home').innerHTML.includes('Cipher success'));
   const mission=vm.runInContext(`missionCard({name:'Apollodorus',missionType:'MT_SURVIVAL',minEnemyLevel:6,maxEnemyLevel:11,faction:'FC_GRINEER',tileset:'ShipTileset',masteryReq:5,questReqs:['ExampleQuest'],completed:true})`,context);
   assert.ok(mission.includes('Enemy level'));
+  vm.runInContext(`state.items={index:{
+    A:{category:'nodes',name:'Earth node',systemName:'Earth'},
+    B:{category:'nodes',name:'Caloris',systemName:'Mercury'},
+    C:{category:'nodes',name:'Kiliken',systemName:'Venus'}
+  }}; state.profile.normalized.progression.missions=[
+    {Tag:'EarthToMercuryJunction',Completes:1},{Tag:'EarthToVenusJunction',Completes:1}
+  ];`,context);
+  const suggestions=vm.runInContext('nextMissionPanel()',context);
+  assert.ok(suggestions.includes('Mercury planet illustration'));
+  assert.ok(suggestions.includes('Venus planet illustration'));
+  assert.ok(!suggestions.includes('mission icon'));
   for (const label of ['Faction','Location','Requirements']) assert.ok(!mission.includes(label));
   const html=fs.readFileSync('popup.html','utf8');
   assert.ok(!html.includes('data-page="resources"'));

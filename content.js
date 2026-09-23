@@ -17,7 +17,7 @@
     #launcher[hidden],#panel[hidden]{display:none!important}
     .sigil{display:grid;place-items:center;width:36px;height:36px;flex:0 0 36px;border:1px solid rgba(232,207,157,.57);border-radius:50%;color:#e8d4ae;font-size:22px;line-height:1;box-shadow:inset 0 0 12px rgba(153,226,220,.19),0 0 14px rgba(153,226,220,.18);animation:tenno-glow 5s ease-in-out infinite}
     .sigil img{display:block;width:27px;height:27px;object-fit:contain}
-    #panel{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;width:min(680px,calc(100vw - 24px));height:min(760px,calc(100vh - 24px));min-height:260px;overflow:hidden;border:1px solid rgba(190,226,226,.43);border-radius:22px;background:rgba(13,27,38,.86);box-shadow:0 22px 60px rgba(0,8,17,.48),inset 0 1px 0 rgba(255,255,255,.22);backdrop-filter:blur(28px) saturate(150%);-webkit-backdrop-filter:blur(28px) saturate(150%);animation:tenno-open .28s cubic-bezier(.2,.8,.2,1) both}
+    #panel{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;width:min(680px,calc(100vw - 24px));height:min(760px,calc(100vh - 24px));min-height:260px;overflow:hidden;border:1px solid rgba(190,226,226,.43);border-radius:22px;background:rgba(13,27,38,.86);box-shadow:0 22px 60px rgba(0,8,17,.48),inset 0 1px 0 rgba(255,255,255,.22);backdrop-filter:blur(28px) saturate(150%);-webkit-backdrop-filter:blur(28px) saturate(150%);transform-origin:bottom right;animation:tenno-open .6s cubic-bezier(.16,1,.3,1) both}
     #handle{display:flex;align-items:center;gap:8px;min-height:43px;padding:5px 9px;border-bottom:1px solid rgba(177,225,223,.22);background:linear-gradient(100deg,rgba(64,116,121,.37),rgba(28,44,55,.48));color:#f0f7f4;touch-action:none;cursor:grab;user-select:none}
     #handle.dragging{cursor:grabbing}
     #handle .sigil{width:28px;height:28px;flex-basis:28px}#handle .sigil img{width:22px;height:22px}
@@ -27,7 +27,7 @@
     #launcher:focus-visible,#close:focus-visible{outline:2px solid #9be5df;outline-offset:3px}
     iframe{display:block;width:100%;min-height:0;flex:1;border:0;background:#0d1c27}
     @keyframes tenno-metal{0%,55%{transform:translateX(-100%)}85%,100%{transform:translateX(100%)}}
-    @keyframes tenno-open{from{opacity:0;transform:translateY(13px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+    @keyframes tenno-open{0%{opacity:0;transform:translateY(24px) scale(.18);border-radius:80px}55%{opacity:1}100%{opacity:1;transform:none;border-radius:22px}}
     @keyframes tenno-glow{0%,100%{box-shadow:inset 0 0 12px rgba(153,226,220,.19),0 0 14px rgba(153,226,220,.18)}50%{box-shadow:inset 0 0 15px rgba(153,226,220,.27),0 0 22px rgba(153,226,220,.3)}}
     @media(max-width:480px){#launcher{right:12px;bottom:12px}#panel{right:8px;bottom:8px;width:calc(100vw - 16px);height:calc(100vh - 16px);border-radius:18px}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
