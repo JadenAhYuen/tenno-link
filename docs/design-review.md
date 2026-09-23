@@ -115,3 +115,9 @@ Scoped planet-header selectors to direct children: previously those rules stretc
 The overlay expands from its lower-right origin over 600ms, and tabs use a stronger sliding, scaling, and blur reveal. Eight noninteractive cyan/gold motes and outlined fragments drift behind the glass surfaces. All new motion follows the existing reduced-motion overrides.
 
 Validation: eight test files pass; syntax and whitespace checks pass. Local browser inspection covered planet recommendation artwork at 680px, mission details at 320px (28px icons, no horizontal overflow, no nested scroll, 8px/10px fact padding), and launcher opening. Live installed-extension verification remains separate.
+
+## Glass finish and repository screenshots
+
+Added brighter upper glass edges, a compact gold Mastery Rank badge, clearer open-mission and input focus feedback, and subtle separators between suggested missions. Preserved the cyan/gold palette, original hero gradients, and reduced-motion support. Removed the redundant account-level caption to retain header space.
+
+README now embeds actual PNG browser captures of Overview, Star Chart, and Export instead of the drawn AI Bridge preview. Captures use the expanded synthetic preview fixture and are explicitly labeled as sample data. Capture instructions are in docs/assets/screenshots/README.md. Desktop captures were visually inspected; the 320px layout has no horizontal overflow. All eight test files pass. Live account integration was not retested in this visual pass.

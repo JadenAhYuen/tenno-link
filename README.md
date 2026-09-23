@@ -12,8 +12,8 @@ It links your Warframe profile to a compact browser dashboard, combines account 
 
 ## 🌌 What Tenno Link does
 
-- 🏠 **Home** — Mastery Rank, missions, play time, arsenal counts and career stats
-- 🧭 **Progress** — mission, challenge, affiliation, Operator and XP records
+- 🏠 **Overview** — Mastery Rank, career stats, profile loadout and missions to explore
+- 🧭 **Standing** — reported affiliations and standing
 - 🔫 **Equipment** — profile history grouped by WFCD category, searchable and sortable by usage, kills or affinity
 - 🌌 **Star Chart** — illustrated planets, mission checklists, cleared junction evidence and profile-based exploration suggestions
 - 📡 **Live** — current PC activities, countdowns and a pinned farming goal
@@ -22,7 +22,16 @@ It links your Warframe profile to a compact browser dashboard, combines account 
 - 🔐 No Tenno Link recommendation backend required
 
 <p align="center">
-  <img src="docs/assets/ai-bridge-preview.svg" alt="Tenno Link export preview" width="88%">
+  <img src="docs/assets/screenshots/overview.png" alt="Actual Tenno Link Overview interface with sample profile data" width="560">
+</p>
+
+### Interface screenshots
+
+Actual browser captures of the running interface, taken September 23, 2026 with the local preview's synthetic **Preview Tenno** data. These show the implemented UI, not a design mockup or a live account. Planet artwork is original illustration. See [capture notes](docs/assets/screenshots/README.md).
+
+<p align="center">
+  <img src="docs/assets/screenshots/star-chart.png" alt="Star Chart with compact mission rows and planet illustrations" width="48%">
+  <img src="docs/assets/screenshots/export.png" alt="Export with responsive profile-copy actions" width="48%">
 </p>
 
 ## Read your profile in the tool
@@ -98,14 +107,14 @@ The [Tenno Link tutorial](docs/TUTORIAL.md) covers:
 
 - 🔗 profile linking
 - 📊 dashboard basics
-- 🛠️ material readiness
+- 🌌 mission progress and planet exploration
 - 📡 live world-state data
 - 🤖 AI export
 
 ## 🤖 AI Bridge
 
 <p align="center">
-  <img src="docs/assets/ai-bridge-preview.svg" alt="Tenno Link AI Bridge preview" width="92%">
+  <img src="docs/assets/screenshots/export.png" alt="Actual Tenno Link Export interface with sample profile data" width="560">
 </p>
 
 Tenno Link does not require an AI API key. It prepares a prompt and selected profile package locally, then you choose where to paste it.

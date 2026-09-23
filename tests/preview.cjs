@@ -7,12 +7,15 @@ const root = path.resolve(__dirname, '..');
 const context = vm.createContext({chrome:{runtime:{onMessage:{addListener(){}}}},importScripts(){}});
 for (const file of ['catalog.js','inventory.js','background.js']) vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);
 context.input = process.argv[2] ? JSON.parse(fs.readFileSync(process.argv[2], 'utf8').replace(/^\uFEFF/,'')) : {
-  Results:[{DisplayName:'Preview Tenno',PlayerLevel:4,LoadOutInventory:{},Affiliations:[{Tag:'CetusSyndicate',Standing:250,Title:0}]}],
+  Results:[{DisplayName:'Preview Tenno',PlayerLevel:4,LoadOutInventory:{},Missions:[{Tag:'EarthToMercuryJunction',Completes:1},{Tag:'EarthToVenusJunction',Completes:1}],Affiliations:[{Tag:'CetusSyndicate',Standing:250,Title:0}]}],
   Stats:{MissionsCompleted:80,TimePlayedSec:64594,CiphersSolved:60,Weapons:[{type:'/Lotus/Powersuits/Mag/Mag',equipTime:45448,kills:993},{type:'/Lotus/Weapons/TestRifle',equipTime:53652,kills:1243}]}
 };
 context.catalogPayload = process.argv[3] ? JSON.parse(fs.readFileSync(process.argv[3],'utf8')) : [
   {name:'Mag',uniqueName:'/Lotus/Powersuits/Mag/Mag',category:'Warframes'},
-  {name:'Test Rifle',uniqueName:'/Lotus/Weapons/TestRifle',category:'Primary'}
+  {name:'Test Rifle',uniqueName:'/Lotus/Weapons/TestRifle',category:'Primary'},
+  {name:'E Prime',uniqueName:'PreviewEarth',category:'Node',systemName:'Earth',systemIndex:0,missionType:'MT_EXTERMINATION',minEnemyLevel:1,maxEnemyLevel:3},
+  ...['Caloris','Elion','Odin'].map((name,i)=>({name,uniqueName:`PreviewMercury${i}`,category:'Node',systemName:'Mercury',systemIndex:1,minEnemyLevel:6,maxEnemyLevel:11})),
+  {name:'Kiliken',uniqueName:'PreviewVenus',category:'Node',systemName:'Venus',systemIndex:2,minEnemyLevel:3,maxEnemyLevel:7}
 ];
 const index = vm.runInContext('TennoCatalog.build(catalogPayload)',context);
 context.index = index;
