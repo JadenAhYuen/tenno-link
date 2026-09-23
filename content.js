@@ -12,7 +12,7 @@
     *{box-sizing:border-box}
     #launcher,#panel{pointer-events:auto;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
     #launcher{position:fixed;right:22px;bottom:22px;display:flex;align-items:center;gap:10px;min-height:54px;padding:8px 17px 8px 10px;border:1px solid rgba(206,238,232,.52);border-radius:999px;color:#efffff;background:linear-gradient(135deg,rgba(47,82,92,.91),rgba(13,28,40,.9));box-shadow:inset 0 1px 0 rgba(255,255,255,.26),0 12px 32px rgba(2,12,22,.35),0 0 25px rgba(101,215,209,.18);backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px) saturate(150%);font-size:13px;font-weight:750;letter-spacing:.02em;cursor:pointer;transition:transform .24s ease,box-shadow .24s ease,background .24s ease}
-    #launcher:hover{transform:translateY(-3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 17px 36px rgba(2,12,22,.44),0 0 30px rgba(101,215,209,.28)}
+    #launcher{overflow:hidden;isolation:isolate}#launcher::before{content:"";position:absolute;inset:-60% -30%;z-index:-1;pointer-events:none;background:linear-gradient(110deg,transparent 35%,rgba(245,215,155,.08) 43%,rgba(255,229,170,.35) 49%,rgba(232,195,127,.12) 55%,transparent 63%);animation:tenno-metal 8s ease-in-out infinite}#launcher:hover{transform:translateY(-3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 17px 36px rgba(2,12,22,.44),0 0 30px rgba(101,215,209,.28)}
     #launcher:active{transform:translateY(1px)}
     #launcher[hidden],#panel[hidden]{display:none!important}
     .sigil{display:grid;place-items:center;width:36px;height:36px;flex:0 0 36px;border:1px solid rgba(232,207,157,.57);border-radius:50%;color:#e8d4ae;font-size:22px;line-height:1;box-shadow:inset 0 0 12px rgba(153,226,220,.19),0 0 14px rgba(153,226,220,.18);animation:tenno-glow 5s ease-in-out infinite}
@@ -26,6 +26,7 @@
     #close:hover{background:rgba(111,187,185,.22);transform:rotate(90deg)}
     #launcher:focus-visible,#close:focus-visible{outline:2px solid #9be5df;outline-offset:3px}
     iframe{display:block;width:100%;min-height:0;flex:1;border:0;background:#0d1c27}
+    @keyframes tenno-metal{0%,55%{transform:translateX(-100%)}85%,100%{transform:translateX(100%)}}
     @keyframes tenno-open{from{opacity:0;transform:translateY(13px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
     @keyframes tenno-glow{0%,100%{box-shadow:inset 0 0 12px rgba(153,226,220,.19),0 0 14px rgba(153,226,220,.18)}50%{box-shadow:inset 0 0 15px rgba(153,226,220,.27),0 0 22px rgba(153,226,220,.3)}}
     @media(max-width:480px){#launcher{right:12px;bottom:12px}#panel{right:8px;bottom:8px;width:calc(100vw - 16px);height:calc(100vh - 16px);border-radius:18px}}
@@ -39,7 +40,7 @@
   launcher.setAttribute('aria-label','Open Tenno Link companion');
   launcher.setAttribute('aria-expanded','false');
   const logo = document.createElement('img');
-  logo.src = chrome.runtime.getURL('assets/tenno-link-logo.svg');
+  logo.src = chrome.runtime.getURL('assets/tenno-link-logo-animated.svg');
   logo.alt = '';
   const launcherSigil = document.createElement('span');
   launcherSigil.className = 'sigil';

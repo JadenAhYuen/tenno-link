@@ -33,7 +33,7 @@ http.createServer((req,res)=>{
     return;
   }
   const file = url.pathname === '/' ? 'popup.html' : url.pathname.slice(1);
-  if (!['popup.html','popup.css','visual.css','overlay-mode.css','popup.js','catalog.js','progression.js','inventory.js','insights.js','prompts.js','assets/tenno-link-logo.svg','content.js'].includes(file)) {res.writeHead(404);res.end();return;}
+  if (!['popup.html','popup.css','visual.css','overlay-mode.css','popup.js','catalog.js','progression.js','inventory.js','insights.js','prompts.js','assets/tenno-link-logo.svg','assets/tenno-link-logo-animated.svg','content.js'].includes(file)) {res.writeHead(404);res.end();return;}
   res.setHeader('Content-Type',file.endsWith('.html')?'text/html':file.endsWith('.css')?'text/css':file.endsWith('.svg')?'image/svg+xml':'text/javascript');
   let body = fs.readFileSync(path.join(root,file),'utf8');
   if (file === 'popup.html') body = body.replace('<script src="prompts.js">',`<script src="/mock.js${url.searchParams.has('empty')?'?empty':url.searchParams.has('nocatalog')?'?nocatalog':''}"></script><script src="prompts.js">`);

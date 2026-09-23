@@ -27,7 +27,9 @@ html.overlay-mode .stat p { font-size:12px; }
 html.overlay-mode .item { padding:9px 0; }
 html.overlay-mode .equipment-controls { margin:13px 0 10px; gap:8px; }
 html.overlay-mode .copy-grid { margin-top:12px; }
-html.overlay-mode .copy-grid button { min-height:54px; }
+html.overlay-mode .copy-grid button { min-height:54px; padding-top:10px; padding-bottom:10px; }
+html.overlay-mode .prompt-shell p { margin:8px 0 12px; }
+html.overlay-mode .format,html.overlay-mode .toggles { margin:8px 0; }
 html.overlay-mode footer { flex:0 0 auto; min-height:23px; padding:6px 2px 0; font-size:11px; }
 html.overlay-mode .toast { position:absolute; }
 @media(min-width:560px) {
