@@ -4,11 +4,11 @@
 
 # ✨ Tenno Link — Warframe profile dashboard and Star Chart companion
 
-**Tenno Link** is an unofficial, local-first Warframe Chrome extension for viewing profile progression, exploring Star Chart missions, tracking equipment history and preparing AI-ready exports.
+**Tenno Link** is a local-first Warframe Chrome extension for viewing profile progression, exploring Star Chart missions, tracking equipment history and preparing AI-ready exports.
 
 It links your Warframe profile to a compact browser dashboard, combines account data with public world-state information, and prepares privacy-conscious profile packages that you can copy into the AI assistant of your choice.
 
-> 🚧 **Status:** active preview development. Tenno Link is not affiliated with or endorsed by Digital Extremes.
+<small>Independent preview project · unofficial and not affiliated with Digital Extremes.</small>
 
 <p align="center">
   <img src="docs/assets/screenshots/tenno-link-banner.gif" alt="Animated Tenno Link preview showing the profile dashboard, Star Chart mission search and export interface" width="100%">
@@ -20,9 +20,9 @@ It links your Warframe profile to a compact browser dashboard, combines account 
 - 🧭 **Standing** — reported affiliations and standing
 - 🔫 **Equipment** — profile history grouped by WFCD category, searchable and sortable by usage, kills or affinity
 - 🌌 **Star Chart** — illustrated planets, searchable mission nodes, an unplayed filter, cleared junction evidence and profile-based exploration suggestions
-- 📡 **Live** — current PC activities, countdowns and a pinned farming goal
+- 📡 **Live** — current PC activities, second-by-second countdowns and a pinned farming goal
 - 🤖 **AI Bridge** — 12 prompt presets with Recommended, Compact and Raw export modes
-- 💾 Cache-aware syncing and local storage
+- 💾 Profile refresh while the interface is open, cache-aware syncing and local storage
 - 🔐 No Tenno Link recommendation backend required
 
 <p align="center">
@@ -52,6 +52,12 @@ The popup uses an original dark glass treatment with Warframe-inspired cyan and 
 
 On `warframe.com`, a floating Tenno Link button opens the **full six-section interface** over the page. Drag the slim top handle to move it; close it to return to the small launcher. The frame adapts to narrow screens, keeps the header and navigation visible, and scrolls only the active section when its content is long. The account UI stays inside an extension-origin frame rather than being copied into the website DOM.
 
+Opening Tenno Link checks whether saved profile and public event data are due for refresh. While the interface is open in a visible tab, it checks again as each source becomes due: profile data no sooner than five minutes, subject to the profile endpoint's cache interval, and public events after their one-minute cache period. Pressing ↻ requests a fresh profile and event fetch. Countdown clocks update locally each second. Closing the floating interface unloads it, so the launcher alone makes no background API requests.
+
+<p align="center">
+  <img src="docs/assets/screenshots/live-events.gif" alt="Live event countdowns updating each second in the local preview" width="560">
+</p>
+
 The interface supports narrow layouts and keyboard focus, and distinguishes missing values from zero. Loadout records are not described as owned items, and historical affinity is not treated as mastery completion.
 
 See [design review and verification](docs/design-review.md) for calculation definitions and current validation limits.
@@ -71,6 +77,8 @@ node tests/preview.cjs
 ```
 
 The preview opens at `http://127.0.0.1:8765` with synthetic data and mocked extension APIs. Visit `/site` on that server to try the floating interface. Optionally pass a local profile JSON path to the preview or profile paths to the insights test. Samples are read locally and are not copied into the repository. Stop the preview with Ctrl+C.
+
+With Playwright and Chrome installed, `node tests/overlay-lifecycle.cjs` checks that the floating launcher leaves the interface unloaded until opened and unloads it again on close.
 
 ## 🛰️ How the data flows
 
@@ -105,7 +113,7 @@ For the current development build:
 4. 📂 Click **Load unpacked**
 5. ✅ Select the repository folder containing `manifest.json`
 6. 🔑 Log in to the official Warframe website
-7. 🔄 Open Tenno Link and press **Sync**
+7. 🔄 Open Tenno Link to load your profile. Press **↻** whenever you want a fresh fetch.
 
 See the full [Chrome installation guide](docs/INSTALL.md).
 
@@ -147,6 +155,7 @@ Automated tests cover:
 - 🧾 recipe catalog normalization
 - ✅ material-readiness calculation
 - 🧹 blueprint pseudo-component removal
+- ⏱️ visible-only refresh checks and local countdown rendering
 
 GitHub Actions also validates the extension manifest and JavaScript syntax.
 

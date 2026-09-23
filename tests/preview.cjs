@@ -21,13 +21,14 @@ const index = vm.runInContext('TennoCatalog.build(catalogPayload)',context);
 context.index = index;
 const normalized = vm.runInContext('normalizeProfile(input,index)',context);
 normalized.identity.displayName = 'Preview Tenno';
-const state = {profile:{raw:{},normalized,recommended:normalized,compact:normalized,lastSyncAt:Date.now()},items:{index,schemaVersion:5,lastSyncAt:Date.now(),craftables:vm.runInContext('TennoInventory.compactCatalog(catalogPayload)',context)}};
+const previewNow = Date.now();
+const state = {profile:{raw:{},normalized,recommended:normalized,compact:normalized,lastSyncAt:previewNow,nextAllowedSyncAt:previewNow+5*60*1000},world:{raw:{fissures:[{tier:'Lith',node:'E Prime, Earth',missionType:'Exterminate',expiry:new Date(previewNow+16*60*1000).toISOString()}],alerts:[{node:'Mercury',expiry:new Date(previewNow+8*60*1000).toISOString()}],sortie:{boss:'Preview sortie'},voidTrader:{active:false,activation:new Date(previewNow+3*60*60*1000).toISOString()}},lastSyncAt:previewNow,nextAllowedSyncAt:previewNow+60*1000},items:{index,schemaVersion:5,lastSyncAt:previewNow,craftables:vm.runInContext('TennoInventory.compactCatalog(catalogPayload)',context)}};
 http.createServer((req,res)=>{
   const url = new URL(req.url,'http://localhost');
   if (url.pathname === '/mock.js') {
     res.setHeader('Content-Type','text/javascript');
     const mockState = url.searchParams.has('empty') ? {} : url.searchParams.has('nocatalog') ? {...state,items:{}} : state;
-    res.end(`window.__previewState=${JSON.stringify(mockState)};window.chrome={runtime:{getURL:file=>location.origin+'/'+file,sendMessage:async message=>message.type==='GET_STATE'?{ok:true,state:window.__previewState}:message.type==='FIND_GOAL_SOURCES'?(window.__previewState.goal={name:message.name,checkedAt:Date.now(),sources:[{source:'Mantle, Earth',detail:'Mission reward',chance:10.84},{source:'Ani, Void',detail:'Rotation A',chance:7.14}],partial:false},{ok:true,goal:window.__previewState.goal}):message.type==='CLEAR_GOAL'?(window.__previewState.goal=null,{ok:true}):message.type==='SYNC_ITEMS'?{ok:false,error:'Preview catalog refresh unavailable; saved catalog retained.'}:{ok:true,result:{profile:{error:'Preview only: sign in to warframe.com in the extension to sync.'}}}}};`);
+    res.end(`window.__previewState=${JSON.stringify(mockState)};window.chrome={runtime:{getURL:file=>location.origin+'/'+file,sendMessage:async message=>message.type==='GET_STATE'?{ok:true,state:window.__previewState}:message.type==='FIND_GOAL_SOURCES'?(window.__previewState.goal={name:message.name,checkedAt:Date.now(),sources:[{source:'Mantle, Earth',detail:'Mission reward',chance:10.84},{source:'Ani, Void',detail:'Rotation A',chance:7.14}],partial:false},{ok:true,goal:window.__previewState.goal}):message.type==='CLEAR_GOAL'?(window.__previewState.goal=null,{ok:true}):message.type==='SYNC_ACTIVE'?{ok:true,result:{profile:{cached:true},world:{cached:true}}}:message.type==='SYNC_ITEMS'?{ok:false,error:'Preview catalog refresh unavailable; saved catalog retained.'}:{ok:true,result:{profile:{error:'Preview only: sign in to warframe.com in the extension to sync.'}}}}};`);
     return;
   }
   if (url.pathname === '/site') {

@@ -15,6 +15,8 @@ let equipmentLimit = 50;
 let includeOtherCombat = false;
 let equipmentCategory = "all";
 let catalogSyncing = false;
+let activeSyncing = false;
+let nextAutoAttemptAt = 0;
 let missionQuery = "";
 let onlyUnplayedMissions = false;
 const categoryLabel = category => TennoCatalog.labels[category] || "Unclassified";
@@ -318,12 +320,32 @@ function timeLeft(expiry) {
 
   if (ms <= 0) return "expired";
 
-  const hours = Math.floor(ms / 3600000);
-  const minutes = Math.floor((ms % 3600000) / 60000);
+  const secondsLeft = Math.ceil(ms / 1000);
+  const hours = Math.floor(secondsLeft / 3600);
+  const minutes = Math.floor((secondsLeft % 3600) / 60);
+  const seconds = secondsLeft % 60;
+  return hours ? `${hours}h ${String(minutes).padStart(2,'0')}m ${String(seconds).padStart(2,'0')}s` : `${minutes}m ${String(seconds).padStart(2,'0')}s`;
+}
 
-  return hours
-    ? `${hours}h ${minutes}m`
-    : `${minutes}m`;
+function countdown(expiry) {
+  const ms = new Date(expiry).getTime();
+  if (!Number.isFinite(ms)) return '—';
+  const iso = new Date(ms).toISOString();
+  return `<time class="live-countdown" datetime="${iso}" data-countdown="${iso}">${escapeHtml(timeLeft(iso))}</time>`;
+}
+
+function itemWithCountdown(label, prefix, expiry, suffix = '') {
+  return `<div class="item"><b>${escapeHtml(label)}</b><span>${escapeHtml(prefix)}${countdown(expiry)}${escapeHtml(suffix)}</span></div>`;
+}
+
+function itemWithOptionalCountdown(label, value, expiry) {
+  return expiry && Number.isFinite(new Date(expiry).getTime()) ? itemWithCountdown(label,`${value} · `,expiry,' left') : item(label,value);
+}
+
+function updateCountdowns() {
+  document.querySelectorAll('[data-countdown]').forEach(element => {
+    element.textContent = timeLeft(element.dataset.countdown);
+  });
 }
 
 function activityPanel() {
@@ -334,12 +356,12 @@ function activityPanel() {
   const alert = (w?.alerts || []).filter(row => !row.expired && new Date(row.expiry).getTime() > now)
     .sort((a,b) => new Date(a.expiry) - new Date(b.expiry))[0];
   const activities = [
-    fissure && {name:`${fissure.tier || 'Void'} fissure`,detail:`${fissure.node || 'Node unknown'} · ${timeLeft(fissure.expiry)} left`},
-    alert && {name:'Alert',detail:`${alert.mission?.node || alert.node || 'Node unknown'} · ${timeLeft(alert.expiry)} left`},
-    w?.sortie && {name:'Sortie',detail:w.sortie.boss || w.sortie.faction || 'Active on PC'},
-    w?.voidTrader && {name:"Baro Ki'Teer",detail:w.voidTrader.active ? `At ${w.voidTrader.location || 'a relay'}` : `Returns in ${timeLeft(w.voidTrader.activation)}`}
+    fissure && {name:`${fissure.tier || 'Void'} fissure`,detail:`${fissure.node || 'Node unknown'} · `,expiry:fissure.expiry,suffix:' left'},
+    alert && {name:'Alert',detail:`${alert.mission?.node || alert.node || 'Node unknown'} · `,expiry:alert.expiry,suffix:' left'},
+    w?.sortie && {name:'Sortie',detail:w.sortie.boss || w.sortie.faction || 'Active on PC',expiry:w.sortie.expiry,suffix:' left'},
+    w?.voidTrader && (w.voidTrader.active ? {name:"Baro Ki'Teer",detail:`At ${w.voidTrader.location || 'a relay'}`} : {name:"Baro Ki'Teer",detail:'Returns in ',expiry:w.voidTrader.activation})
   ].filter(Boolean).slice(0,3);
-  return `<div class="panel"><div class="section-title"><div><h2>Tonight in the Origin System</h2><small>Public PC world state · ${state.world?.lastSyncAt ? `updated ${escapeHtml(new Date(state.world.lastSyncAt).toLocaleString())}` : 'sync to load'}</small></div></div><div class="list">${activities.length ? activities.map(row => item(row.name,row.detail)).join('') : '<p class="muted">Sync to see current activities.</p>'}</div><button class="secondary-action" data-open-live>Open Live</button></div>`;
+  return `<div class="panel"><div class="section-title"><div><h2>Tonight in the Origin System</h2><small>Public PC world state · ${state.world?.lastSyncAt ? `updated ${escapeHtml(new Date(state.world.lastSyncAt).toLocaleString())}` : 'sync to load'}</small></div></div><div class="list">${activities.length ? activities.map(row => row.expiry ? itemWithCountdown(row.name,row.detail,row.expiry,row.suffix) : item(row.name,row.detail)).join('') : '<p class="muted">Sync to see current activities.</p>'}</div><button class="secondary-action" data-open-live>Open Live</button></div>`;
 }
 
 function bindLiveShortcut() {
@@ -429,10 +451,7 @@ function renderLive() {
         ${
           fissures
             .map(entry =>
-              item(
-                `${entry.tier || ""} • ${entry.node || "Unknown"}`,
-                `${entry.missionType || ""} • ${timeLeft(entry.expiry)}`
-              )
+              itemWithCountdown(`${entry.tier || ""} • ${entry.node || "Unknown"}`,`${entry.missionType || ""} • `,entry.expiry)
             )
             .join("") ||
           item("No fissures", "—")
@@ -447,32 +466,11 @@ function renderLive() {
       </div>
 
       <div class="list">
-        ${item(
-          "Sortie",
-          sortie?.boss || sortie?.faction || "Unavailable"
-        )}
-        ${item(
-          "Nightwave",
-          w.nightwave?.activeChallenges?.length != null
-            ? `${w.nightwave.activeChallenges.length} active challenges`
-            : "Unavailable"
-        )}
-        ${item(
-          "Baro Ki'Teer",
-          baro?.active
-            ? `Active at ${baro.location || "Relay"}`
-            : `Returns ${timeLeft(baro?.activation)}`
-        )}
-        ${item(
-          "Arbitration",
-          w.arbitration?.node || "Unavailable"
-        )}
-        ${item(
-          "Archon Hunt",
-          w.archonHunt?.boss ||
-            w.archonHunt?.faction ||
-            "Unavailable"
-        )}
+        ${itemWithOptionalCountdown("Sortie",sortie?.boss || sortie?.faction || "Unavailable",sortie?.expiry)}
+        ${itemWithOptionalCountdown("Nightwave",w.nightwave?.activeChallenges?.length != null ? `${w.nightwave.activeChallenges.length} active challenges` : "Unavailable",w.nightwave?.expiry)}
+        ${baro?.active ? item("Baro Ki'Teer",`Active at ${baro.location || "Relay"}`) : itemWithCountdown("Baro Ki'Teer","Returns in ",baro?.activation)}
+        ${itemWithOptionalCountdown("Arbitration",w.arbitration?.node || "Unavailable",w.arbitration?.expiry)}
+        ${itemWithOptionalCountdown("Archon Hunt",w.archonHunt?.boss || w.archonHunt?.faction || "Unavailable",w.archonHunt?.expiry)}
         ${item(
           "Steel Path",
           w.steelPath?.currentReward?.name || "Unavailable"
@@ -565,23 +563,50 @@ async function copy(text, message) {
   } catch { showToast("Could not copy. Allow clipboard access and try again."); }
 }
 
-async function syncAll() {
+function interfaceVisible() {
+  return document.visibilityState !== 'hidden';
+}
+
+function renderRefreshedState() {
+  const activeId = document.activeElement?.id;
+  const goalDraft = $("goalName")?.value;
+  renderAll();
+  if (goalDraft != null && $("goalName")) $("goalName").value = goalDraft;
+  if (activeId && $(activeId)) $(activeId).focus({preventScroll:true});
+}
+
+async function syncActive(force = false, resources = {profile:true,world:true}) {
+  if (activeSyncing || !interfaceVisible()) return;
+  activeSyncing = true;
   $("syncAll").disabled = true;
-  $("status").textContent = "Synchronizing profile and public data…";
+  $("status").textContent = "Refreshing profile and live events…";
   try {
-    const response = await chrome.runtime.sendMessage({ type: "SYNC_ALL" });
+    const response = await chrome.runtime.sendMessage({ type: "SYNC_ACTIVE", force, ...resources });
     if (!response?.ok) throw new Error(response?.error || "Sync failed. Try again.");
     const next = await chrome.runtime.sendMessage({ type: "GET_STATE" });
     if (!next?.ok) throw new Error(next?.error || "Could not load saved data. Reopen the extension.");
+    const previousProfileSync = state.profile?.lastSyncAt;
+    const previousWorldSync = state.world?.lastSyncAt;
     state = next.state || {};
-    renderAll();
+    if (previousProfileSync !== state.profile?.lastSyncAt || previousWorldSync !== state.world?.lastSyncAt) renderRefreshedState();
+    else updateSyncMeta();
     const failures = Object.entries(response.result || {}).filter(([,v]) => v?.error);
-    $("status").textContent = failures.length ? failures.map(([key,v]) => `${key}: ${v.error}`).join(" · ") : "Up to date · Stats are interpreted locally";
+    $("status").textContent = failures.length ? failures.map(([key,v]) => `${key}: ${v.error}`).join(" · ") : "Profile and events up to date";
+    nextAutoAttemptAt = failures.length ? Date.now() + 60_000 : 0;
   } catch (error) {
     $("status").textContent = error.message;
+    nextAutoAttemptAt = Date.now() + 60_000;
   } finally {
+    activeSyncing = false;
     $("syncAll").disabled = false;
   }
+}
+
+function autoRefreshIfDue() {
+  if (!interfaceVisible() || activeSyncing || catalogSyncing || Date.now() < nextAutoAttemptAt) return;
+  const due = section => !section?.nextAllowedSyncAt || Date.now() >= section.nextAllowedSyncAt;
+  const resources = {profile:due(state.profile),world:due(state.world)};
+  if (resources.profile || resources.world) void syncActive(false,resources);
 }
 
 function updateSyncMeta() {
@@ -642,7 +667,7 @@ document.querySelectorAll(".format button").forEach(button => {
   };
 });
 
-$("syncAll").onclick = syncAll;
+$("syncAll").onclick = () => syncActive(true);
 
 $("copyPrompt").onclick = () =>
   copy(prompt.prompt || "", "PROMPT COPIED");
@@ -683,9 +708,14 @@ ${JSON.stringify(
   state = response.state || {};
   setActivePage("home");
   renderAll();
-
-  if (!state.items?.index || state.items?.schemaVersion !== 5) await syncCatalog();
-  if (!state?.profile?.raw) await syncAll();
+  const countdownTimer = setInterval(() => { if (interfaceVisible()) { updateCountdowns(); updateSyncMeta(); } },1000);
+  const refreshTimer = setInterval(autoRefreshIfDue,15000);
+  document.addEventListener('visibilitychange',() => { if (interfaceVisible()) { updateCountdowns(); autoRefreshIfDue(); } });
+  window.addEventListener('pagehide',() => { clearInterval(countdownTimer); clearInterval(refreshTimer); });
+  if (interfaceVisible()) {
+    await syncActive(false);
+    if (!state.items?.index || state.items?.schemaVersion !== 5) await syncCatalog();
+  }
 })().catch(error => {
   renderAll();
   $("status").textContent = error.message || "Could not open Tenno Link. Reopen the extension.";

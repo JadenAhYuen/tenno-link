@@ -18,7 +18,7 @@ Tenno Link is currently in active development. Until the Chrome Web Store build 
 6. 📁 Select the folder containing `manifest.json`.
 7. 📌 Pin **Tenno Link** from Chrome's Extensions menu if you want quick access.
 8. 🔑 Sign in to [warframe.com](https://www.warframe.com/).
-9. 🔄 Open Tenno Link and press **Sync**.
+9. 🔄 Open Tenno Link to load your profile. Press **↻** to request a fresh profile and event fetch.
 
 ## 🔁 Updating a developer install
 

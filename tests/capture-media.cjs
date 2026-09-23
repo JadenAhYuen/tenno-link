@@ -44,6 +44,13 @@ async function main() {
     await capture('chart',4);
     await page.locator('#onlyUnplayedMissions').uncheck();
     await capture('chart',5);
+    await page.locator('#nav button[data-page="live"]').click();
+    await page.locator('#live').evaluate(element => { element.scrollTop = 320; });
+    await capture('live',0);
+    await page.waitForTimeout(1100);
+    await capture('live',1);
+    await page.waitForTimeout(1100);
+    await capture('live',2);
     await page.locator('#nav button[data-page="ai"]').click();
     await capture('export',0);
     await page.locator('.format button[data-format="compact"]').click();
