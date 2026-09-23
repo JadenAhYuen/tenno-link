@@ -12,8 +12,8 @@ It links your Warframe profile to a compact browser dashboard, combines account 
 
 ## 🌌 What Tenno Link does
 
-- 🏠 **Home** — Mastery Rank, missions, play time, arsenal counts and career stats
-- 🧭 **Progress** — mission, challenge, affiliation, Operator and XP records
+- 🏠 **Overview** — Mastery Rank, career stats, profile loadout and missions to explore
+- 🧭 **Standing** — reported affiliations and standing
 - 🔫 **Equipment** — profile history grouped by WFCD category, searchable and sortable by usage, kills or affinity
 - 🌌 **Star Chart** — illustrated planets, mission checklists, cleared junction evidence and profile-based exploration suggestions
 - 📡 **Live** — current PC activities, countdowns and a pinned farming goal
@@ -22,7 +22,16 @@ It links your Warframe profile to a compact browser dashboard, combines account 
 - 🔐 No Tenno Link recommendation backend required
 
 <p align="center">
-  <img src="docs/assets/ai-bridge-preview.svg" alt="Tenno Link export preview" width="88%">
+  <img src="docs/assets/screenshots/overview.png" alt="Actual Tenno Link Overview interface with sample profile data" width="560">
+</p>
+
+### Interface screenshots
+
+Actual browser captures of the running interface, taken September 23, 2026 with the local preview's synthetic **Preview Tenno** data. These show the implemented UI, not a design mockup or a live account. Planet artwork is original illustration. See [capture notes](docs/assets/screenshots/README.md).
+
+<p align="center">
+  <img src="docs/assets/screenshots/star-chart.png" alt="Star Chart with compact mission rows and planet illustrations" width="48%">
+  <img src="docs/assets/screenshots/export.png" alt="Export with responsive profile-copy actions" width="48%">
 </p>
 
 ## Read your profile in the tool
@@ -31,7 +40,9 @@ Overview explains lifetime mission pace and career counters. Equipment offers lo
 
 The popup uses an original dark glass treatment with Warframe-inspired cyan and gold accents. The logo beacon, page transitions, and control feedback use short CSS animations; reduced-motion and increased-contrast preferences are supported.
 
-The interface follows system light/dark appearance, supports narrow layouts and keyboard focus, and distinguishes missing values from zero. Loadout records are not described as owned items, and historical affinity is not treated as mastery completion.
+On `warframe.com`, a floating Tenno Link button opens the **full six-section interface** over the page. Drag the slim top handle to move it; close it to return to the small launcher. The frame adapts to narrow screens, keeps the header and navigation visible, and scrolls only the active section when its content is long. The account UI stays inside an extension-origin frame rather than being copied into the website DOM.
+
+The interface supports narrow layouts and keyboard focus, and distinguishes missing values from zero. Loadout records are not described as owned items, and historical affinity is not treated as mastery completion.
 
 See [design review and verification](docs/design-review.md) for calculation definitions and current validation limits.
 
@@ -49,7 +60,7 @@ node tests/storage.test.cjs
 node tests/preview.cjs
 ```
 
-The preview opens at `http://127.0.0.1:8765` with synthetic data and mocked extension APIs. Optionally pass a local profile JSON path to the preview or profile paths to the insights test. Samples are read locally and are not copied into the repository. Stop the preview with Ctrl+C.
+The preview opens at `http://127.0.0.1:8765` with synthetic data and mocked extension APIs. Visit `/site` on that server to try the floating interface. Optionally pass a local profile JSON path to the preview or profile paths to the insights test. Samples are read locally and are not copied into the repository. Stop the preview with Ctrl+C.
 
 ## 🛰️ How the data flows
 
@@ -96,14 +107,14 @@ The [Tenno Link tutorial](docs/TUTORIAL.md) covers:
 
 - 🔗 profile linking
 - 📊 dashboard basics
-- 🛠️ material readiness
+- 🌌 mission progress and planet exploration
 - 📡 live world-state data
 - 🤖 AI export
 
 ## 🤖 AI Bridge
 
 <p align="center">
-  <img src="docs/assets/ai-bridge-preview.svg" alt="Tenno Link AI Bridge preview" width="92%">
+  <img src="docs/assets/screenshots/export.png" alt="Actual Tenno Link Export interface with sample profile data" width="560">
 </p>
 
 Tenno Link does not require an AI API key. It prepares a prompt and selected profile package locally, then you choose where to paste it.

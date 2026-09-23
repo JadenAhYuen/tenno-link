@@ -103,21 +103,21 @@ footer { color:var(--muted); font-size:12px; padding:12px 0 0; overflow-wrap:any
 .item-art img { object-fit:contain; background:var(--panel); }
 .item-art img[hidden] { display:none; }
 .loadout-card { padding:12px; }
-.loadout-card small,.loadout-card b,.planet-row summary small { display:block; }
+.loadout-card small,.loadout-card b,.planet-row > summary small { display:block; }
 .loadout-card .item-art { width:72px; height:72px; flex-basis:72px; }
 .loadout-card img { width:72px; height:72px; }
-.planet-row summary { display:flex; justify-content:space-between; align-items:center; gap:12px; cursor:pointer; min-height:44px; }
-.planet-row summary small { color:var(--muted); font-size:12px; font-weight:400; margin-top:4px; }
+.planet-row > summary { display:flex; justify-content:space-between; align-items:center; gap:12px; cursor:pointer; min-height:44px; }
+.planet-row > summary small { color:var(--muted); font-size:12px; font-weight:400; margin-top:4px; }
 .planet-row progress { width:100%; height:8px; margin-top:12px; accent-color:var(--accent); }
 
-.planet-row summary::before { content:'›'; color:var(--accent); }
-.planet-row[open] summary::before { content:'⌄'; }
-.planet-row summary > span:first-of-type { flex:1; }
+.planet-row > summary::before { content:'›'; color:var(--accent); }
+.planet-row[open] > summary::before { content:'⌄'; }
+.planet-row > summary > span:first-of-type { flex:1; }
 .primary-nav button { white-space:nowrap; }
 .planet-art { width:56px; height:56px; flex:0 0 56px; border-radius:50%; background:radial-gradient(circle at 30% 25%,#fff8 0 2%,#72baca 22%,#284b7b 58%,#0b1328 78%); box-shadow:0 0 18px #45aadd36; }
-.planet-row summary > span:nth-child(2) { flex:1; }
-.planet-row summary::before { content:'›'; color:var(--accent); }
-.planet-row[open] summary::before { content:'⌄'; }
+.planet-row > summary > span:nth-child(2) { flex:1; }
+.planet-row > summary::before { content:'›'; color:var(--accent); }
+.planet-row[open] > summary::before { content:'⌄'; }
 .mission-art { width:38px; height:38px; flex:0 0 38px; display:grid; place-items:center; color:#d4edf0; border:1px solid var(--line); border-radius:10px; background:radial-gradient(circle at 35% 30%,#2d738a,#16232d 75%); font-size:18px; }
 .mission-art.variant-1 { background:radial-gradient(circle at 35% 30%,#946b43,#25211d 75%); }
 .mission-art.variant-2 { background:radial-gradient(circle at 35% 30%,#7863a3,#211d30 75%); }
@@ -128,19 +128,32 @@ footer { color:var(--muted); font-size:12px; padding:12px 0 0; overflow-wrap:any
 .mission-suggestions { display:grid; gap:8px; margin:12px 0; }
 .mission-suggestion { display:flex; align-items:center; gap:12px; padding:8px 0; }
 .mission-suggestion small { display:block; color:var(--muted); }
-.planet-row .list { max-height:340px; overflow:auto; }
-.planet-row .list { border-top:1px solid var(--line); }
+.planet-row > .list { border-top:1px solid var(--line); }
 .planet-art { border-radius:50%; object-fit:cover; }
 .mission-card { border-bottom:1px solid var(--line); }
-.mission-card summary { display:flex; align-items:center; gap:12px; min-height:58px; cursor:pointer; }
+.mission-card summary { display:grid; grid-template-columns:28px minmax(0,1fr) auto; align-items:center; gap:10px; min-height:54px; padding:7px 0; cursor:pointer; }
+.mission-card .mission-art { width:28px; height:28px; font-size:14px; border-radius:8px; }
 .mission-card summary > span:nth-child(2) { flex:1; min-width:0; }
 .mission-card summary small { display:block; color:var(--muted); font-weight:400; }
 .mission-status { color:var(--muted); font-size:12px; }
-.mission-details { padding:0 12px 14px 50px; }
+.mission-details { padding:0 0 12px 38px; overflow-wrap:anywhere; }
+.mission-details .mission-facts { grid-template-columns:minmax(0,1fr); }
+.mission-facts .item { display:flex; flex-wrap:nowrap; gap:12px; align-items:center; justify-content:space-between; }
+.mission-suggestion > span { min-width:0; overflow-wrap:anywhere; }
+.mission-suggestion .planet-art { width:38px; height:38px; flex-basis:38px; background:none; box-shadow:none; }
+@media(max-width:420px) {
+  .mission-card summary { grid-template-columns:28px minmax(0,1fr); gap:4px 9px; }
+  .mission-card .mission-art { grid-row:1 / 3; }
+  .mission-status { grid-column:2; font-size:11px; }
+  .mission-details { padding-left:0; }
+  .planet-row > summary { gap:8px; }
+  .planet-row > summary .planet-art { width:38px; height:38px; flex-basis:38px; }
+  .planet-row > summary > span:last-child { flex:0 0 auto; font-size:12px; }
+}
 .mission-details > p { margin-bottom:12px; }
 .mission-details > p > b { display:block; }
 .mission-facts,.gear-facts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
 .mission-facts .item,.gear-facts .item { min-width:0; border:1px solid var(--line); border-radius:9px; padding:8px; }
 .mission-facts .item b,.gear-facts .item b { color:var(--muted); font-size:12px; }
 .equipment-description { padding:10px 0; }
-.planet-row summary > span:last-child { text-align:right; }
+.planet-row > summary > span:last-child { text-align:right; }

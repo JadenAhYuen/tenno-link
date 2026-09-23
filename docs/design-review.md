@@ -93,3 +93,31 @@ Local tests cover matching, rotations, relic states, goal persistence, and popup
 `visual.css` layers a dark translucent material over the existing readable layout. The palette uses cool cyan for navigation and focus, restrained gold for account and export accents, and a dark spatial backdrop built from CSS gradients. The project logo remains the only header image; the orbit lines and glints are original CSS decoration. Blur is confined to major surfaces, with solid-enough dark fills to retain legibility.
 
 Motion is purposeful and brief: the header and identity enter once, switching sections fades the new content into place, controls respond to press and hover, and the logo ring and connection dot breathe slowly. `prefers-reduced-motion` removes animation and transitions; increased contrast removes translucency and blur. The 760px and 320px local previews showed no horizontal overflow. Overview, Live, and Export were visually inspected. Eight local test files pass, and `git diff --check` passes. Live extension visual verification still requires a reload in Chrome.
+
+## On-page full interface
+
+A floating launcher is injected only on `warframe.com` and `www.warframe.com`. It opens the existing six-section popup inside an extension-origin frame, leaving profile data outside the website DOM. A small outer handle supports pointer dragging; Escape or the close button dismisses the panel. The panel fits within the viewport, and its position is clamped after dragging or resizing. In overlay mode, the brand, profile identity, and navigation remain visible while only the current section scrolls. The narrower form stacks at mobile widths, and reduced-motion/increased-contrast settings apply to the launcher as well.
+
+The local `/site` preview uses a same-origin stand-in page and mocked extension APIs to check layout and interactions. The launcher opened all six sections, the handle moved the panel, Close and Escape returned to the launcher, and a desktop-to-320px resize kept a dragged panel on-screen. Overview, Live, and Export were visually inspected at narrow width without horizontal clipping or console errors. This preview does not prove the cross-origin frame works on the live Warframe site; that requires a reload and check in installed Chrome.
+
+## Animated emblem and Export refinement
+
+The original emblem now has a lightweight SVG animation: a slow gold orbit, a traveling rim highlight, and a cyan core pulse. The floating launcher adds a periodic metallic gold sweep. Export puts the combined action first across the full width, with two aligned secondary actions below; all three stack on narrow screens. Format buttons share one row, while tighter overlay spacing reduces scrolling.
+
+Section entries, opened disclosures, artwork hover, export hover glints, and the disabled sync control now provide motion feedback. Existing glass materials and cyan/gold colors remain. CSS and SVG both include reduced-motion overrides.
+
+Validation: all eight existing test files pass; content.js syntax and git diff whitespace checks pass. Local browser previews at 680px and 320px show no horizontal overflow or clipped copy buttons. The animated SVG loads successfully and all three loops were observed running. The floating launcher opens the full interface in the local preview. This pass does not verify the updated unpacked extension on the live Warframe website.
+
+## Compact mission rows and ambient motion
+
+Scoped planet-header selectors to direct children: previously those rules stretched nested mission thumbnails into wide banners. Mission rows now use 28px icons, put status on its own line below 420px, and give enemy-level details a full-width padded row. Removed the nested planet mission scrollbar so navigation uses the section scroll surface. Mission recommendations now render their respective original planet illustrations, with a regression check for Mercury and Venus.
+
+The overlay expands from its lower-right origin over 600ms, and tabs use a stronger sliding, scaling, and blur reveal. Eight noninteractive cyan/gold motes and outlined fragments drift behind the glass surfaces. All new motion follows the existing reduced-motion overrides.
+
+Validation: eight test files pass; syntax and whitespace checks pass. Local browser inspection covered planet recommendation artwork at 680px, mission details at 320px (28px icons, no horizontal overflow, no nested scroll, 8px/10px fact padding), and launcher opening. Live installed-extension verification remains separate.
+
+## Glass finish and repository screenshots
+
+Added brighter upper glass edges, a compact gold Mastery Rank badge, clearer open-mission and input focus feedback, and subtle separators between suggested missions. Preserved the cyan/gold palette, original hero gradients, and reduced-motion support. Removed the redundant account-level caption to retain header space.
+
+README now embeds actual PNG browser captures of Overview, Star Chart, and Export instead of the drawn AI Bridge preview. Captures use the expanded synthetic preview fixture and are explicitly labeled as sample data. Capture instructions are in docs/assets/screenshots/README.md. Desktop captures were visually inspected; the 320px layout has no horizontal overflow. All eight test files pass. Live account integration was not retested in this visual pass.

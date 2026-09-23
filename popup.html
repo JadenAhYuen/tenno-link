@@ -6,12 +6,14 @@
   <title>Tenno Link</title>
   <link rel="stylesheet" href="popup.css">
   <link rel="stylesheet" href="visual.css">
+  <link rel="stylesheet" href="overlay-mode.css">
 </head>
 <body>
   <main>
+    <div class="ambient-field" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
     <header class="topbar">
       <div class="brand-icon">
-        <img src="assets/tenno-link-logo.svg" alt="Tenno Link logo">
+        <img src="assets/tenno-link-logo-animated.svg" alt="Tenno Link logo">
       </div>
 
       <div class="brand">
@@ -96,21 +98,20 @@
         </div>
 
         <div class="copy-grid">
+          <button id="copyBoth" class="gold">
+            <span class="copy-glyph" aria-hidden="true">◇</span>
+            <span class="copy-label"><strong>Copy prompt + profile</strong><small>Ready to paste into your AI</small></span>
+          </button>
           <button id="copyPrompt" class="copy-action">
-            <span class="copy-glyph">⌁</span>
-            <span><strong>COPY PROMPT</strong><small>Instructions only</small></span>
+            <span class="copy-glyph" aria-hidden="true">⌁</span>
+            <span class="copy-label"><strong>Copy prompt</strong><small>Instructions only</small></span>
           </button>
 
           <button id="copyProfile" class="copy-action">
-            <span class="copy-glyph">{ }</span>
-            <span><strong>COPY PROFILE</strong><small>Selected data</small></span>
+            <span class="copy-glyph" aria-hidden="true">{ }</span>
+            <span class="copy-label"><strong>Copy profile</strong><small>Selected data</small></span>
           </button>
 
-          <button id="copyBoth" class="gold">
-            <span class="gold-orbit" aria-hidden="true"></span>
-            <span class="copy-glyph">◇</span>
-            <span><strong>COPY PROMPT + PROFILE</strong><small>Ready to paste into your AI</small></span>
-          </button>
         </div>
       </div>
     </section>

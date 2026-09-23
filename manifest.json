@@ -18,6 +18,19 @@
   "background": {
     "service_worker": "background.js"
   },
+  "content_scripts": [
+    {
+      "matches": ["https://warframe.com/*", "https://www.warframe.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["popup.html", "assets/tenno-link-logo-animated.svg"],
+      "matches": ["https://warframe.com/*", "https://www.warframe.com/*"]
+    }
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_title": "Tenno Link",

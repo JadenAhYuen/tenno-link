@@ -1,0 +1,56 @@
+/* The same six-page popup, arranged as a bounded on-page workspace. */
+html.overlay-mode { width:100%; max-width:none; height:100%; }
+html.overlay-mode body { height:100%; min-height:0; overflow:hidden; }
+html.overlay-mode main { display:flex; flex-direction:column; height:100%; min-height:0; padding:15px 18px 9px; overflow:hidden; }
+html.overlay-mode .topbar { flex:0 0 auto; margin-bottom:12px; }
+html.overlay-mode .brand-icon { width:42px; height:42px; flex-basis:42px; }
+html.overlay-mode .brand-icon img { width:34px; height:34px; }
+html.overlay-mode .brand-icon::after { inset:4px; }
+html.overlay-mode h1 { font-size:20px; }
+html.overlay-mode .brand-subline { margin-top:2px; }
+html.overlay-mode .hero-panel { flex:0 0 auto; min-height:86px; margin-bottom:0; padding:13px 17px; }
+html.overlay-mode .name { font-size:22px; }
+html.overlay-mode .mr strong { font-size:27px; }
+html.overlay-mode .primary-nav { flex:0 0 auto; margin:11px 0 12px; padding:4px; }
+html.overlay-mode .primary-nav button { min-height:39px; padding:7px 4px; font-size:12px; }
+html.overlay-mode .page.active { flex:1 1 auto; min-height:0; overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:rgba(174,225,222,.37) transparent; padding:2px 4px 8px 0; }
+html.overlay-mode .page.active::-webkit-scrollbar { width:6px; }
+html.overlay-mode .page.active::-webkit-scrollbar-thumb { border-radius:8px; background:rgba(174,225,222,.36); }
+html.overlay-mode .panel { padding:16px; margin-bottom:11px; }
+html.overlay-mode .section-title { margin-bottom:11px; }
+html.overlay-mode .section-title h2 { margin-bottom:3px; }
+html.overlay-mode h2 { font-size:17px; }
+html.overlay-mode .stats-grid { gap:9px; margin-bottom:11px; }
+html.overlay-mode .stat { padding:13px; }
+html.overlay-mode .stat strong { font-size:23px; }
+html.overlay-mode .stat p { font-size:12px; }
+html.overlay-mode .item { padding:9px 0; }
+html.overlay-mode .mission-facts .item { padding:8px 10px; }
+html.overlay-mode .equipment-controls { margin:13px 0 10px; gap:8px; }
+html.overlay-mode .copy-grid { margin-top:12px; }
+html.overlay-mode .copy-grid button { min-height:54px; padding-top:10px; padding-bottom:10px; }
+html.overlay-mode .prompt-shell p { margin:8px 0 12px; }
+html.overlay-mode .format,html.overlay-mode .toggles { margin:8px 0; }
+html.overlay-mode footer { flex:0 0 auto; min-height:23px; padding:6px 2px 0; font-size:11px; }
+html.overlay-mode .toast { position:absolute; }
+@media(min-width:560px) {
+  html.overlay-mode #home .stats-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  html.overlay-mode .equipment-controls { grid-template-columns:repeat(3,minmax(0,1fr)); }
+}
+@media(max-width:520px) {
+  html.overlay-mode main { padding:11px 10px 7px; }
+  html.overlay-mode .topbar { gap:8px; margin-bottom:9px; }
+  html.overlay-mode .hero-panel { min-height:76px; padding:11px 13px; }
+  html.overlay-mode .name { font-size:18px; }
+  html.overlay-mode .mr strong { font-size:23px; }
+  html.overlay-mode .primary-nav { margin:8px 0 10px; }
+  html.overlay-mode .primary-nav button { min-height:34px; }
+  html.overlay-mode .panel { padding:13px; }
+  html.overlay-mode .stat { padding:12px; }
+}
+@media(max-height:540px) {
+  html.overlay-mode .topbar { margin-bottom:7px; }
+  html.overlay-mode .hero-panel { min-height:62px; padding-top:8px; padding-bottom:8px; }
+  html.overlay-mode .primary-nav { margin:7px 0; }
+  html.overlay-mode footer { display:none; }
+}
