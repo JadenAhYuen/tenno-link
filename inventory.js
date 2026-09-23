@@ -10,171 +10,49 @@
   ];
 
   const CURRENCY_KEYS = new Map([
-    ["credits", "Credits"],
-    ["premiumcredits", "Platinum"],
-    ["platinum", "Platinum"],
-    ["ducats", "Ducats"],
-    ["voidtraces", "Void Traces"],
-    ["standing", "Standing"],
-    ["focus", "Focus"]
+    ["credits", "Credits"], ["premiumcredits", "Platinum"], ["platinum", "Platinum"],
+    ["ducats", "Ducats"], ["voidtraces", "Void Traces"], ["endo", "Endo"]
   ]);
-
-  const INVENTORY_PATH_HINTS = [
-    "inventory", "resources", "miscitems", "consumables", "components",
-    "blueprints", "recipes", "relics", "mods", "prime", "parts", "currency"
-  ];
-
-  const CATEGORY_HINTS = [
-    ["currency", "currency"],
-    ["resource", "resources"],
-    ["miscitems", "resources"],
-    ["component", "parts"],
-    ["parts", "parts"],
-    ["prime", "parts"],
-    ["blueprint", "blueprints"],
-    ["recipe", "blueprints"],
-    ["relic", "relics"],
-    ["mod", "mods"],
-    ["consumable", "gear"]
-  ];
-
+  const COLLECTIONS = {
+    Resources:"resources", resources:"resources", MiscItems:"resources", Materials:"resources",
+    Components:"parts", Parts:"parts", Blueprints:"blueprints", Recipes:"blueprints",
+    Relics:"relics", Projections:"relics", Mods:"mods", Upgrades:"mods",
+    Consumables:"gear", Gear:"gear", Items:"other", items:"other"
+  };
   function firstValue(object, keys) {
-    for (const key of keys) {
-      if (object && object[key] != null) return object[key];
-    }
+    for (const key of keys) if (object?.[key] != null) return object[key];
     return null;
   }
-
-  function normalizeKey(value) {
-    return String(value ?? "")
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, "");
-  }
-
   function readableName(rawName) {
     if (!rawName) return "Unknown item";
-    const text = String(rawName);
-    const last = text.includes("/") ? text.split("/").filter(Boolean).pop() : text;
-    return last
-      .replace(/([a-z])([A-Z])/g, "$1 $2")
-      .replace(/_/g, " ")
-      .trim();
+    return String(rawName).split("/").filter(Boolean).pop()
+      .replace(/([a-z])([A-Z])/g,"$1 $2").replace(/_/g," ").trim();
   }
-
-  function inferCategory(path, name) {
-    const haystack = `${path} ${name}`.toLowerCase();
-    for (const [hint, category] of CATEGORY_HINTS) {
-      if (haystack.includes(hint)) return category;
-    }
-    return "other";
+  function validQuantity(value) {
+    return (typeof value === "number" || typeof value === "string" && value.trim() !== "") &&
+      Number.isFinite(Number(value)) && Number(value) >= 0;
   }
-
-  function likelyInventoryPath(path) {
-    const lower = path.toLowerCase();
-    return INVENTORY_PATH_HINTS.some(hint => lower.includes(hint));
-  }
-
-  function addOrMerge(map, item) {
-    const key = item.uniqueName || `${item.category}:${item.name.toLowerCase()}`;
-    const existing = map.get(key);
-
-    if (!existing) {
-      map.set(key, item);
-      return;
-    }
-
-    existing.quantity += item.quantity;
-    existing.sources = Array.from(new Set([...(existing.sources || []), ...(item.sources || [])]));
-    existing.confidence = Math.max(existing.confidence || 0, item.confidence || 0);
-  }
-
-  function extractCurrencies(node, path, map, depth = 0) {
-    if (!node || typeof node !== "object" || depth > 8) return;
-
-    for (const [key, value] of Object.entries(node)) {
-      const nextPath = path ? `${path}.${key}` : key;
-
-      if (typeof value === "number" && Number.isFinite(value)) {
-        const normalized = normalizeKey(key);
-        const currencyName = CURRENCY_KEYS.get(normalized);
-
-        if (currencyName) {
-          addOrMerge(map, {
-            id: `currency:${normalized}`,
-            name: currencyName,
-            uniqueName: null,
-            quantity: value,
-            category: "currency",
-            sourcePath: nextPath,
-            sources: [nextPath],
-            confidence: 1
-          });
+  // Only account/inventory containers are balances. Never recurse into stats,
+  // affiliations, loadouts, challenges, recipe costs or lifetime earnings.
+  function containers(profile) {
+    const roots = [{node:profile?.Results?.[0],path:"Results[0]"},{node:profile,path:"root"}];
+    const result = [];
+    for (const root of roots) {
+      if (!root.node || typeof root.node !== "object") continue;
+      for (const key of ["Inventory","inventory"]) {
+        const inventory = root.node[key];
+        if (inventory && typeof inventory === "object" && !Array.isArray(inventory)) {
+          for (const wallet of ["Wallet","wallet","Currencies"]) if (inventory[wallet])
+            result.push({node:inventory[wallet],path:`${root.path}.${key}.${wallet}`});
+          result.push({node:inventory,path:`${root.path}.${key}`});
         }
-      } else if (value && typeof value === "object") {
-        extractCurrencies(value, nextPath, map, depth + 1);
       }
+      for (const wallet of ["Wallet","wallet","Currencies"]) if (root.node[wallet])
+        result.push({node:root.node[wallet],path:`${root.path}.${wallet}`});
+      result.push(root);
     }
+    return result;
   }
-
-  function extractQuantityObjects(node, path, map, depth = 0) {
-    if (!node || typeof node !== "object" || depth > 8) return;
-
-    if (Array.isArray(node)) {
-      node.forEach((entry, index) => {
-        const entryPath = `${path}[${index}]`;
-
-        if (entry && typeof entry === "object") {
-          const rawCount = firstValue(entry, COUNT_KEYS);
-          const rawName = firstValue(entry, NAME_KEYS);
-
-          if (
-            rawName != null &&
-            rawCount != null &&
-            Number.isFinite(Number(rawCount)) &&
-            (likelyInventoryPath(path) || String(rawName).startsWith("/Lotus/"))
-          ) {
-            const quantity = Number(rawCount);
-            const uniqueName =
-              entry.uniqueName ||
-              entry.UniqueName ||
-              entry.ItemType ||
-              entry.itemType ||
-              (String(rawName).startsWith("/Lotus/") ? String(rawName) : null);
-
-            const name = readableName(
-              entry.name ||
-              entry.Name ||
-              entry.ItemName ||
-              entry.itemName ||
-              rawName
-            );
-
-            addOrMerge(map, {
-              id: uniqueName || `${inferCategory(path, name)}:${name.toLowerCase()}`,
-              name,
-              uniqueName,
-              quantity,
-              category: inferCategory(path, name),
-              sourcePath: entryPath,
-              sources: [entryPath],
-              confidence: likelyInventoryPath(path) ? 1 : 0.65
-            });
-          }
-        }
-
-        extractQuantityObjects(entry, entryPath, map, depth + 1);
-      });
-
-      return;
-    }
-
-    for (const [key, value] of Object.entries(node)) {
-      if (value && typeof value === "object") {
-        extractQuantityObjects(value, path ? `${path}.${key}` : key, map, depth + 1);
-      }
-    }
-  }
-
   function summarize(items) {
     return {
       totalEntries: items.length,
@@ -187,25 +65,48 @@
     };
   }
 
-  function build(profile) {
+  function build(profile, catalog = {}) {
     const map = new Map();
-
-    extractCurrencies(profile, "", map);
-    extractQuantityObjects(profile, "", map);
-
-    const items = Array.from(map.values())
-      .filter(item => Number.isFinite(item.quantity))
-      .sort((a, b) => {
-        if (a.category !== b.category) return a.category.localeCompare(b.category);
-        return a.name.localeCompare(b.name);
-      });
-
-    return {
-      version: 1,
-      items,
-      summary: summarize(items),
-      generatedAt: Date.now()
-    };
+    const reportedCollections = [];
+    for (const {node,path} of containers(profile)) {
+      for (const [field,name] of CURRENCY_KEYS) {
+        const entry = Object.entries(node).find(([key]) => key.toLowerCase() === field);
+        if (!entry || !validQuantity(entry[1]) || map.has(`currency:${name}`)) continue;
+        const sourcePath = `${path}.${entry[0]}`;
+        map.set(`currency:${name}`, {id:`currency:${name}`,name,uniqueName:null,quantity:Number(entry[1]),
+          category:"currency",sourcePath,sources:[sourcePath],confidence:1});
+      }
+      for (const [field,fallback] of Object.entries(COLLECTIONS)) {
+        if (!Array.isArray(node[field])) continue;
+        const collection = `${path}.${field}`;
+        reportedCollections.push(collection);
+        node[field].forEach((entry,i) => {
+          const rawName = firstValue(entry,NAME_KEYS), rawCount = firstValue(entry,COUNT_KEYS);
+          if (typeof rawName !== "string" || !validQuantity(rawCount)) return;
+          const uniqueName = firstValue(entry,["uniqueName","UniqueName","ItemType","itemType"]) ||
+            (rawName.startsWith("/Lotus/") ? rawName : null);
+          const metadata = catalog[uniqueName];
+          const name = metadata?.name || readableName(firstValue(entry,["name","Name","ItemName","itemName"]) || rawName);
+          const category = metadata?.category && ["resources","parts","blueprints","relics","mods","gear","arcanes"].includes(metadata.category)
+            ? metadata.category : fallback;
+          const id = uniqueName || `${category}:${name.toLowerCase()}`;
+          const sourcePath = `${collection}[${i}]`;
+          const previous = map.get(id);
+          if (previous) {
+            // Multiple stacks in one collection add; mirrored containers do not.
+            if (previous.collection === collection) previous.quantity += Number(rawCount);
+            previous.sources.push(sourcePath);
+            return;
+          }
+          map.set(id,{id,name,uniqueName,quantity:Number(rawCount),category,collection,
+            sourcePath,sources:[sourcePath],confidence:1});
+        });
+      }
+    }
+    const items = Array.from(map.values()).sort((a,b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
+    return {version:2,items,summary:summarize(items),reportedCollections,
+      availability:{currencies:items.some(x=>x.category === "currency") ? "reported" : "not-reported",
+        materials:items.some(x=>["resources","parts"].includes(x.category)) ? "reported" : "not-reported"},generatedAt:Date.now()};
   }
 
   function unwrapCatalog(payload) {
@@ -254,20 +155,21 @@
           const owned =
             (component.uniqueName && byUnique.get(component.uniqueName)) ??
             byName.get(String(component.name || "").toLowerCase()) ??
-            0;
+            null;
 
           return {
             ...component,
             owned,
-            missing: Math.max(0, Number(component.itemCount || 0) - Number(owned || 0))
+            missing: owned === null ? null : Math.max(0, Number(component.itemCount) - owned)
           };
         });
 
-        const missing = componentState.filter(component => component.missing > 0);
+        const invalid = !componentState.length || componentState.some(component => !Number.isFinite(component.itemCount) || component.itemCount <= 0);
+        const missing = componentState.filter(component => component.missing === null || component.missing > 0);
 
         return {
           ...craftable,
-          status: missing.length ? "missing-materials" : "materials-ready",
+          status: invalid || missing.length ? "unverified-materials" : "materials-ready",
           missingCount: missing.length,
           components: componentState
         };

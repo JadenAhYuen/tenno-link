@@ -1,44 +1,17 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Tenno Link</title>
   <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="visual.css">
 </head>
 <body>
-  <div class="bg" aria-hidden="true">
-    <div class="nebula n1"></div>
-    <div class="nebula n2"></div>
-
-    <div class="orb o1"><span></span></div>
-    <div class="orb o2"><span></span></div>
-    <div class="orb o3"><span></span></div>
-
-    <div class="orbit orbit-a"><i></i><i></i><i></i></div>
-    <div class="orbit orbit-b"><i></i><i></i></div>
-
-    <div class="starfield">
-      <i class="star s1"></i><i class="star s2"></i><i class="star s3"></i>
-      <i class="star s4"></i><i class="star s5"></i><i class="star s6"></i>
-      <i class="star s7"></i><i class="star s8"></i><i class="star s9"></i>
-      <i class="star s10"></i><i class="star s11"></i><i class="star s12"></i>
-    </div>
-
-    <div class="float-glyph glyph-a">◇</div>
-    <div class="float-glyph glyph-b">⌁</div>
-    <div class="float-glyph glyph-c">◈</div>
-
-    <div class="scan"></div>
-    <div class="vignette"></div>
-  </div>
-
   <main>
     <header class="topbar">
       <div class="brand-icon">
         <img src="assets/tenno-link-logo.svg" alt="Tenno Link logo">
-        <span class="brand-ring r1" aria-hidden="true"></span>
-        <span class="brand-ring r2" aria-hidden="true"></span>
       </div>
 
       <div class="brand">
@@ -50,13 +23,12 @@
         </div>
       </div>
 
-      <button id="syncAll" class="round sync-button" title="Synchronize profile">
+      <button id="syncAll" class="round sync-button" title="Synchronize profile" aria-label="Synchronize profile">
         <span>↻</span>
       </button>
     </header>
 
     <section class="identity panel hero-panel">
-      <div class="hero-decoration" aria-hidden="true"></div>
       <div>
         <div class="label">ACTIVE TENNO</div>
         <div id="name" class="name">Awaiting link…</div>
@@ -74,17 +46,18 @@
     </section>
 
     <nav id="nav" class="primary-nav" aria-label="Tenno Link sections">
-      <button data-page="home" class="active">
-        <span class="nav-icon">⌂</span>
-        <span>HOME</span>
-      </button>
-      <button data-page="ai">
-        <span class="nav-icon">✦</span>
-        <span>AI BRIDGE</span>
-      </button>
+      <button data-page="home" class="active" aria-current="page">Overview</button>
+      <button data-page="arsenal">Equipment</button>
+      <button data-page="chart">Star Chart</button>
+      <button data-page="progress">Standing</button>
+      <button data-page="live">Live</button>
+      <button data-page="ai">Export</button>
     </nav>
-
-    <section id="home" class="page active"></section>
+    <section id="home" class="page active" aria-label="Overview"></section>
+    <section id="arsenal" class="page" aria-label="Equipment"></section>
+    <section id="chart" class="page" aria-label="Star Chart"></section>
+    <section id="progress" class="page" aria-label="Standing"></section>
+    <section id="live" class="page" aria-label="Live"></section>
 
     <section id="ai" class="page">
       <div class="panel ai-panel">
@@ -143,14 +116,18 @@
     </section>
 
     <footer>
-      <span id="status">Local-first • Unofficial passion project</span>
+      <span id="status" role="status">Local-first • Unofficial passion project</span>
       <span class="footer-node"></span>
     </footer>
 
-    <div id="toast" class="toast"></div>
+    <div id="toast" class="toast" role="status"></div>
   </main>
 
   <script src="prompts.js"></script>
+  <script src="catalog.js"></script>
+  <script src="progression.js"></script>
+  <script src="inventory.js"></script>
+  <script src="insights.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

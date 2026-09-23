@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/tenno-link-banner.svg" alt="Tenno Link" width="100%">
+  <img src="assets/tenno-link-logo.svg" alt="Tenno Link logo" width="112">
 </p>
 
 # ✨ Tenno Link
@@ -14,65 +14,42 @@ It links your Warframe profile to a compact browser dashboard, combines account 
 
 - 🏠 **Home** — Mastery Rank, missions, play time, arsenal counts and career stats
 - 🧭 **Progress** — mission, challenge, affiliation, Operator and XP records
-- 🔫 **Arsenal** — Warframe/weapon counts and usage statistics
-- 📦 **Inventory** — searchable/filterable quantity-bearing profile data
-- 🛠️ **Materials Ready** — experimental material-readiness checks using maintained public recipe metadata
-- 📡 **Live** — public Warframe world-state information
+- 🔫 **Equipment** — profile history grouped by WFCD category, searchable and sortable by usage, kills or affinity
+- 🌌 **Star Chart** — illustrated planets, mission checklists, cleared junction evidence and profile-based exploration suggestions
+- 📡 **Live** — current PC activities, countdowns and a pinned farming goal
 - 🤖 **AI Bridge** — 12 prompt presets with Recommended, Compact and Raw export modes
 - 💾 Cache-aware syncing and local storage
 - 🔐 No Tenno Link recommendation backend required
 
 <p align="center">
-  <img src="docs/assets/inventory-preview.svg" alt="Tenno Link searchable inventory preview" width="88%">
+  <img src="docs/assets/ai-bridge-preview.svg" alt="Tenno Link export preview" width="88%">
 </p>
 
-## 📦 Inventory model
+## Read your profile in the tool
 
-Tenno Link does **not** hardcode example balances or invent resources.
+Overview explains lifetime mission pace and career counters. Equipment offers local search, sorting by time/kills/affinity, expandable details and incremental loading. Standing exposes reported affiliations, including negative standing. Live and Export remain available.
 
-The inventory layer recursively inspects the returned profile JSON for quantity-bearing account structures, normalizes detected entries, and records where each value came from.
+The popup uses an original dark glass treatment with Warframe-inspired cyan and gold accents. The logo beacon, page transitions, and control feedback use short CSS animations; reduced-motion and increased-contrast preferences are supported.
 
-Each normalized inventory entry can contain:
+The interface follows system light/dark appearance, supports narrow layouts and keyboard focus, and distinguishes missing values from zero. Loadout records are not described as owned items, and historical affinity is not treated as mastery completion.
 
-```text
-id
-name
-uniqueName
-quantity
-category
-sourcePath
-sources[]
-confidence
+See [design review and verification](docs/design-review.md) for calculation definitions and current validation limits.
+
+### Local checks
+
+```sh
+node tests/inventory.test.js
+node tests/inventory-safety.test.cjs
+node tests/catalog.test.cjs
+node tests/insights.test.js
+node tests/progression.test.cjs
+node tests/farming.test.cjs
+node tests/popup.test.cjs
+node tests/storage.test.cjs
+node tests/preview.cjs
 ```
 
-Current UI categories include:
-
-```text
-CURRENCY  RESOURCES  PARTS  BLUEPRINTS  RELICS  MODS  GEAR  OTHER
-```
-
-The model is intentionally defensive because the profile-view payload is not a formally documented inventory API and may change over time.
-
-## 🔎 Searchable inventory
-
-The **Resources** tab now includes:
-
-- 🔍 instant local search
-- 🏷️ category filters
-- 🔢 formatted quantities
-- 🧾 profile-source tracking internally
-- 🚫 no fabricated balances
-- 🧩 a separate crafting-readiness layer
-
-## 🛠️ Materials Ready
-
-Recipe data is fetched from the maintained WarframeStat.us / WFCD item API rather than permanently hardcoded into the extension.
-
-Tenno Link caches a compact recipe catalog and derives **Materials Ready** by comparing detected inventory quantities against current recipe component quantities.
-
-> ⚠️ **Materials Ready does not mean guaranteed craftable.**
-
-Blueprint ownership, Mastery Rank, quests, clan research and other game requirements remain separate checks.
+The preview opens at `http://127.0.0.1:8765` with synthetic data and mocked extension APIs. Optionally pass a local profile JSON path to the preview or profile paths to the insights test. Samples are read locally and are not copied into the repository. Stop the preview with Ctrl+C.
 
 ## 🛰️ How the data flows
 
@@ -119,7 +96,6 @@ The [Tenno Link tutorial](docs/TUTORIAL.md) covers:
 
 - 🔗 profile linking
 - 📊 dashboard basics
-- 📦 inventory search
 - 🛠️ material readiness
 - 📡 live world-state data
 - 🤖 AI export
@@ -141,7 +117,7 @@ These are treated as upstream dependencies, not as data formats Tenno Link contr
 
 ## 🧪 Testing
 
-The inventory branch includes automated tests for:
+Automated tests cover:
 
 - 💰 currency detection
 - 📦 quantity-bearing inventory extraction
@@ -156,12 +132,6 @@ GitHub Actions also validates the extension manifest and JavaScript syntax.
 ## 🧑‍💻 Development
 
 Feature work is developed on branches and reviewed through pull requests.
-
-Current inventory work:
-
-```text
-feature/inventory-ui
-```
 
 For an unpacked extension that is already loaded:
 
@@ -194,3 +164,19 @@ Warframe and related trademarks, names and game assets belong to Digital Extreme
 <p align="center">
   <strong>⚡ Your profile. Your data. Your AI. ⚡</strong>
 </p>
+
+## Star Chart and item pictures
+
+Loadouts and equipment history display WFCD images when available, with a placeholder if an image is missing or fails. Item definitions do not prove ownership.
+
+Star Chart joins recorded mission tags to public destination metadata. It shows per-destination node completion evidence and completed incoming junctions. It does not claim that an unrecorded destination is locked or infer current access from activity alone. Duplicate tiers count once; unknown mission tags remain visible separately. Destination totals are not an authoritative Steel Path or Arbitration checklist.
+
+Reload the unpacked extension after updating. Item data schema 5 automatically refreshes older caches to add mission and equipment details.
+
+Good follow-up features would be change history across syncs and a richer mission route planner.
+
+The Catalog browsing page was removed. Its public metadata still loads in the background for equipment names, item images and destinations. Star Chart displays distinct original planet illustrations and expandable mission objectives and details. Equipment entries include public descriptions and whichever base stats the source provides. Inventory balances are not shown because the profile-view data may omit them.
+
+## Live activities and farming goals
+
+Overview highlights up to three current PC world-state activities. Live lets you pin a blueprint, part or mod name and check exact-name matches against WFCD mission rewards, blueprint drops, mod drops and intact relic rewards. Mission sources appear first; enemy table percentages are labelled as conditional on an item or mod drop. A matching mission may show that a completion was recorded in the profile. The goal is saved locally, while the full public drop files are not stored in extension storage. A completion record does not establish current access, and a drop source does not establish ownership.

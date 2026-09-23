@@ -8,48 +8,19 @@ Open Tenno Link and press **Sync**. The extension reads the local Warframe profi
 
 ## 🏠 2. Review your dashboard
 
-- **Home** surfaces high-value account statistics such as Mastery Rank, missions completed, play time, and arsenal counts.
-- **Progress** displays mission, challenge, affiliation, Operator-loadout and XP records.
-- **Arsenal** summarizes Warframe and weapon records plus usage statistics.
+- **Overview** surfaces high-value account statistics such as Mastery Rank, missions completed, play time, and arsenal counts.
+- **Standing** displays mission, challenge, affiliation, Operator-loadout and XP records.
+- **Equipment** summarizes Warframe and weapon records plus usage statistics.
 
-## 📦 3. Search your inventory
-
-Open **Resources**.
-
-Tenno Link scans quantity-bearing structures actually returned in your profile data and normalizes them into a searchable inventory model.
-
-You can:
-
-- 🔍 search by item or resource name
-- 🏷️ filter by category
-- 🔢 inspect detected quantities
-- 🧾 rely on source-tracked values instead of example balances
-
-Tenno Link does **not** invent a balance if it cannot find one in your profile response.
-
-## 🛠️ 4. Materials readiness
-
-Tenno Link can refresh maintained public item/recipe metadata and compare recipe component requirements against detected inventory quantities.
-
-A **Materials Ready** result means the detected material quantities satisfy the recipe component counts.
-
-It does **not** automatically mean:
-
-- 📜 you own the blueprint
-- 🎖️ you meet Mastery Rank requirements
-- 🧭 a required quest is complete
-- 🏯 clan research is unlocked
-- ⚙️ every game-specific build requirement is satisfied
-
-Those checks stay separate on purpose.
-
-## 📡 5. Live data
+## 📡 3. Live data
 
 The **Live** section uses public world-state data for time-sensitive activities such as fissures and other rotating systems.
 
-## 🤖 6. Ask your AI
+Overview also shows a short PC activity summary. In Live, enter the exact name of a blueprint, part or mod and press **Find sources** to pin a farming goal. The result lists public WFCD mission, enemy and intact relic reward sources. Enemy table chances are conditional on an item or mod drop. A recorded mission completion is historical evidence, not proof that a route is currently unlocked.
 
-Open **AI** and choose a prompt template.
+## 🤖 4. Export for your AI
+
+Open **Export** and choose a prompt template.
 
 You can copy:
 
@@ -59,6 +30,6 @@ You can copy:
 
 The copied package can include sanitized player data and public live world-state data without copying your Warframe session cookies.
 
-## 🔐 7. Privacy check
+## 🔐 5. Privacy check
 
 Tenno Link is local-first. Your login password is never part of the exported profile package, and clipboard actions only happen when you trigger them.

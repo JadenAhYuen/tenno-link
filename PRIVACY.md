@@ -23,6 +23,13 @@ Profile data is fetched directly from Digital Extremes and cached locally in Chr
 
 Live world-state information is fetched from the public WarframeStat.us API.
 
+Farming goal searches download public WFCD drop tables from GitHub. The name you enter is matched locally; it is not placed in the download URL. Tenno Link stores your chosen name and matching sources in Chrome extension storage, not the full drop tables.
+
+
 The extension places data on your clipboard only after you press one of the Copy buttons.
 
 You decide which AI service, application, or person receives that clipboard content.
+
+## Item pictures and Star Chart
+
+Public item definitions come from api.warframestat.us. Item pictures load directly from cdn.warframestat.us, without a referrer or profile payload. Like other remote images, the CDN receives the requesting IP address and the requested image name. Profile interpretation and mission matching happen locally.
