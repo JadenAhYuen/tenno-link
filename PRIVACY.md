@@ -25,6 +25,8 @@ On `warframe.com`, the floating button opens the extension's own interface in a 
 
 Live world-state information is fetched from the public WarframeStat.us API.
 
+The floating launcher by itself does not request profile or world-state data. Refresh checks run only while the Tenno Link interface is open in a visible tab; closing the floating interface unloads its frame. Event countdowns update from cached expiry times without another API request each second.
+
 Farming goal searches download public WFCD drop tables from GitHub. The name you enter is matched locally; it is not placed in the download URL. Tenno Link stores your chosen name and matching sources in Chrome extension storage, not the full drop tables.
 
 

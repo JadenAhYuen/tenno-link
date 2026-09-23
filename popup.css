@@ -48,6 +48,7 @@ small { font-size:13px; }
 .item { display:flex; justify-content:space-between; align-items:baseline; gap:16px; padding:12px 0; border-bottom:1px solid var(--line); overflow-wrap:anywhere; }
 .item b { font-size:14px; font-weight:550; }
 .item span { font-size:14px; color:var(--muted); text-align:right; font-variant-numeric:tabular-nums; }
+.live-countdown { font-variant-numeric:tabular-nums; white-space:nowrap; }
 .career-grid .item { display:block; }
 .career-grid .item span { display:block; text-align:left; }
 summary { min-height:44px; padding:10px 0; font-weight:600; }

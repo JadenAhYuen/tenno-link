@@ -199,15 +199,15 @@ function setStore(patch) {
 }
 
 async function syncProfile(force = false) {
-  const gid = await getGid();
   const state = await getStore();
   const now = Date.now();
 
-  if (!force && state.profile?.nextAllowedSyncAt > now && state.profile?.raw) {
-    const rebuilt = rebuildProfileState(state.profile, state.items?.index);
-    await setStore({ profile: rebuilt });
-    return { cached: true, profile: rebuilt };
+  if (!force && state.profile?.nextAllowedSyncAt > now) {
+    if (state.profile?.raw) return { cached: true, profile: state.profile };
+    throw new Error('Profile refresh is waiting for its retry interval.');
   }
+
+  const gid = await getGid();
 
   const response = await fetch(
     `${PROFILE_ENDPOINT}?playerId=${encodeURIComponent(gid)}`,
@@ -456,6 +456,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
               items.status === "fulfilled"
                 ? items.value
                 : { error: items.reason?.message }
+          }
+        });
+        return;
+      }
+
+      if (message?.type === "SYNC_ACTIVE") {
+        const [profile, world] = await Promise.allSettled([
+          message.profile === false ? Promise.resolve({skipped:true}) : syncProfile(Boolean(message.force)),
+          message.world === false ? Promise.resolve({skipped:true}) : syncWorldState(Boolean(message.force))
+        ]);
+        sendResponse({
+          ok: true,
+          result: {
+            profile: profile.status === "fulfilled" ? profile.value : {error:profile.reason?.message},
+            world: world.status === "fulfilled" ? world.value : {error:world.reason?.message}
           }
         });
         return;

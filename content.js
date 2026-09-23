@@ -82,6 +82,7 @@
   };
   const dismiss = () => {
     panel.hidden = true;
+    frame.src = 'about:blank';
     launcher.hidden = false;
     launcher.setAttribute('aria-expanded','false');
     launcher.focus();

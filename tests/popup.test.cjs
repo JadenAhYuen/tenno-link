@@ -3,12 +3,13 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const elements = new Map();
 const handlers = {};
+const countdownElements = [];
 const element = id => {
   if (!elements.has(id)) elements.set(id,{value:'',checked:true,textContent:'',innerHTML:'',classList:{add(){},remove(){}},addEventListener(){},insertAdjacentHTML(){},appendChild(){},replaceChildren(){},querySelector:()=>({disabled:false}),focus(){},setSelectionRange(){}});
   return elements.get(id);
 };
-const context = vm.createContext({console,structuredClone,setTimeout,clearTimeout,
-  document:{addEventListener(type,handler){handlers[type]=handler;},getElementById:element,querySelectorAll:()=>[],createElement:()=>({}),body:{dataset:{}}},
+const context = vm.createContext({console,structuredClone,setTimeout,clearTimeout,setInterval:()=>1,clearInterval(){},
+  document:{visibilityState:'visible',addEventListener(type,handler){handlers[type]=handler;},getElementById:element,querySelectorAll:selector=>selector==='[data-countdown]'?countdownElements:[],createElement:()=>({}),body:{dataset:{}}},window:{addEventListener(){}},
   chrome:{runtime:{sendMessage:async()=>({ok:true,state:{}})}},navigator:{clipboard:{writeText:async()=>{}}}
 });
 for (const file of ['catalog.js','progression.js','inventory.js','insights.js','popup.js']) vm.runInContext(fs.readFileSync(file,'utf8'),context);
@@ -23,6 +24,12 @@ setImmediate(()=>{(async()=>{
   assert.ok(element('home').innerHTML.includes('Not reported'));
   assert.ok(element('home').innerHTML.includes('Tonight in the Origin System'));
   assert.ok(element('live').innerHTML.includes('Pinned farming goal'));
+  assert.match(vm.runInContext('timeLeft(new Date(Date.now()+61000).toISOString())',context),/^1m 0[0-2]s$/);
+  assert.ok(vm.runInContext('itemWithCountdown("Test", "Ends in ", new Date(Date.now()+60000).toISOString())',context).includes('data-countdown='));
+  const ticking = {dataset:{countdown:new Date(Date.now()+3000).toISOString()},textContent:''};
+  countdownElements.push(ticking);
+  vm.runInContext('updateCountdowns()',context);
+  assert.match(ticking.textContent,/^0m 0[1-3]s$/);
   element('goalName').value='Vitality';
   context.chrome.runtime.sendMessage=async message=>message.type==='FIND_GOAL_SOURCES'
     ? {ok:true,goal:{name:'Vitality',checkedAt:Date.now(),sources:[{source:'Mantle, Earth',detail:'Mission reward',chance:10.84}],partial:false}}
@@ -67,5 +74,27 @@ setImmediate(()=>{(async()=>{
   assert.equal(exported.playerProfile.summary,undefined);
   assert.equal(exported.playerProfile.arsenal.weaponStats,undefined);
   assert.equal(vm.runInContext('state.profile.recommended.summary.deaths',context),2);
+  const calls=[];
+  context.chrome.runtime.sendMessage=async message=>{
+    calls.push(message);
+    return message.type==='SYNC_ACTIVE' ? {ok:true,result:{profile:{cached:true},world:{cached:true}}} : {ok:true,state:{profile:{raw:{},lastSyncAt:1,nextAllowedSyncAt:Date.now()+300000},world:{raw:{},lastSyncAt:1,nextAllowedSyncAt:Date.now()+60000}}};
+  };
+  vm.runInContext("state.profile.nextAllowedSyncAt=0; document.visibilityState='hidden'; autoRefreshIfDue()",context);
+  assert.equal(calls.length,0,'hidden interface must make no sync request');
+  vm.runInContext("document.visibilityState='visible'; autoRefreshIfDue()",context);
+  await new Promise(setImmediate);
+  assert.equal(calls[0].type,'SYNC_ACTIVE');
+  assert.equal(calls[0].force,false);
+  assert.equal(calls[0].profile,true);
+  assert.equal(calls[0].world,true);
+  calls.length=0;
+  vm.runInContext('state.world.nextAllowedSyncAt=0; autoRefreshIfDue()',context);
+  await new Promise(setImmediate);
+  assert.equal(calls[0].profile,false,'world refresh should not request a fresh profile');
+  assert.equal(calls[0].world,true);
+  calls.length=0;
+  await element('syncAll').onclick();
+  assert.equal(calls[0].type,'SYNC_ACTIVE');
+  assert.equal(calls[0].force,true);
   console.log('popup.test.cjs: rendering, escaping and export isolation passed');
 })().catch(error=>{console.error(error);process.exitCode=1;});});

@@ -20,9 +20,11 @@ def gif(name, pictures, durations, width=520):
 overview_frames = frames('overview')
 overview = overview_frames[0]
 chart = frames('chart')
+live = frames('live')
 export = frames('export')
 gif('overview.gif', overview_frames, [1600, 1700, 1400])
 gif('star-chart.gif', chart, [1300, 700, 850, 1100, 1400, 900])
+gif('live-events.gif', live, [1100, 1100, 1100])
 gif('export.gif', export, [1500, 1100, 1500])
 
 font_path = 'C:/Windows/Fonts/segoeuib.ttf' if Path('C:/Windows/Fonts/segoeuib.ttf').exists() else 'DejaVuSans-Bold.ttf'
@@ -42,7 +44,7 @@ def make_banner(label, subtitle, screen, focus='left'):
     draw.text((56, 55), 'TENNO LINK', font=small, fill='#8de0da')
     draw.text((56, 123), label, font=headline, fill='#eef7f3')
     draw.text((58, 218), subtitle, font=subhead, fill='#b4cbd0')
-    draw.text((58, 308), 'UNOFFICIAL WARFRAME COMPANION  /  LOCAL PREVIEW', font=small, fill='#bb9e6d')
+    draw.text((58, 308), 'INDEPENDENT WARFRAME COMPANION  /  LOCAL PREVIEW', font=small, fill='#bb9e6d')
     return banner
 
 
