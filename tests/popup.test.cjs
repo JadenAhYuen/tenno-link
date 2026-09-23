@@ -37,12 +37,24 @@ setImmediate(()=>{(async()=>{
     B:{category:'nodes',name:'Caloris',systemName:'Mercury'},
     C:{category:'nodes',name:'Kiliken',systemName:'Venus'}
   }}; state.profile.normalized.progression.missions=[
+    {Tag:'A',Completes:1},
     {Tag:'EarthToMercuryJunction',Completes:1},{Tag:'EarthToVenusJunction',Completes:1}
   ];`,context);
   const suggestions=vm.runInContext('nextMissionPanel()',context);
   assert.ok(suggestions.includes('Mercury planet illustration'));
   assert.ok(suggestions.includes('Venus planet illustration'));
   assert.ok(!suggestions.includes('mission icon'));
+  vm.runInContext('renderChart()',context);
+  assert.ok(element('missionResults').innerHTML.includes('Caloris'));
+  element('missionSearch').oninput({target:{value:'caloris'}});
+  assert.ok(element('missionResults').innerHTML.includes('Caloris'));
+  assert.ok(!element('missionResults').innerHTML.includes('Kiliken'));
+  assert.equal(element('missionFilterCount').textContent,'1 of 3 nodes shown');
+  element('onlyUnplayedMissions').onchange({target:{checked:true}});
+  assert.ok(element('missionResults').innerHTML.includes('Caloris'));
+  vm.runInContext("missionQuery='earth'; renderMissionResults(TennoProgression.chart(profile()?.progression?.missions,catalogIndex()))",context);
+  assert.ok(!element('missionResults').innerHTML.includes('Earth node'));
+  assert.ok(element('missionResults').innerHTML.includes('No nodes match'));
   for (const label of ['Faction','Location','Requirements']) assert.ok(!mission.includes(label));
   const html=fs.readFileSync('popup.html','utf8');
   assert.ok(!html.includes('data-page="resources"'));
