@@ -31,7 +31,9 @@ Overview explains lifetime mission pace and career counters. Equipment offers lo
 
 The popup uses an original dark glass treatment with Warframe-inspired cyan and gold accents. The logo beacon, page transitions, and control feedback use short CSS animations; reduced-motion and increased-contrast preferences are supported.
 
-The interface follows system light/dark appearance, supports narrow layouts and keyboard focus, and distinguishes missing values from zero. Loadout records are not described as owned items, and historical affinity is not treated as mastery completion.
+On `warframe.com`, a floating Tenno Link button opens the **full six-section interface** over the page. Drag the slim top handle to move it; close it to return to the small launcher. The frame adapts to narrow screens, keeps the header and navigation visible, and scrolls only the active section when its content is long. The account UI stays inside an extension-origin frame rather than being copied into the website DOM.
+
+The interface supports narrow layouts and keyboard focus, and distinguishes missing values from zero. Loadout records are not described as owned items, and historical affinity is not treated as mastery completion.
 
 See [design review and verification](docs/design-review.md) for calculation definitions and current validation limits.
 
@@ -49,7 +51,7 @@ node tests/storage.test.cjs
 node tests/preview.cjs
 ```
 
-The preview opens at `http://127.0.0.1:8765` with synthetic data and mocked extension APIs. Optionally pass a local profile JSON path to the preview or profile paths to the insights test. Samples are read locally and are not copied into the repository. Stop the preview with Ctrl+C.
+The preview opens at `http://127.0.0.1:8765` with synthetic data and mocked extension APIs. Visit `/site` on that server to try the floating interface. Optionally pass a local profile JSON path to the preview or profile paths to the insights test. Samples are read locally and are not copied into the repository. Stop the preview with Ctrl+C.
 
 ## 🛰️ How the data flows
 

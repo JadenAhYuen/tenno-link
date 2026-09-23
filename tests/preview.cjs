@@ -24,11 +24,16 @@ http.createServer((req,res)=>{
   if (url.pathname === '/mock.js') {
     res.setHeader('Content-Type','text/javascript');
     const mockState = url.searchParams.has('empty') ? {} : url.searchParams.has('nocatalog') ? {...state,items:{}} : state;
-    res.end(`window.chrome={runtime:{sendMessage:async message=>message.type==='GET_STATE'?{ok:true,state:${JSON.stringify(mockState)}}:message.type==='SYNC_ITEMS'?{ok:false,error:'Preview catalog refresh unavailable; saved catalog retained.'}:{ok:true,result:{profile:{error:'Preview only: sign in to warframe.com in the extension to sync.'}}}}};`);
+    res.end(`window.__previewState=${JSON.stringify(mockState)};window.chrome={runtime:{getURL:file=>location.origin+'/'+file,sendMessage:async message=>message.type==='GET_STATE'?{ok:true,state:window.__previewState}:message.type==='FIND_GOAL_SOURCES'?(window.__previewState.goal={name:message.name,checkedAt:Date.now(),sources:[{source:'Mantle, Earth',detail:'Mission reward',chance:10.84},{source:'Ani, Void',detail:'Rotation A',chance:7.14}],partial:false},{ok:true,goal:window.__previewState.goal}):message.type==='CLEAR_GOAL'?(window.__previewState.goal=null,{ok:true}):message.type==='SYNC_ITEMS'?{ok:false,error:'Preview catalog refresh unavailable; saved catalog retained.'}:{ok:true,result:{profile:{error:'Preview only: sign in to warframe.com in the extension to sync.'}}}}};`);
+    return;
+  }
+  if (url.pathname === '/site') {
+    res.setHeader('Content-Type','text/html');
+    res.end('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Overlay preview</title><style>body{margin:0;min-height:120vh;background:linear-gradient(145deg,#161d28,#263c49);color:#f1f5f6;font:18px/1.5 system-ui}header{padding:22px 5vw;border-bottom:1px solid #ffffff30}main{max-width:900px;margin:10vh auto;padding:24px}h1{font-size:clamp(36px,8vw,70px);line-height:1.1}</style></head><body><header>Warframe page - Local overlay preview</header><main><h1>Your Tenno companion stays close.</h1><p>Open the floating button, move the panel, and inspect all six sections.</p></main><script src="/mock.js"></script><script src="/content.js"></script></body></html>');
     return;
   }
   const file = url.pathname === '/' ? 'popup.html' : url.pathname.slice(1);
-  if (!['popup.html','popup.css','visual.css','popup.js','catalog.js','progression.js','inventory.js','insights.js','prompts.js','assets/tenno-link-logo.svg'].includes(file)) {res.writeHead(404);res.end();return;}
+  if (!['popup.html','popup.css','visual.css','overlay-mode.css','popup.js','catalog.js','progression.js','inventory.js','insights.js','prompts.js','assets/tenno-link-logo.svg','content.js'].includes(file)) {res.writeHead(404);res.end();return;}
   res.setHeader('Content-Type',file.endsWith('.html')?'text/html':file.endsWith('.css')?'text/css':file.endsWith('.svg')?'image/svg+xml':'text/javascript');
   let body = fs.readFileSync(path.join(root,file),'utf8');
   if (file === 'popup.html') body = body.replace('<script src="prompts.js">',`<script src="/mock.js${url.searchParams.has('empty')?'?empty':url.searchParams.has('nocatalog')?'?nocatalog':''}"></script><script src="prompts.js">`);

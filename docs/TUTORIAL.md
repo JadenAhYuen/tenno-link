@@ -6,6 +6,8 @@ Sign in to the official Warframe website in the same Chrome profile where Tenno 
 
 Open Tenno Link and press **Sync**. The extension reads the local Warframe profile identifier and requests profile-view data directly.
 
+On `warframe.com`, click the floating **Tenno Link** button to open the complete interface over the page. Drag the narrow top handle to reposition it, use any of the six sections, and close it to return to the button. The active section scrolls when its contents extend beyond the window.
+
 ## 🏠 2. Review your dashboard
 
 - **Overview** surfaces high-value account statistics such as Mastery Rank, missions completed, play time, and arsenal counts.

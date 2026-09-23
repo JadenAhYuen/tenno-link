@@ -1,4 +1,11 @@
 const $ = id => document.getElementById(id);
+const isOverlay = typeof location !== 'undefined' && new URLSearchParams(location.search).get('overlay') === '1';
+if (isOverlay) {
+  document.documentElement.classList.add('overlay-mode');
+  document.addEventListener('keydown',event => {
+    if (event.key === 'Escape') window.parent.postMessage({type:'tenno-link-close'},'*');
+  });
+}
 
 let state = {};
 let format = "recommended";

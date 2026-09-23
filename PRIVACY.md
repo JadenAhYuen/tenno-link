@@ -21,6 +21,8 @@ Tenno Link does not collect or upload:
 
 Profile data is fetched directly from Digital Extremes and cached locally in Chrome extension storage.
 
+On `warframe.com`, the floating button opens the extension's own interface in a separate frame. Profile data is rendered in that extension frame, not copied into the website's document. The website sees the launcher and frame container.
+
 Live world-state information is fetched from the public WarframeStat.us API.
 
 Farming goal searches download public WFCD drop tables from GitHub. The name you enter is matched locally; it is not placed in the download URL. Tenno Link stores your chosen name and matching sources in Chrome extension storage, not the full drop tables.
