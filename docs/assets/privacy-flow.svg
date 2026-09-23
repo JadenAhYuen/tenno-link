@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="430" viewBox="0 0 1200 430">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#061018"/><stop offset="1" stop-color="#091720"/></linearGradient></defs>
+<rect width="1200" height="430" rx="24" fill="url(#bg)"/>
+<text x="56" y="64" fill="#eefafa" font-family="Segoe UI,Inter,sans-serif" font-size="28" font-weight="700">🔒 PRIVACY BY DESIGN</text>
+<text x="56" y="94" fill="#7f9ba0" font-family="Segoe UI,Inter,sans-serif" font-size="15">Tenno Link is designed to keep account access local and exports intentional.</text>
+
+<g font-family="Segoe UI,Inter,sans-serif">
+<rect x="70" y="145" width="300" height="190" rx="18" fill="#0a1d26" stroke="#244c56" stroke-width="2"/>
+<text x="220" y="185" text-anchor="middle" fill="#76f2ef" font-size="17" font-weight="700">✅ STAYS LOCAL</text>
+<text x="100" y="225" fill="#eefafa" font-size="16">• gid lookup</text>
+<text x="100" y="257" fill="#eefafa" font-size="16">• profile cache</text>
+<text x="100" y="289" fill="#eefafa" font-size="16">• inventory normalization</text>
+<text x="100" y="321" fill="#eefafa" font-size="16">• UI state</text>
+
+<rect x="450" y="145" width="300" height="190" rx="18" fill="#0a1d26" stroke="#244c56" stroke-width="2"/>
+<text x="600" y="185" text-anchor="middle" fill="#d9b875" font-size="17" font-weight="700">📋 USER CONTROLLED</text>
+<text x="480" y="225" fill="#eefafa" font-size="16">• copy prompt</text>
+<text x="480" y="257" fill="#eefafa" font-size="16">• copy profile JSON</text>
+<text x="480" y="289" fill="#eefafa" font-size="16">• choose export mode</text>
+<text x="480" y="321" fill="#eefafa" font-size="16">• choose AI destination</text>
+
+<rect x="830" y="145" width="300" height="190" rx="18" fill="#0a1d26" stroke="#244c56" stroke-width="2"/>
+<text x="980" y="185" text-anchor="middle" fill="#76f2ef" font-size="17" font-weight="700">🚫 NOT EXPORTED</text>
+<text x="860" y="225" fill="#eefafa" font-size="16">• password</text>
+<text x="860" y="257" fill="#eefafa" font-size="16">• session cookies</text>
+<text x="860" y="289" fill="#eefafa" font-size="16">• browser history</text>
+<text x="860" y="321" fill="#eefafa" font-size="16">• unrelated site data</text>
+</g>
+
+<text x="600" y="382" text-anchor="middle" fill="#607a80" font-family="Segoe UI,Inter,sans-serif" font-size="13" letter-spacing="1.5">NO TENNO LINK CLOUD ACCOUNT REQUIRED</text>
+</svg>

@@ -1,0 +1,38 @@
+name: Validate extension
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate manifest JSON
+        run: python -m json.tool manifest.json > /dev/null
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check background.js
+          node --check inventory.js
+          node --check popup.js
+          node --check prompts.js
+
+      - name: Verify required extension files
+        run: |
+          test -f manifest.json
+          test -f background.js
+          test -f inventory.js
+          test -f popup.html
+          test -f popup.css
+          test -f popup.js
+          test -f prompts.js
+
+
+      - name: Run inventory tests
+        run: node tests/inventory.test.js

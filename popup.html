@@ -1,92 +1,133 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Tenno Link</title>
   <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="visual.css">
 </head>
 <body>
-  <div class="bg">
-    <div class="orb o1"></div>
-    <div class="orb o2"></div>
-    <div class="scan"></div>
-  </div>
-
   <main>
-    <header>
-      <div class="brand-icon" aria-hidden="true">◇</div>
+    <header class="topbar">
+      <div class="brand-icon">
+        <img src="assets/tenno-link-logo.svg" alt="Tenno Link logo">
+      </div>
+
       <div class="brand">
         <div class="eyebrow">TENNO PROFILE LINK</div>
         <h1>Tenno Link</h1>
+        <div class="brand-subline">
+          <span class="pulse-dot"></span>
+          <span id="linkState">Local link ready</span>
+        </div>
       </div>
-      <button id="syncAll" class="round" title="Sync">↻</button>
+
+      <button id="syncAll" class="round sync-button" title="Synchronize profile" aria-label="Synchronize profile">
+        <span>↻</span>
+      </button>
     </header>
 
-    <section class="identity panel">
+    <section class="identity panel hero-panel">
       <div>
-        <div class="label">PROFILE</div>
+        <div class="label">ACTIVE TENNO</div>
         <div id="name" class="name">Awaiting link…</div>
+        <div class="profile-meta">
+          <span id="syncAge">No sync yet</span>
+          <span class="meta-sep">•</span>
+          <span>Profile viewer</span>
+        </div>
       </div>
       <div class="mr">
-        <div class="label">MASTERY</div>
+        <div class="label">MASTERY RANK</div>
         <strong id="mr">—</strong>
+        <span class="mr-caption">ACCOUNT LEVEL</span>
       </div>
     </section>
 
-    <nav id="nav">
-      <button data-page="home" class="active">HOME</button>
-      <button data-page="progress">PROGRESS</button>
-      <button data-page="arsenal">ARSENAL</button>
-      <button data-page="resources">RESOURCES</button>
-      <button data-page="live">LIVE</button>
-      <button data-page="ai">AI</button>
+    <nav id="nav" class="primary-nav" aria-label="Tenno Link sections">
+      <button data-page="home" class="active" aria-current="page">Overview</button>
+      <button data-page="arsenal">Equipment</button>
+      <button data-page="chart">Star Chart</button>
+      <button data-page="progress">Standing</button>
+      <button data-page="live">Live</button>
+      <button data-page="ai">Export</button>
     </nav>
-
-    <section id="home" class="page active"></section>
-    <section id="progress" class="page"></section>
-    <section id="arsenal" class="page"></section>
-    <section id="resources" class="page"></section>
-    <section id="live" class="page"></section>
+    <section id="home" class="page active" aria-label="Overview"></section>
+    <section id="arsenal" class="page" aria-label="Equipment"></section>
+    <section id="chart" class="page" aria-label="Star Chart"></section>
+    <section id="progress" class="page" aria-label="Standing"></section>
+    <section id="live" class="page" aria-label="Live"></section>
 
     <section id="ai" class="page">
-      <div class="panel">
+      <div class="panel ai-panel">
         <div class="section-title">
-          <span>AI BRIDGE</span>
-          <small>Prepare a profile package for any AI</small>
+          <div>
+            <span>AI BRIDGE</span>
+            <small>Prepare a focused Tenno package for any AI</small>
+          </div>
+          <div class="signal-mark" aria-hidden="true">✦</div>
         </div>
 
-        <select id="promptSelect"></select>
-        <p id="promptDesc" class="muted"></p>
-
-        <div class="toggles">
-          <label><input type="checkbox" id="includeProfile" checked> Profile</label>
-          <label><input type="checkbox" id="includeLive" checked> Live world state</label>
-          <label><input type="checkbox" id="includeStats" checked> Career stats</label>
+        <div class="prompt-shell">
+          <label class="label" for="promptSelect">PROMPT TEMPLATE</label>
+          <select id="promptSelect"></select>
+          <p id="promptDesc" class="muted"></p>
         </div>
 
-        <div class="format">
-          <button data-format="recommended" class="active">Recommended</button>
-          <button data-format="compact">Compact</button>
-          <button data-format="raw">Raw</button>
+        <div class="ai-options-grid">
+          <div class="option-panel">
+            <div class="label">INCLUDE</div>
+            <div class="toggles">
+              <label><input type="checkbox" id="includeProfile" checked> <span>Profile</span></label>
+              <label><input type="checkbox" id="includeLive" checked> <span>Live world state</span></label>
+              <label><input type="checkbox" id="includeStats" checked> <span>Career stats</span></label>
+            </div>
+          </div>
+
+          <div class="option-panel">
+            <div class="label">EXPORT MODE</div>
+            <div class="format">
+              <button data-format="recommended" class="active">Recommended</button>
+              <button data-format="compact">Compact</button>
+              <button data-format="raw">Raw</button>
+            </div>
+          </div>
         </div>
 
         <div class="copy-grid">
-          <button id="copyPrompt">COPY PROMPT</button>
-          <button id="copyProfile">COPY PROFILE</button>
-          <button id="copyBoth" class="gold">COPY PROMPT + PROFILE</button>
+          <button id="copyPrompt" class="copy-action">
+            <span class="copy-glyph">⌁</span>
+            <span><strong>COPY PROMPT</strong><small>Instructions only</small></span>
+          </button>
+
+          <button id="copyProfile" class="copy-action">
+            <span class="copy-glyph">{ }</span>
+            <span><strong>COPY PROFILE</strong><small>Selected data</small></span>
+          </button>
+
+          <button id="copyBoth" class="gold">
+            <span class="gold-orbit" aria-hidden="true"></span>
+            <span class="copy-glyph">◇</span>
+            <span><strong>COPY PROMPT + PROFILE</strong><small>Ready to paste into your AI</small></span>
+          </button>
         </div>
       </div>
     </section>
 
     <footer>
-      <span id="status">Local-first • Unofficial passion project</span>
+      <span id="status" role="status">Local-first • Unofficial passion project</span>
+      <span class="footer-node"></span>
     </footer>
 
-    <div id="toast" class="toast"></div>
+    <div id="toast" class="toast" role="status"></div>
   </main>
 
   <script src="prompts.js"></script>
+  <script src="catalog.js"></script>
+  <script src="progression.js"></script>
+  <script src="inventory.js"></script>
+  <script src="insights.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="420" viewBox="0 0 1600 420" role="img" aria-labelledby="t d">
+<title id="t">Tenno Link</title>
+<desc id="d">Local-first Warframe profile bridge for AI</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#061018"/>
+    <stop offset="0.6" stop-color="#0a1922"/>
+    <stop offset="1" stop-color="#050b10"/>
+  </linearGradient>
+  <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#3e9da8"/>
+    <stop offset="0.5" stop-color="#76f2ef"/>
+    <stop offset="1" stop-color="#347f8a"/>
+  </linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#8a6530"/>
+    <stop offset="0.5" stop-color="#d9b875"/>
+    <stop offset="1" stop-color="#725025"/>
+  </linearGradient>
+  <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+    <path d="M48 0H0V48" fill="none" stroke="#76f2ef" stroke-opacity=".025"/>
+  </pattern>
+</defs>
+<rect width="1600" height="420" rx="28" fill="url(#bg)"/>
+<rect width="1600" height="420" rx="28" fill="url(#grid)"/>
+<path d="M34 34H270M34 34V112" stroke="#d9b875" stroke-opacity=".58" stroke-width="2"/>
+<path d="M1566 386H1330M1566 386V308" stroke="#76f2ef" stroke-opacity=".45" stroke-width="2"/>
+<circle cx="1268" cy="180" r="220" fill="none" stroke="#76f2ef" stroke-opacity=".055"/>
+<circle cx="1268" cy="180" r="145" fill="none" stroke="#76f2ef" stroke-opacity=".045"/>
+<path d="M990 160C1135 42 1382 42 1510 150" fill="none" stroke="#d9b875" stroke-opacity=".13"/>
+<path d="M1000 250C1160 346 1382 330 1510 220" fill="none" stroke="#76f2ef" stroke-opacity=".1"/>
+
+<g transform="translate(105 47)">
+  <circle cx="155" cy="160" r="122" fill="none" stroke="url(#cyan)" stroke-width="3" stroke-opacity=".75"/>
+  <ellipse cx="155" cy="160" rx="178" ry="53" fill="none" stroke="url(#gold)" stroke-width="2" stroke-opacity=".66"/>
+  <path d="M155 18L195 91L182 178L155 300L128 178L115 91Z" fill="#09161e" stroke="url(#gold)" stroke-width="4"/>
+  <path d="M155 42L175 108L155 256L135 108Z" fill="none" stroke="#76f2ef" stroke-width="5"/>
+  <path d="M68 118L122 143L102 246L37 188Z" fill="#0d1a22" stroke="url(#gold)" stroke-width="4"/>
+  <path d="M242 118L188 143L208 246L273 188Z" fill="#0d1a22" stroke="url(#gold)" stroke-width="4"/>
+  <circle cx="155" cy="160" r="27" fill="#08151d" stroke="#76f2ef" stroke-width="4"/>
+  <circle cx="155" cy="160" r="7" fill="#76f2ef"/>
+  <circle cx="-23" cy="160" r="7" fill="#d9b875"/>
+  <circle cx="333" cy="160" r="7" fill="#d9b875"/>
+</g>
+
+<g transform="translate(530 105)">
+  <text x="0" y="72" fill="#eefafa" font-family="Segoe UI,Inter,sans-serif" font-size="72" font-weight="600" letter-spacing="8">TENNO LINK</text>
+  <rect x="2" y="95" width="560" height="2" fill="url(#cyan)" opacity=".68"/>
+  <text x="0" y="140" fill="#91aeb2" font-family="Segoe UI,Inter,sans-serif" font-size="22" letter-spacing="2.5">LOCAL-FIRST WARFRAME PROFILE BRIDGE FOR AI</text>
+  <g transform="translate(0 188)" font-family="Segoe UI,Inter,sans-serif" font-size="13" font-weight="700" letter-spacing="1.2">
+    <rect width="148" height="40" rx="20" fill="#0a202a" stroke="#76f2ef" stroke-opacity=".32"/>
+    <text x="74" y="26" text-anchor="middle" fill="#76f2ef">LOCAL FIRST</text>
+    <rect x="165" width="142" height="40" rx="20" fill="#0a202a" stroke="#76f2ef" stroke-opacity=".2"/>
+    <text x="236" y="26" text-anchor="middle" fill="#b8cfd2">OPEN SOURCE</text>
+    <rect x="324" width="126" height="40" rx="20" fill="#17160f" stroke="#d9b875" stroke-opacity=".32"/>
+    <text x="387" y="26" text-anchor="middle" fill="#d9b875">COMMUNITY</text>
+  </g>
+  <text x="0" y="286" fill="#607980" font-family="Segoe UI,Inter,sans-serif" font-size="15" letter-spacing="2">UNOFFICIAL COMMUNITY PASSION PROJECT</text>
+</g>
+</svg>
