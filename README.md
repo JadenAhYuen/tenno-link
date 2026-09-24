@@ -8,6 +8,10 @@ Tenno Link is an independent Chrome extension built around **AI Bridge**. Choose
 
 <p align="center"><img src="docs/assets/screenshots/tenno-link-banner.gif" alt="Tenno Link overview, Star Chart, and AI Bridge preview" width="100%"></p>
 
+The floating **Tenno Link** button opens the companion while you browse warframe.com. This local website preview shows where the button appears; the account shown in the animations is sample data.
+
+<p align="center"><img src="docs/assets/screenshots/website-floating-button.png" alt="Local website preview with the Tenno Link floating button at the bottom right" width="100%"></p>
+
 ## What you can do
 
 - **Plan with AI Bridge:** Choose from 12 focused plans, add a goal or quantity, preview the prompt, and copy only the profile sections you choose.
@@ -30,10 +34,9 @@ Every AI Bridge prompt asks the receiving assistant to check recent [official pa
 
 **A prompt cannot make an AI browse.** If your assistant cannot verify current information, it should say so and label its advice unverified. You can then provide recent patch notes before acting on a build or farming route.
 
-<p align="center">
-  <img src="docs/assets/screenshots/star-chart.gif" alt="Star Chart search and unplayed mission filter" width="48%">
-  <img src="docs/assets/screenshots/export.gif" alt="AI Bridge interface preview" width="48%">
-</p>
+<p align="center"><img src="docs/assets/screenshots/export.gif" alt="AI Bridge Farming Planner with named materials, quantities, and prompt preview" width="680"></p>
+
+<p align="center"><img src="docs/assets/screenshots/star-chart.gif" alt="Star Chart search and unplayed mission filter" width="680"></p>
 
 AI Bridge prepares text locally; Tenno Link does not require an AI API key or send your export to an AI service. Nothing is copied until you press a copy button. The previews above use synthetic sample data.
 
