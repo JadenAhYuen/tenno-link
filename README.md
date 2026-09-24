@@ -1,212 +1,68 @@
-<p align="center">
-  <img src="assets/tenno-link-logo.svg" alt="Tenno Link logo" width="112">
-</p>
+<p align="center"><img src="assets/tenno-link-logo-animated.svg" alt="Animated Tenno Link logo" width="116"></p>
 
-# ✨ Tenno Link — Warframe profile dashboard and Star Chart companion
+# Tenno Link
 
-**Tenno Link** is a local-first Warframe Chrome extension for viewing profile progression, exploring Star Chart missions, tracking equipment history and preparing AI-ready exports.
+**Turn your Warframe profile into better, current-game questions for the AI assistant you choose.**
 
-It links your Warframe profile to a compact browser dashboard, combines account data with public world-state information, and prepares privacy-conscious profile packages that you can copy into the AI assistant of your choice.
+Tenno Link is an independent Chrome extension built around **AI Bridge**. Choose a goal, add details such as the exact materials you want to farm, and copy a tailored prompt with selected account context. The dashboard, equipment history, Star Chart, and live activities help you understand the data behind that request.
 
-<small>Independent preview project · unofficial and not affiliated with Digital Extremes.</small>
+<p align="center"><img src="docs/assets/screenshots/tenno-link-banner.gif" alt="Tenno Link overview, Star Chart, and AI Bridge preview" width="100%"></p>
 
-<p align="center">
-  <img src="docs/assets/screenshots/tenno-link-banner.gif" alt="Animated Tenno Link preview showing the profile dashboard, Star Chart mission search and export interface" width="100%">
-</p>
+The floating **Tenno Link** button opens the companion while you browse warframe.com. This local website preview shows where the button appears; the account shown in the animations is sample data.
 
-## 🌌 What Tenno Link does
+<p align="center"><img src="docs/assets/screenshots/website-floating-button.png" alt="Local website preview with the Tenno Link floating button at the bottom right" width="100%"></p>
 
-- 🏠 **Overview** — Mastery Rank, career stats, profile loadout and missions to explore
-- 🧭 **Standing** — reported affiliations and standing
-- 🔫 **Equipment** — profile history grouped by WFCD category, searchable and sortable by usage, kills or affinity
-- 🌌 **Star Chart** — illustrated planets, searchable mission nodes, an unplayed filter, cleared junction evidence and profile-based exploration suggestions
-- 📡 **Live** — current PC activities, second-by-second countdowns and a pinned farming goal
-- 🤖 **AI Bridge** — 12 prompt presets with Recommended, Compact and Raw export modes
-- 💾 Profile refresh while the interface is open, cache-aware syncing and local storage
-- 🔐 No Tenno Link recommendation backend required
+## What you can do
 
-<p align="center">
-  <img src="docs/assets/screenshots/overview.gif" alt="Animated Overview dashboard with synthetic Preview Tenno profile data" width="560">
-</p>
+- **Plan with AI Bridge:** Choose from 12 focused plans, add a goal or quantity, preview the prompt, and copy only the profile sections you choose.
+- **Understand your account:** See Mastery Rank, career stats, equipment history, standing, and recorded mission completions.
+- **Explore the Origin System:** Search Star Chart nodes and filter missions without a recorded completion. Check access in game before planning a route.
+- **Follow live activities:** See current PC world events and pin an item to look up possible farming sources.
 
-### Interface previews
+## AI advice that checks the current game
 
-Animated browser captures of the running interface use the local preview's synthetic **Preview Tenno** data. These show the implemented UI, not a design mockup or a live account. Planet artwork is original illustration. See [capture notes](docs/assets/screenshots/README.md).
+Overview opens first so you can see what your profile actually reports. When you want advice, open **AI Bridge** from the tab or the Overview shortcut:
 
-<p align="center">
-  <img src="docs/assets/screenshots/star-chart.gif" alt="Animated Star Chart node search and unplayed mission filter" width="48%">
-  <img src="docs/assets/screenshots/export.gif" alt="Animated AI Bridge export mode selection" width="48%">
-</p>
+1. Choose a template. **Beginner-Friendly Plan** explains the basics; **What Should I Do Next?** picks one action; **Progression Advisor**, **Star Chart Advisor**, and **Quest Planner** map longer routes. Use **Farming Planner** for named materials and quantities, or **Arsenal Review** for equipment decisions. The remaining templates focus on mastery, syndicates, account health, a short session, or a weekly review.
+2. Add a specific target and any preferences, such as solo play or avoiding spoilers. Leave fields blank if you want broader suggestions.
+3. Choose what to include: **Profile**, **Live world state**, and **Career stats**. **Recommended** is the readable default, **Compact** reduces text, and **Raw** shares more of the source profile. Preview the prompt and review your choices before copying.
+4. Select **Copy prompt + profile** to paste the full request into an AI assistant. **Copy prompt** shares no profile package; **Copy profile** shares only the selected data. You choose where to paste it.
 
-## Read your profile in the tool
+The in-app **How AI Bridge works** guide explains the controls at any time. Beginners can start with one immediate goal; experienced players can name a build, farm, unlock, or time limit.
 
-Overview explains lifetime mission pace and career counters. Equipment offers local search, sorting by time/kills/affinity, expandable details and incremental loading. Standing exposes reported affiliations, including negative standing. Live and Export remain available.
+Every AI Bridge prompt asks the receiving assistant to check recent [official patch notes](https://www.warframe.com/en/patch-notes), the [Warframe Wiki](https://wiki.warframe.com/), and [official drop tables](https://www.warframe.com/droptables) when relevant. It asks for source links and dates, and to check whether an older build or farm still works after changes to abilities, weapons, mods, arcanes, or rewards.
 
-Star Chart lets you search nodes by name, planet or mission type and show only nodes without a recorded completion. Filtered planets open to reveal matching missions. An unplayed result does not establish that the route is unlocked; confirm access in game.
+**A prompt cannot make an AI browse.** If your assistant cannot verify current information, it should say so and label its advice unverified. You can then provide recent patch notes before acting on a build or farming route.
 
-<p align="center">
-  <img src="docs/assets/screenshots/mission-filter-banner.gif" alt="Animated Tenno Link mission search and unplayed filter banner" width="100%">
-</p>
+<p align="center"><img src="docs/assets/screenshots/export.gif" alt="AI Bridge Farming Planner with named materials, quantities, and prompt preview" width="680"></p>
 
-The popup uses an original dark glass treatment with Warframe-inspired cyan and gold accents. The logo beacon, page transitions, and control feedback use short CSS animations; reduced-motion and increased-contrast preferences are supported.
+<p align="center"><img src="docs/assets/screenshots/star-chart.gif" alt="Star Chart search and unplayed mission filter" width="680"></p>
 
-On `warframe.com`, a floating Tenno Link button opens the **full six-section interface** over the page. Drag the slim top handle to move it; close it to return to the small launcher. The frame adapts to narrow screens, keeps the header and navigation visible, and scrolls only the active section when its content is long. The account UI stays inside an extension-origin frame rather than being copied into the website DOM.
+AI Bridge prepares text locally; Tenno Link does not require an AI API key or send your export to an AI service. Nothing is copied until you press a copy button. The previews above use synthetic sample data.
 
-Opening Tenno Link checks whether saved profile and public event data are due for refresh. While the interface is open in a visible tab, it checks again as each source becomes due: profile data no sooner than five minutes, subject to the profile endpoint's cache interval, and public events after their one-minute cache period. Pressing ↻ requests a fresh profile and event fetch. Countdown clocks update locally each second. Closing the floating interface unloads it, so the launcher alone makes no background API requests.
+## Install
 
-<p align="center">
-  <img src="docs/assets/screenshots/live-events.gif" alt="Live event countdowns updating each second in the local preview" width="560">
-</p>
+1. Download the latest ZIP from [GitHub Releases](https://github.com/JadenAhYuen/tenno-link/releases), then extract it to a folder you can keep.
+2. Open `chrome://extensions/` in Chrome and enable **Developer mode**.
+3. Choose **Load unpacked** and select the extracted `tenno-link` folder containing `manifest.json`.
+4. Sign in at [warframe.com](https://www.warframe.com/), then open Tenno Link. Press **↻** to refresh.
 
-The interface supports narrow layouts and keyboard focus, and distinguishes missing values from zero. Loadout records are not described as owned items, and historical affinity is not treated as mastery completion.
+See the [installation guide](docs/INSTALL.md) for update steps and permission details. A Chrome Web Store release is planned.
 
-See [design review and verification](docs/design-review.md) for calculation definitions and current validation limits.
+## Privacy and scope
 
-### Local checks
+Profile data is stored in Chrome extension storage. AI Bridge copies only the sections you select, and session cookies are excluded from exports. Read the [privacy policy](PRIVACY.md).
 
-```sh
-node tests/inventory.test.js
-node tests/inventory-safety.test.cjs
-node tests/catalog.test.cjs
-node tests/insights.test.js
-node tests/progression.test.cjs
-node tests/farming.test.cjs
-node tests/popup.test.cjs
-node tests/storage.test.cjs
-node tests/preview.cjs
-```
+Tenno Link uses Warframe profile data and public world state and item data. Missing profile values are shown as unreported; a mission without recorded completion does not prove it is unlocked, and item metadata does not prove ownership.
 
-The preview opens at `http://127.0.0.1:8765` with synthetic data and mocked extension APIs. Visit `/site` on that server to try the floating interface. Optionally pass a local profile JSON path to the preview or profile paths to the insights test. Samples are read locally and are not copied into the repository. Stop the preview with Ctrl+C.
+Tenno Link is unofficial and is not affiliated with Digital Extremes. Warframe and related trademarks belong to Digital Extremes Ltd.
 
-With Playwright and Chrome installed, `node tests/overlay-lifecycle.cjs` checks that the floating launcher leaves the interface unloaded until opened and unloads it again on close.
+## Community data credit
 
-## 🛰️ How the data flows
+Thanks to [Warframe Community Developers (WFCD)](https://github.com/WFCD) for the public [warframe-drop-data](https://github.com/WFCD/warframe-drop-data) used to look up possible farming sources. WFCD parses [Digital Extremes' official drop data](https://www.warframe.com/droptables). Public drop information helps plan a farm; it does not tell Tenno Link what you own or which missions you can enter.
 
-<p align="center">
-  <img src="docs/assets/data-flow.svg" alt="Tenno Link local-first data flow" width="92%">
-</p>
+## More information
 
-Tenno Link keeps normalization separate from presentation so upstream format changes can be handled in one place.
+[Tutorial](docs/TUTORIAL.md) · [Changelog](CHANGELOG.md) · [License](LICENSE) · [Contributing](CONTRIBUTING.md)
 
-## 🔒 Privacy by design
-
-<p align="center">
-  <img src="docs/assets/privacy-flow.svg" alt="Tenno Link privacy model" width="92%">
-</p>
-
-- ✅ Warframe passwords are never collected
-- ✅ session cookies are not included in AI exports
-- ✅ profile data is cached in Chrome extension storage
-- ✅ clipboard export only happens after you press a copy button
-- ✅ public world-state/item metadata comes from WarframeStat.us
-- 🚫 no Tenno Link cloud account is required
-
-Read the full [privacy policy](PRIVACY.md).
-
-## 🚀 Install
-
-For the current development build:
-
-1. 📥 Download or clone this repository
-2. 🌐 Open `chrome://extensions/`
-3. 🧑‍💻 Enable **Developer mode**
-4. 📂 Click **Load unpacked**
-5. ✅ Select the repository folder containing `manifest.json`
-6. 🔑 Log in to the official Warframe website
-7. 🔄 Open Tenno Link to load your profile. Press **↻** whenever you want a fresh fetch.
-
-See the full [Chrome installation guide](docs/INSTALL.md).
-
-> 🛍️ A Chrome Web Store release is planned for one-click installation and automatic updates.
-
-## 🎓 Tutorial
-
-The [Tenno Link tutorial](docs/TUTORIAL.md) covers:
-
-- 🔗 profile linking
-- 📊 dashboard basics
-- 🌌 mission progress and planet exploration
-- 📡 live world-state data
-- 🤖 AI export
-
-## 🤖 AI Bridge
-
-<p align="center">
-  <img src="docs/assets/screenshots/export.gif" alt="Animated Tenno Link Export interface with synthetic sample profile data" width="560">
-</p>
-
-Tenno Link does not require an AI API key. It prepares a prompt and selected profile package locally, then you choose where to paste it.
-
-## 🌐 Data sources
-
-- 🎮 Digital Extremes Warframe profile-view endpoint for player profile data
-- 📡 WarframeStat.us / WFCD for public world-state and maintained item metadata
-
-These are treated as upstream dependencies, not as data formats Tenno Link controls.
-
-## 🧪 Testing
-
-Automated tests cover:
-
-- 💰 currency detection
-- 📦 quantity-bearing inventory extraction
-- ➕ duplicate quantity merging
-- 🏷️ category inference
-- 🧾 recipe catalog normalization
-- ✅ material-readiness calculation
-- 🧹 blueprint pseudo-component removal
-- ⏱️ visible-only refresh checks and local countdown rendering
-
-GitHub Actions also validates the extension manifest and JavaScript syntax.
-
-## 🧑‍💻 Development
-
-Feature work is developed on branches and reviewed through pull requests.
-
-For an unpacked extension that is already loaded:
-
-```text
-git pull
-→ chrome://extensions/
-→ Reload
-```
-
-## 📜 License & copyright
-
-Tenno Link source code and original project assets are released under the [MIT License](LICENSE).
-
-**Copyright © 2026 Jaden Ah Yuen and Tenno Link contributors.**
-
-Warframe and related trademarks, names and game assets belong to Digital Extremes Ltd. The project license does not grant rights to third-party intellectual property.
-
-## 📚 Project docs
-
-- 🚀 [Install](docs/INSTALL.md)
-- 🎓 [Tutorial](docs/TUTORIAL.md)
-- 🔒 [Privacy](PRIVACY.md)
-- 🛡️ [Security](SECURITY.md)
-- 🤝 [Contributing](CONTRIBUTING.md)
-- 📦 [Release checklist](RELEASE.md)
-- 📝 [Changelog](CHANGELOG.md)
-
----
-
-<p align="center">
-  <strong>⚡ Your profile. Your data. Your AI. ⚡</strong>
-</p>
-
-## Star Chart and item pictures
-
-Loadouts and equipment history display WFCD images when available, with a placeholder if an image is missing or fails. Item definitions do not prove ownership.
-
-Star Chart joins recorded mission tags to public destination metadata. It shows per-destination node completion evidence and completed incoming junctions. It does not claim that an unrecorded destination is locked or infer current access from activity alone. Duplicate tiers count once; unknown mission tags remain visible separately. Destination totals are not an authoritative Steel Path or Arbitration checklist.
-
-Reload the unpacked extension after updating. Item data schema 5 automatically refreshes older caches to add mission and equipment details.
-
-Good follow-up features would be change history across syncs and a richer mission route planner.
-
-The Catalog browsing page was removed. Its public metadata still loads in the background for equipment names, item images and destinations. Star Chart displays distinct original planet illustrations and expandable mission objectives and details. Equipment entries include public descriptions and whichever base stats the source provides. Inventory balances are not shown because the profile-view data may omit them.
-
-## Live activities and farming goals
-
-Overview highlights up to three current PC world-state activities. Live lets you pin a blueprint, part or mod name and check exact-name matches against WFCD mission rewards, blueprint drops, mod drops and intact relic rewards. Mission sources appear first; enemy table percentages are labelled as conditional on an item or mod drop. A matching mission may show that a completion was recorded in the profile. The goal is saved locally, while the full public drop files are not stored in extension storage. A completion record does not establish current access, and a drop source does not establish ownership.
+Copyright © 2026 Jaden Ah Yuen and Tenno Link contributors.

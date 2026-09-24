@@ -30,7 +30,7 @@ The floating launcher by itself does not request profile or world-state data. Re
 Farming goal searches download public WFCD drop tables from GitHub. The name you enter is matched locally; it is not placed in the download URL. Tenno Link stores your chosen name and matching sources in Chrome extension storage, not the full drop tables.
 
 
-The extension places data on your clipboard only after you press one of the Copy buttons.
+The extension places data on your clipboard only after you press one of the Copy buttons. It uses a temporary, hidden extension document for this operation because the floating panel is subject to the Warframe page's clipboard restrictions. The document closes after the copy attempt; it does not send the copied text to a server.
 
 You decide which AI service, application, or person receives that clipboard content.
 

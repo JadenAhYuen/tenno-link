@@ -2,6 +2,9 @@
 // cross-origin extension frame and is never copied into the host page DOM.
 (() => {
   if (document.getElementById('tenno-link-overlay-host')) return;
+  const popupUrl = chrome.runtime?.getURL?.('popup.html');
+  const logoUrl = chrome.runtime?.getURL?.('assets/tenno-link-logo-animated.svg');
+  if (!popupUrl || !logoUrl) return;
 
   const host = document.createElement('div');
   host.id = 'tenno-link-overlay-host';
@@ -17,13 +20,15 @@
     #launcher[hidden],#panel[hidden]{display:none!important}
     .sigil{display:grid;place-items:center;width:36px;height:36px;flex:0 0 36px;border:1px solid rgba(232,207,157,.57);border-radius:50%;color:#e8d4ae;font-size:22px;line-height:1;box-shadow:inset 0 0 12px rgba(153,226,220,.19),0 0 14px rgba(153,226,220,.18);animation:tenno-glow 5s ease-in-out infinite}
     .sigil img{display:block;width:27px;height:27px;object-fit:contain}
-    #panel{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;width:min(680px,calc(100vw - 24px));height:min(760px,calc(100vh - 24px));min-height:260px;overflow:hidden;border:1px solid rgba(190,226,226,.43);border-radius:22px;background:rgba(13,27,38,.86);box-shadow:0 22px 60px rgba(0,8,17,.48),inset 0 1px 0 rgba(255,255,255,.22);backdrop-filter:blur(28px) saturate(150%);-webkit-backdrop-filter:blur(28px) saturate(150%);transform-origin:bottom right;animation:tenno-open .6s cubic-bezier(.16,1,.3,1) both}
+    #panel{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;width:min(820px,calc(100vw - 24px));height:min(800px,calc(100vh - 24px));min-height:260px;overflow:hidden;border:1px solid rgba(190,226,226,.43);border-radius:22px;background:rgba(13,27,38,.86);box-shadow:0 22px 60px rgba(0,8,17,.48),inset 0 1px 0 rgba(255,255,255,.22);backdrop-filter:blur(28px) saturate(150%);-webkit-backdrop-filter:blur(28px) saturate(150%);transform-origin:bottom right;animation:tenno-open .6s cubic-bezier(.16,1,.3,1) both}
     #handle{display:flex;align-items:center;gap:8px;min-height:43px;padding:5px 9px;border-bottom:1px solid rgba(177,225,223,.22);background:linear-gradient(100deg,rgba(64,116,121,.37),rgba(28,44,55,.48));color:#f0f7f4;touch-action:none;cursor:grab;user-select:none}
     #handle.dragging{cursor:grabbing}
     #handle .sigil{width:28px;height:28px;flex-basis:28px}#handle .sigil img{width:22px;height:22px}
     .headcopy{flex:1;min-width:0;line-height:1.16}.headcopy small{display:block;color:#bcd1d2;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
-    #close{display:grid;place-items:center;width:30px;height:30px;flex:0 0 30px;border:1px solid rgba(197,231,229,.22);border-radius:9px;color:#e4f5f2;background:rgba(7,22,31,.39);font:22px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer;transition:background .2s ease,transform .2s ease}
-    #close:hover{background:rgba(111,187,185,.22);transform:rotate(90deg)}
+    #close{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;padding:0;border:1px solid rgba(197,231,229,.28);border-radius:50%;color:#e4f5f2;background:rgba(7,22,31,.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.09);cursor:pointer;transition:background .2s ease,border-color .2s ease,transform .2s ease,box-shadow .2s ease}
+    #close svg{display:block;width:18px;height:18px}
+    #close:hover{background:rgba(111,187,185,.21);border-color:rgba(202,243,237,.68);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 0 14px rgba(111,187,185,.17)}
+    #close:active{transform:scale(.94)}
     #launcher:focus-visible,#close:focus-visible{outline:2px solid #9be5df;outline-offset:3px}
     iframe{display:block;width:100%;min-height:0;flex:1;border:0;background:#0d1c27}
     @keyframes tenno-metal{0%,55%{transform:translateX(-100%)}85%,100%{transform:translateX(100%)}}
@@ -40,7 +45,7 @@
   launcher.setAttribute('aria-label','Open Tenno Link companion');
   launcher.setAttribute('aria-expanded','false');
   const logo = document.createElement('img');
-  logo.src = chrome.runtime.getURL('assets/tenno-link-logo-animated.svg');
+  logo.src = logoUrl;
   logo.alt = '';
   const launcherSigil = document.createElement('span');
   launcherSigil.className = 'sigil';
@@ -64,7 +69,17 @@
   close.id = 'close';
   close.type = 'button';
   close.setAttribute('aria-label','Close Tenno Link companion');
-  close.textContent = '\u00d7';
+  const closeIcon = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  closeIcon.setAttribute('viewBox','0 0 24 24');
+  closeIcon.setAttribute('fill','none');
+  closeIcon.setAttribute('aria-hidden','true');
+  const closeStroke = document.createElementNS('http://www.w3.org/2000/svg','path');
+  closeStroke.setAttribute('d','M6 6l12 12M18 6L6 18');
+  closeStroke.setAttribute('stroke','currentColor');
+  closeStroke.setAttribute('stroke-width','2');
+  closeStroke.setAttribute('stroke-linecap','round');
+  closeIcon.append(closeStroke);
+  close.append(closeIcon);
   const frame = document.createElement('iframe');
   frame.title = 'Tenno Link full interface';
   handle.append(close);
@@ -72,8 +87,10 @@
   shadow.append(style,launcher,panel);
   (document.body || document.documentElement).append(host);
 
+  let openedOnce = false;
   const open = () => {
-    frame.src = chrome.runtime.getURL('popup.html?overlay=1');
+    frame.src = `${popupUrl}?overlay=1${openedOnce ? '&returning=1' : ''}`;
+    openedOnce = true;
     panel.hidden = false;
     launcher.hidden = true;
     launcher.setAttribute('aria-expanded','true');

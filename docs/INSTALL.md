@@ -39,6 +39,7 @@ Tenno Link currently requests:
 - 🍪 **cookies** — reads the Warframe `gid` used to request profile-view data.
 - 💾 **storage** — caches normalized profile and public world-state data locally.
 - 📋 **clipboardWrite** — copies the AI prompt/profile package when you explicitly click a copy action.
+- 🗂️ **offscreen** — opens a temporary hidden extension document to complete that copy action when the floating panel is restricted by the website.
 - 🌐 **warframe.com host access** — profile linking.
 - 📡 **warframestat.us host access** — public world-state and maintained item/recipe metadata.
 

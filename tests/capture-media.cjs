@@ -21,6 +21,11 @@ async function main() {
   const browser = await chromium.launch({channel:'chrome',headless:true});
   try {
     const page = await browser.newPage({viewport:{width:680,height:860},deviceScaleFactor:1,reducedMotion:'reduce'});
+    const website = await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1,reducedMotion:'reduce'});
+    await website.goto('http://127.0.0.1:8765/site');
+    await website.locator('#tenno-link-overlay-host').waitFor();
+    await website.screenshot({path:path.join(output,'website-floating-button.png')});
+    await website.close();
     await page.goto('http://127.0.0.1:8765/popup.html?overlay=1');
     await page.locator('#name').getByText('Preview Tenno').waitFor();
     const capture = async (scene,index) => {
@@ -53,11 +58,16 @@ async function main() {
     await capture('live',2);
     await page.locator('#nav button[data-page="ai"]').click();
     await capture('export',0);
-    await page.locator('.format button[data-format="compact"]').click();
+    await page.locator('#promptSelect').selectOption('farm');
     await capture('export',1);
-    await page.locator('.format button[data-format="raw"]').click();
+    await page.locator('[data-prompt-field="materials"]').fill('Orokin Cells and Neurodes');
     await capture('export',2);
-    execFileSync('python',[path.join(__dirname,'make-gifs.py'),work,output],{stdio:'inherit'});
+    await page.locator('[data-prompt-field="amount"]').fill('10 Orokin Cells, 5 Neurodes');
+    await capture('export',3);
+    await page.locator('.prompt-preview summary').click();
+    await page.locator('#ai').evaluate(element => { element.scrollTop = 300; });
+    await capture('export',4);
+    execFileSync(process.env.TENNO_PYTHON || 'python',[path.join(__dirname,'make-gifs.py'),work,output],{stdio:'inherit'});
   } finally { await browser.close(); }
 }
 main().catch(error=>{console.error(error);process.exitCode=1;}).finally(()=>{server.kill();rmSync(work,{recursive:true,force:true});});

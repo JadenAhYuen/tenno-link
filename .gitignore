@@ -1,0 +1,3 @@
+# Generated extension packages. Build these from the tracked source for a release.
+/release/tenno-link/
+/release/*.zip

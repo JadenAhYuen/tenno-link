@@ -1,5 +1,8 @@
 const $ = id => document.getElementById(id);
-const isOverlay = typeof location !== 'undefined' && new URLSearchParams(location.search).get('overlay') === '1';
+const openingParams = typeof location !== 'undefined' ? new URLSearchParams(location.search) : {get:()=>null};
+const isOverlay = openingParams.get('overlay') === '1';
+const returningOpen = openingParams.get('returning') === '1';
+if (returningOpen) document.documentElement.classList.add('returning-open');
 if (isOverlay) {
   document.documentElement.classList.add('overlay-mode');
   document.addEventListener('keydown',event => {
@@ -25,7 +28,7 @@ function itemImage(entry) {
   const name = entry?.imageName;
   return `<span class="item-art" aria-hidden="true"><span>◇</span>${typeof name === 'string' && name ? `<img src="https://cdn.warframestat.us/img/${escapeHtml(encodeURIComponent(name))}" alt="" width="56" height="56" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ''}</span>`;
 }
-function planetArt(name, order) {
+function planetArt(name, order, decorative = false) {
   const scenes = {
     Mercury:['#d1c5b2','#62594e','<g fill="none" stroke="#463f39" stroke-width="3"><circle cx="25" cy="28" r="7"/><circle cx="49" cy="22" r="5"/><circle cx="51" cy="49" r="9"/><circle cx="25" cy="54" r="4"/></g>'],
     Venus:['#ffe19a','#9b5e32','<path d="M12 29q12-14 27-5t30-3M9 43q14-12 30-1t30-3M14 56q13-12 25-2t30-4" fill="none" stroke="#f4bf70" stroke-width="5"/>'],
@@ -51,7 +54,7 @@ function planetArt(name, order) {
   };
   const [top,bottom,details] = scenes[name] || (name.includes('Deimos') ? scenes.Deimos : scenes.Earth);
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><defs><radialGradient id="g" cx="30%" cy="25%"><stop stop-color="${top}"/><stop offset=".7" stop-color="${bottom}"/><stop offset="1" stop-color="#10151e"/></radialGradient><clipPath id="c"><circle cx="40" cy="40" r="29"/></clipPath></defs><circle cx="40" cy="40" r="29" fill="url(#g)"/><g clip-path="url(#c)">${details}<ellipse cx="28" cy="20" rx="34" ry="8" fill="#fff" opacity=".1"/></g><circle cx="40" cy="40" r="29" fill="none" stroke="#d9e3ec" stroke-opacity=".5"/></svg>`;
-  return `<img class="planet-art" alt="${escapeHtml(name)} planet illustration" src="data:image/svg+xml,${encodeURIComponent(svg)}">`;
+  return `<img class="planet-art" alt="${decorative ? '' : `${escapeHtml(name)} planet illustration`}"${decorative ? ' aria-hidden="true"' : ''} src="data:image/svg+xml,${encodeURIComponent(svg)}">`;
 }
 const missionTypes = {
   MT_EXTERMINATION:['Exterminate','Clear the marked enemy force.'], MT_CAPTURE:['Capture','Track down and capture the target, then reach extraction.'],
@@ -175,7 +178,7 @@ function renderIdentity() {
 function renderHome() {
   const p = profile();
   if (!p) {
-    $("home").innerHTML = `<div class="panel empty"><h2>Your next mission starts here</h2><p>Sign in to <a href="https://www.warframe.com/" target="_blank" rel="noopener">warframe.com</a>, then use Synchronize profile above.</p><p class="muted">Explore your career, equipment and standing here. No AI upload needed.</p></div>${activityPanel()}`;
+    $("home").innerHTML = `<div class="panel empty"><h2>Your next mission starts here</h2><p>Sign in to <a href="https://www.warframe.com/" target="_blank" rel="noopener">warframe.com</a>, then use the round refresh button above.</p><p class="muted">Explore your career, equipment and standing here. AI Bridge can also prepare a question without account data.</p><button type="button" class="bridge-entry" data-open-ai>Explore AI Bridge</button></div>${activityPanel()}`;
     bindLiveShortcut();
     return;
   }
@@ -189,6 +192,7 @@ function renderHome() {
   }));
   $("home").innerHTML = `
     <div class="section-title"><div><h2>Your career, at a glance</h2><small>Lifetime records from the latest profile snapshot</small></div></div>
+    <div class="bridge-invitation"><div><strong>Need a plan for your next session?</strong><small>Choose a goal, then build a question with the account details you want to share.</small></div><button type="button" class="bridge-entry" data-open-ai>Open AI Bridge</button></div>
     <div class="stats-grid">
       ${metric("Missions completed", formatQuantity(s.missionsCompleted), "Successful mission completions recorded by the profile.")}
       ${metric("Time played", fmtHours(s.timePlayedSec), "Profile play time; may differ from platform launcher hours.")}
@@ -319,12 +323,20 @@ function timeLeft(expiry) {
   if (!Number.isFinite(ms)) return "—";
 
   if (ms <= 0) return "expired";
+  if (ms > 21 * 24 * 60 * 60 * 1000) return "time unavailable";
 
   const secondsLeft = Math.ceil(ms / 1000);
+  const days = Math.floor(secondsLeft / 86400);
   const hours = Math.floor(secondsLeft / 3600);
   const minutes = Math.floor((secondsLeft % 3600) / 60);
   const seconds = secondsLeft % 60;
-  return hours ? `${hours}h ${String(minutes).padStart(2,'0')}m ${String(seconds).padStart(2,'0')}s` : `${minutes}m ${String(seconds).padStart(2,'0')}s`;
+  if (days) return `${days}d ${hours % 24}h`;
+  return hours ? `${hours}h ${String(minutes).padStart(2,'0')}m` : `${minutes}m ${String(seconds).padStart(2,'0')}s`;
+}
+
+function plausibleExpiry(expiry, maxHours = 21 * 24) {
+  const remaining = new Date(expiry).getTime() - Date.now();
+  return Number.isFinite(remaining) && remaining > 0 && remaining <= maxHours * 3600000;
 }
 
 function countdown(expiry) {
@@ -335,11 +347,136 @@ function countdown(expiry) {
 }
 
 function itemWithCountdown(label, prefix, expiry, suffix = '') {
-  return `<div class="item"><b>${escapeHtml(label)}</b><span>${escapeHtml(prefix)}${countdown(expiry)}${escapeHtml(suffix)}</span></div>`;
+  const detail = String(prefix || '').trim().replace(/[·•]\s*$/, '').trim();
+  return `<div class="item"><b>${escapeHtml(label)}</b><span class="world-detail">${detail ? `<span class="world-value">${escapeHtml(detail)}</span>` : ''}<span class="world-timer">${countdown(expiry)}${escapeHtml(suffix)}</span></span></div>`;
 }
 
-function itemWithOptionalCountdown(label, value, expiry) {
-  return expiry && Number.isFinite(new Date(expiry).getTime()) ? itemWithCountdown(label,`${value} · `,expiry,' left') : item(label,value);
+function itemWithOptionalCountdown(label, value, expiry, maxHours) {
+  return plausibleExpiry(expiry,maxHours) ? itemWithCountdown(label,value,expiry,' left') : item(label,value);
+}
+
+function displayWorldNode(value) {
+  const node = cleanUiText(value);
+  if (!node) return 'Location unavailable';
+  if (!/^SolNode\d+$/i.test(node)) return node;
+  const match = catalogIndex()[node];
+  if (!match?.name || /^SolNode\d+$/i.test(match.name)) return 'Location unavailable';
+  return match.systemName ? `${match.name}, ${match.systemName}` : match.name;
+}
+
+function liveText(...values) {
+  return values.map(cleanUiText).filter(value => value && !/^SolNode\d+$/i.test(value)).join(' · ');
+}
+
+const LIVE_SYSTEMS = ['Kuva Fortress','Höllvania','Mercury','Venus','Earth','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto','Europa','Ceres','Deimos','Phobos','Lua','Eris','Sedna','Void','Duviri','Zariman'];
+
+function worldLocationSystem(value) {
+  const text = cleanUiText(value);
+  const catalogSystem = /^SolNode\d+$/i.test(text) ? catalogIndex()[text]?.systemName : null;
+  if (LIVE_SYSTEMS.includes(catalogSystem)) return catalogSystem;
+  return LIVE_SYSTEMS.find(name => text === name || text.endsWith(`, ${name}`) || text.endsWith(`(${name})`)) || null;
+}
+
+function cycleStateIcon(state) {
+  const key = cleanUiText(state).toLowerCase();
+  const paths = {
+    day:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.5 1.5m11.2 11.2 1.5 1.5M19.1 4.9l-1.5 1.5M6.4 17.6l-1.5 1.5"/>',
+    night:'<path d="M20 16.5A8.5 8.5 0 0 1 7.5 4 8.5 8.5 0 1 0 20 16.5z"/><path d="m17 4 .4 1.6L19 6l-1.6.4L17 8l-.4-1.6L15 6l1.6-.4z"/>',
+    warm:'<path d="M12 3v11m-3 0a4 4 0 1 0 6 0V6a3 3 0 0 0-6 0z"/><path d="M12 13v5"/>',
+    cold:'<path d="M12 2v20M4 6l16 12M20 6 4 18M9 4l3 3 3-3M9 20l3-3 3 3"/>',
+    vome:'<path d="M4 18c2-8 7-13 16-14-1 9-6 14-14 16M7 17l9-9"/>',
+    fass:'<path d="M12 3c3 4 5 7 5 11a5 5 0 0 1-10 0c0-4 2-7 5-11zM10 16c0 1 1 2 2 2"/>'
+  };
+  if (!paths[key]) return '';
+  return `<svg class="cycle-state-icon cycle-${key}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[key]}</svg>`;
+}
+
+function liveRow(label, values, expiry, maxHours = 48, options = {}) {
+  const detail = liveText(...values) || 'Details unavailable';
+  const system = options.system;
+  const heading = system && LIVE_SYSTEMS.includes(system) ? `<span class="live-entry-heading">${planetArt(system,0,true)}<b>${escapeHtml(label)}</b></span>` : `<b>${escapeHtml(label)}</b>`;
+  const timer = plausibleExpiry(expiry,maxHours) ? `<span class="world-timer">${countdown(expiry)} left</span>` : '';
+  return `<div class="item live-entry">${heading}<span class="world-detail">${options.state ? cycleStateIcon(options.state) : ''}<span class="world-value">${escapeHtml(detail)}</span>${timer}</span></div>`;
+}
+
+function liveIcon(title) {
+  const shapes = {
+    'World cycles':'<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c3 3 3 13 0 16M12 4c-3 3-3 13 0 16"/>',
+    'Sortie':'<path d="m12 3 7 4v5c0 5-3 8-7 9-4-1-7-4-7-9V7z"/><path d="m9 12 2 2 4-4"/>',
+    'Archon Hunt':'<path d="m12 2 7 7-7 12L5 9z"/><path d="m5 9 7 3 7-3"/>',
+    'Current events':'<path d="m12 2 2.1 6.9L21 11l-6.9 2.1L12 20l-2.1-6.9L3 11l6.9-2.1z"/>',
+    'Alerts':'<path d="M12 3a6 6 0 0 0-6 6v4l-2 3h16l-2-3V9a6 6 0 0 0-6-6zM10 20h4"/>',
+    'Void fissures':'<path d="m13 2-7 10h5l-1 10 8-12h-5z"/>',
+    'Steel Path fissures':'<path d="m13 2-7 10h5l-1 10 8-12h-5zM3 18h4M18 18h3"/>',
+    'Void storms':'<path d="M4 13a5 5 0 0 1 5-7 6 6 0 0 1 11 4 4 4 0 0 1-1 8H7"/><path d="m12 11-2 4h3l-1 4"/>',
+    'Vendors & weekly':'<path d="M4 8h16v12H4zM3 8l2-5h14l2 5M9 12h6M12 12v8"/>',
+    'Steel Path incursions':'<path d="M4 12h16M12 4l8 8-8 8M5 5l4 4M5 19l4-4"/>',
+    'Nightwave challenges':'<path d="M3 15a9 9 0 1 0 12-12 7 7 0 1 1-12 12z"/><path d="m17 16 1 2 2 1-2 1-1 2-1-2-2-1 2-1z"/>',
+    'Arbitration':'<path d="M5 5h14v14H5zM8 12h8M12 8v8"/>',
+    'Invasions':'<path d="M4 4 20 20M20 4 4 20M4 4v5M4 4h5M20 4v5M20 4h-5"/>',
+    "Darvo's deal":'<path d="M3 8V4h7l11 11-6 6L4 10z"/><circle cx="7" cy="7" r="1"/>',
+    'News':'<path d="M4 4h16v15H4zM8 8h8M8 12h8M8 16h5"/>'
+  };
+  return `<svg class="live-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${shapes[title] || shapes.News}</svg>`;
+}
+
+const LIVE_TIPS = {
+  'World cycles':'Cycle timers are public PC estimates. Check the phase before starting a bounty or a time-sensitive farm.',
+  'Sortie':'Open each stage to check its mission type and modifier before choosing a loadout.',
+  'Archon Hunt':'The three stages share a weekly target. Check the mission sequence before starting.',
+  'Current events':'Event details can change with game updates. Open the event in game before committing to a reward plan.',
+  'Alerts':'Alerts expire quickly. Check the mission and reward in game before joining.',
+  'Void fissures':'Match the fissure tier to the relic you want to open, then check mission type and time left.',
+  'Steel Path fissures':'Steel Path fissures need Steel Path access. This public list cannot confirm your unlocks.',
+  'Void storms':'Void storms are Railjack fissures. Bring a relic for the listed tier and check your Railjack access.',
+  'Vendors & weekly':'Baro arrival and Steel Path offerings are public rotations. A timer does not confirm that you own the required currency.',
+  'Steel Path incursions':'Incursions rotate daily. If mission details are absent here, inspect the current node in game.',
+  'Nightwave challenges':'Choose challenges that fit your current session. Progress is not read from this public feed.',
+  'Arbitration':'Arbitrations rotate hourly. The public node does not confirm your eligibility.',
+  'Invasions':'Check both sides and their rewards before choosing a faction in game.',
+  "Darvo's deal":'Stock can change before your next refresh. Confirm the current price in game.',
+  'News':'Open the official post for details and patch changes before following a build or farming guide.'
+};
+
+function liveGroup(title, rows, open = false) {
+  if (!rows.length) return '';
+  return `<details class="panel live-group" data-live-group${open ? ' open' : ''}><summary>${liveIcon(title)}<span class="live-group-title">${escapeHtml(title)}</span><small>${rows.length} ${rows.length === 1 ? 'entry' : 'entries'}</small><svg class="live-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 4 6 6-6 6"/></svg></summary><div class="live-group-content"><div class="list world-list">${rows.join('')}</div>${LIVE_TIPS[title] ? `<details class="live-tip"><summary>Tenno tip</summary><p>${escapeHtml(LIVE_TIPS[title])}</p></details>` : ''}</div></details>`;
+}
+
+function bindLiveActions() {
+  const root = $('live');
+  root.querySelectorAll('[data-live-expand]').forEach(button => button.onclick = () => {
+    const expand = button.dataset.liveExpand === 'all';
+    root.querySelectorAll('[data-live-group]').forEach(group => { group.open = expand; });
+  });
+}
+
+function liveMission(row, label) {
+  const level = row.minEnemyLevel != null && row.maxEnemyLevel != null && Number.isFinite(Number(row.minEnemyLevel)) && Number.isFinite(Number(row.maxEnemyLevel))
+    ? `Level ${row.minEnemyLevel}–${row.maxEnemyLevel}` : '';
+  return liveRow(label,[row.node ? displayWorldNode(row.node) : '',row.missionType,row.enemy,row.faction,level,row.modifier,row.modifierDescription],row.expiry,48,{system:worldLocationSystem(row.node)});
+}
+
+function sortieRows(sortie, maxHours = 48) {
+  if (!sortie) return [];
+  const stages = Array.isArray(sortie.variants) && sortie.variants.length ? sortie.variants : sortie.missions || [];
+  return [liveRow('Target',[sortie.boss,sortie.faction],sortie.expiry,maxHours),
+    ...stages.map((stage,index) => liveRow(`Stage ${index+1}`,[stage.missionType,stage.node ? displayWorldNode(stage.node) : '',stage.modifier,stage.modifierDescription,stage.enemy],null,48,{system:worldLocationSystem(stage.node)}))];
+}
+
+function cycleRows(w) {
+  const cycles = [
+    ['Earth','Earth',w.earthCycle,typeof w.earthCycle?.isDay === 'boolean' ? (w.earthCycle.isDay ? 'Day' : 'Night') : ''],
+    ['Plains of Eidolon','Earth',w.cetusCycle,typeof w.cetusCycle?.isDay === 'boolean' ? (w.cetusCycle.isDay ? 'Day' : 'Night') : ''],
+    ['Orb Vallis','Venus',w.vallisCycle,typeof w.vallisCycle?.isWarm === 'boolean' ? (w.vallisCycle.isWarm ? 'Warm' : 'Cold') : ''],
+    ['Cambion Drift','Deimos',w.cambionCycle,w.cambionCycle?.active],
+    ['Duviri','Duviri',w.duviriCycle,w.duviriCycle?.state],
+    ['Zariman','Zariman',w.zarimanCycle,w.zarimanCycle?.state]
+  ];
+  return cycles.filter(([, ,cycle]) => cycle).map(([name,system,cycle,fallback]) => {
+    const current = cycle.state || cycle.active || fallback;
+    return liveRow(name,[current],cycle.expiry || cycle.next,12,{system,state:current});
+  });
 }
 
 function updateCountdowns() {
@@ -358,10 +495,10 @@ function activityPanel() {
   const activities = [
     fissure && {name:`${fissure.tier || 'Void'} fissure`,detail:`${fissure.node || 'Node unknown'} · `,expiry:fissure.expiry,suffix:' left'},
     alert && {name:'Alert',detail:`${alert.mission?.node || alert.node || 'Node unknown'} · `,expiry:alert.expiry,suffix:' left'},
-    w?.sortie && {name:'Sortie',detail:w.sortie.boss || w.sortie.faction || 'Active on PC',expiry:w.sortie.expiry,suffix:' left'},
-    w?.voidTrader && (w.voidTrader.active ? {name:"Baro Ki'Teer",detail:`At ${w.voidTrader.location || 'a relay'}`} : {name:"Baro Ki'Teer",detail:'Returns in ',expiry:w.voidTrader.activation})
+    w?.sortie && {name:'Sortie',detail:w.sortie.boss || w.sortie.faction || 'Active on PC',expiry:plausibleExpiry(w.sortie.expiry,48) ? w.sortie.expiry : null,suffix:' left'},
+    w?.voidTrader && (w.voidTrader.active ? {name:"Baro Ki'Teer",detail:`At ${w.voidTrader.location || 'a relay'}`} : {name:"Baro Ki'Teer",detail:plausibleExpiry(w.voidTrader.activation) ? 'Returns in' : 'Return time unavailable',expiry:plausibleExpiry(w.voidTrader.activation) ? w.voidTrader.activation : null})
   ].filter(Boolean).slice(0,3);
-  return `<div class="panel"><div class="section-title"><div><h2>Tonight in the Origin System</h2><small>Public PC world state · ${state.world?.lastSyncAt ? `updated ${escapeHtml(new Date(state.world.lastSyncAt).toLocaleString())}` : 'sync to load'}</small></div></div><div class="list">${activities.length ? activities.map(row => row.expiry ? itemWithCountdown(row.name,row.detail,row.expiry,row.suffix) : item(row.name,row.detail)).join('') : '<p class="muted">Sync to see current activities.</p>'}</div><button class="secondary-action" data-open-live>Open Live</button></div>`;
+  return `<div class="panel"><div class="section-title"><div><h2>Live in the Origin System</h2><small>Public PC world state · ${state.world?.lastSyncAt ? `updated ${escapeHtml(new Date(state.world.lastSyncAt).toLocaleString())}` : 'sync to load'}</small></div></div><div class="list world-list">${activities.length ? activities.map(row => row.expiry ? itemWithCountdown(row.name,row.detail,row.expiry,row.suffix) : item(row.name,row.detail)).join('') : '<p class="muted">Sync to see current activities.</p>'}</div><button class="secondary-action" data-open-live>Open Live</button></div>`;
 }
 
 function bindLiveShortcut() {
@@ -424,61 +561,59 @@ function renderLive() {
   const w = world();
 
   if (!w) {
-    $("live").innerHTML = `${goalPanel()}
-      <div class="panel">
-        <p class="muted">Live data not loaded yet. Press ↻ to sync.</p>
-      </div>
-    `;
+    $("live").innerHTML = `<div class="panel"><p class="muted">Live data not loaded yet. Refresh to sync PC world state.</p></div>${goalPanel()}`;
     bindGoalActions();
     return;
   }
 
-  const activeFissures = (w.fissures || []).filter(entry => !entry.expired && new Date(entry.expiry).getTime() > Date.now());
-  const fissures = activeFissures.slice(0, 5);
-
-  const sortie = w.sortie;
+  const activeFissures = (w.fissures || []).filter(entry => !entry.expired && plausibleExpiry(entry.expiry,48));
+  const normalFissures = activeFissures.filter(entry => !entry.isHard && !entry.isStorm);
+  const hardFissures = activeFissures.filter(entry => entry.isHard && !entry.isStorm);
+  const storms = activeFissures.filter(entry => entry.isStorm);
   const baro = w.voidTrader;
+  const eventRows = (w.events || []).filter(event => !event.expired).map(event =>
+    liveRow(event.description || event.name || 'Event',[event.tooltip,event.node ? displayWorldNode(event.node) : ''],event.expiry,21*24,{system:worldLocationSystem(event.node)}));
+  const alertRows = (w.alerts || []).filter(alert => !alert.expired && plausibleExpiry(alert.expiry,48)).map(alert =>
+    liveRow(alert.mission?.type || 'Alert',[alert.mission?.node || alert.node ? displayWorldNode(alert.mission?.node || alert.node) : '',alert.mission?.reward?.asString || alert.mission?.reward?.itemString,alert.mission?.faction],alert.expiry,48,{system:worldLocationSystem(alert.mission?.node || alert.node)}));
+  const incursionMissions = w.steelPath?.incursions?.missions;
+  const incursionRows = Array.isArray(incursionMissions) ? incursionMissions.map((mission,index) => liveMission(mission,`Incursion ${index+1}`)) : [];
+  if (w.steelPath?.incursions?.expiry) incursionRows.unshift(liveRow('Daily reset',['Steel Path incursions'],w.steelPath.incursions.expiry,48));
+  const challengeRows = (w.nightwave?.activeChallenges || []).filter(challenge => challenge.title || challenge.description).map(challenge =>
+    liveRow(challenge.title || challenge.description || 'Challenge',[challenge.reputation ? `${challenge.reputation} standing` : '',challenge.isElite ? 'Elite' : ''],challenge.expiry,8*24));
+  const invasionRows = (w.invasions || []).filter(invasion => !invasion.completed).map(invasion =>
+    liveRow(displayWorldNode(invasion.node),[invasion.attacker?.reward?.asString,invasion.defender?.reward?.asString,invasion.desc],invasion.expiry,8*24,{system:worldLocationSystem(invasion.node)}));
+  const newsRows = (w.news || []).slice(0,8).map(entry => item(entry.message || 'News',entry.date && Number.isFinite(new Date(entry.date).getTime()) ? new Date(entry.date).toLocaleDateString() : ''));
+  const dealRows = (w.dailyDeals || []).map(deal => liveRow(deal.item || 'Darvo deal',[
+    deal.salePrice != null && Number.isFinite(Number(deal.salePrice)) ? `${deal.salePrice} Platinum` : '',
+    deal.originalPrice != null && Number.isFinite(Number(deal.originalPrice)) ? `was ${deal.originalPrice}` : '',
+    deal.sold != null && deal.total != null && Number.isFinite(Number(deal.sold)) && Number.isFinite(Number(deal.total)) ? `${deal.sold}/${deal.total} sold` : ''
+  ],deal.expiry,48));
 
-  $("live").innerHTML = `${goalPanel()}
-    <p class="muted">PC world state · Last fetched ${escapeHtml(state.world?.lastSyncAt ? new Date(state.world.lastSyncAt).toLocaleString() : "at an unknown time")}. Sync to refresh.</p>
-    <div class="panel">
-      <div class="section-title">
-        <span>VOID FISSURES</span>
-        <small>${fissures.length} of ${activeFissures.length} active</small>
-      </div>
-
-      <div class="list">
-        ${
-          fissures
-            .map(entry =>
-              itemWithCountdown(`${entry.tier || ""} • ${entry.node || "Unknown"}`,`${entry.missionType || ""} • `,entry.expiry)
-            )
-            .join("") ||
-          item("No fissures", "—")
-        }
-      </div>
-    </div>
-
-    <div class="panel" style="margin-top:8px">
-      <div class="section-title">
-        <span>LIMITED-TIME</span>
-        <small>World state</small>
-      </div>
-
-      <div class="list">
-        ${itemWithOptionalCountdown("Sortie",sortie?.boss || sortie?.faction || "Unavailable",sortie?.expiry)}
-        ${itemWithOptionalCountdown("Nightwave",w.nightwave?.activeChallenges?.length != null ? `${w.nightwave.activeChallenges.length} active challenges` : "Unavailable",w.nightwave?.expiry)}
-        ${baro?.active ? item("Baro Ki'Teer",`Active at ${baro.location || "Relay"}`) : itemWithCountdown("Baro Ki'Teer","Returns in ",baro?.activation)}
-        ${itemWithOptionalCountdown("Arbitration",w.arbitration?.node || "Unavailable",w.arbitration?.expiry)}
-        ${itemWithOptionalCountdown("Archon Hunt",w.archonHunt?.boss || w.archonHunt?.faction || "Unavailable",w.archonHunt?.expiry)}
-        ${item(
-          "Steel Path",
-          w.steelPath?.currentReward?.name || "Unavailable"
-        )}
-      </div>
-    </div>
-  `;
+  $("live").innerHTML = `<div class="live-brief"><div><small>PUBLIC PC WORLD STATE</small><h2>Origin System now</h2><p>Explore current rotations and mission details. Account access and completion are checked in game.</p></div><span class="live-beacon" aria-hidden="true"></span></div>
+    <div class="live-tools"><span>Fetched ${escapeHtml(state.world?.lastSyncAt ? new Date(state.world.lastSyncAt).toLocaleString() : 'at an unknown time')}</span><div><button type="button" data-live-expand="all">Expand all</button><button type="button" data-live-expand="none">Collapse all</button></div></div>
+    ${liveGroup('World cycles',cycleRows(w),true)}
+    ${liveGroup('Sortie',sortieRows(w.sortie),true)}
+    ${liveGroup('Archon Hunt',sortieRows(w.archonHunt,8*24),true)}
+    ${liveGroup('Current events',eventRows,true)}
+    ${liveGroup('Alerts',alertRows,true)}
+    ${liveGroup('Void fissures',normalFissures.map(entry => liveMission(entry,entry.tier || 'Fissure')),true)}
+    ${liveGroup('Steel Path fissures',hardFissures.map(entry => liveMission(entry,entry.tier || 'Fissure')))}
+    ${liveGroup('Void storms',storms.map(entry => liveMission(entry,entry.tier || 'Storm')))}
+    ${liveGroup('Vendors & weekly',[
+      baro?.active ? liveRow("Baro Ki'Teer",[`At ${baro.location || 'a relay'}`],baro.expiry,4*24,{system:worldLocationSystem(baro.location)}) : plausibleExpiry(baro?.activation) ? liveRow("Baro Ki'Teer",[`Returns at ${baro.location || 'a relay'}`],baro.activation,21*24,{system:worldLocationSystem(baro.location)}) : item("Baro Ki'Teer","Return time unavailable"),
+      item('Steel Path weekly offering',w.steelPath?.currentReward?.name || 'Unavailable'),
+      w.duviriCycle?.choices?.length ? item('Circuit choices',w.duviriCycle.choices.map(choice => liveText(choice.category, ...(choice.choices || []))).join(' · ')) : '',
+      item('Nightwave challenges',w.nightwave?.activeChallenges?.length != null ? `${w.nightwave.activeChallenges.length} active` : 'Unavailable')
+    ].filter(Boolean),true)}
+    ${liveGroup('Steel Path incursions',incursionRows)}
+    ${liveGroup('Nightwave challenges',challengeRows)}
+    ${liveGroup('Arbitration',w.arbitration && (plausibleExpiry(w.arbitration.expiry,2) || w.arbitration.missionType) ? [liveMission(w.arbitration,w.arbitration.missionType || 'Current mission')] : [])}
+    ${liveGroup('Invasions',invasionRows)}
+    ${liveGroup("Darvo's deal",dealRows)}
+    ${liveGroup('News',newsRows)}
+    ${goalPanel()}`;
   bindGoalActions();
+  bindLiveActions();
 }
 
 function populatePrompts() {
@@ -498,6 +633,7 @@ function populatePrompts() {
 
   prompt = list[0];
   $("promptDesc").textContent = prompt.description || "";
+  renderPromptFields();
 
   $("promptSelect").onchange = event => {
     prompt =
@@ -506,7 +642,47 @@ function populatePrompts() {
       list[0];
 
     $("promptDesc").textContent = prompt.description || "";
+    renderPromptFields();
   };
+  $("promptNotes").oninput = updatePromptPreview;
+}
+
+const promptFieldValues = new Map();
+
+function renderPromptFields() {
+  const container = $("promptFields");
+  container.replaceChildren();
+  for (const field of prompt.fields || []) {
+    const label = document.createElement("label");
+    label.textContent = field.label;
+    const input = document.createElement("input");
+    input.type = "text";
+    input.maxLength = 160;
+    input.placeholder = field.placeholder;
+    input.dataset.promptField = field.id;
+    input.value = promptFieldValues.get(`${prompt.id}:${field.id}`) || "";
+    input.oninput = () => {
+      promptFieldValues.set(`${prompt.id}:${field.id}`, input.value);
+      updatePromptPreview();
+    };
+    label.appendChild(input);
+    container.appendChild(label);
+  }
+  updatePromptPreview();
+}
+
+function composedPrompt() {
+  const values = Array.from($("promptFields").querySelectorAll("input"))
+    .map(input => ({ label: input.parentElement.textContent.trim(), value: input.value.trim() }))
+    .filter(entry => entry.value);
+  const notes = $("promptNotes").value.trim();
+  if (notes) values.push({ label: "Other preferences", value: notes });
+  const request = values.length ? `\n\nMy specific request:\n${values.map(entry => `- ${entry.label}: ${entry.value}`).join("\n")}\n\nTreat these as my preferences and targets. If I ask for farming, address the named materials and quantities first.` : "";
+  return `${prompt.prompt || ""}${request}\n\nCURRENT-GAME CHECK (requested ${new Date().toISOString().slice(0,10)}):\n${typeof PROMPT_FRESHNESS !== "undefined" ? PROMPT_FRESHNESS : "Verify current Warframe patch notes before recommending a build or farm."}`;
+}
+
+function updatePromptPreview() {
+  $("promptPreview").textContent = composedPrompt();
 }
 
 function exportPackage() {
@@ -558,13 +734,45 @@ function exportPackage() {
 
 async function copy(text, message) {
   try {
-    await navigator.clipboard.writeText(text);
+    const result = await chrome.runtime.sendMessage({ type: "COPY_TEXT", text });
+    if (!result?.ok) throw new Error(result?.error || "Clipboard write failed");
+    $("copyFallback").hidden = true;
     showToast(message);
-  } catch { showToast("Could not copy. Allow clipboard access and try again."); }
+  } catch {
+    const field = document.createElement("textarea");
+    field.value = text;
+    field.setAttribute("readonly", "");
+    field.style.position = "fixed";
+    field.style.opacity = "0";
+    document.body.appendChild(field);
+    field.select();
+    let copied = false;
+    try { copied = document.execCommand("copy"); } catch { /* Use manual fallback below. */ }
+    field.remove();
+    if (copied) {
+      $("copyFallback").hidden = true;
+      showToast(message);
+      return;
+    }
+    $("copyFallbackText").value = text;
+    $("copyFallback").hidden = false;
+    $("copyFallbackText").focus();
+    $("copyFallbackText").select();
+    showToast("Clipboard blocked. Select the text below and press Ctrl+C.");
+  }
 }
+
+$("selectCopyFallback").onclick = () => {
+  $("copyFallbackText").focus();
+  $("copyFallbackText").select();
+};
 
 function interfaceVisible() {
   return document.visibilityState !== 'hidden';
+}
+
+function setStartupLoading(active) {
+  $("loadingVeil").hidden = !active;
 }
 
 function renderRefreshedState() {
@@ -579,6 +787,7 @@ async function syncActive(force = false, resources = {profile:true,world:true}) 
   if (activeSyncing || !interfaceVisible()) return;
   activeSyncing = true;
   $("syncAll").disabled = true;
+  $("syncAll").classList.add("is-refreshing");
   $("status").textContent = "Refreshing profile and live events…";
   try {
     const response = await chrome.runtime.sendMessage({ type: "SYNC_ACTIVE", force, ...resources });
@@ -599,6 +808,7 @@ async function syncActive(force = false, resources = {profile:true,world:true}) 
   } finally {
     activeSyncing = false;
     $("syncAll").disabled = false;
+    $("syncAll").classList.remove("is-refreshing");
   }
 }
 
@@ -639,6 +849,10 @@ function setActivePage(page) {
   document.body.dataset.page = page;
 }
 
+$("home").addEventListener("click", event => {
+  if (event.target.closest?.("[data-open-ai]")) $("nav").querySelector('[data-page="ai"]').click();
+});
+
 document.querySelectorAll("#nav button").forEach(button => {
   button.onclick = () => {
     document
@@ -670,7 +884,7 @@ document.querySelectorAll(".format button").forEach(button => {
 $("syncAll").onclick = () => syncActive(true);
 
 $("copyPrompt").onclick = () =>
-  copy(prompt.prompt || "", "PROMPT COPIED");
+  copy(composedPrompt(), "PROMPT COPIED");
 
 $("copyProfile").onclick = () =>
   copy(
@@ -684,7 +898,7 @@ $("copyProfile").onclick = () =>
 
 $("copyBoth").onclick = () =>
   copy(
-    `${prompt.prompt || ""}
+    `${composedPrompt()}
 
 TENNO LINK DATA
 ===============
@@ -698,6 +912,7 @@ ${JSON.stringify(
   );
 
 (async () => {
+  const openedAt = Date.now();
   populatePrompts();
 
   const response = await chrome.runtime.sendMessage({
@@ -706,17 +921,25 @@ ${JSON.stringify(
   if (!response?.ok) throw new Error(response?.error || "Could not read saved profile. Reopen Tenno Link.");
 
   state = response.state || {};
+  const quickOpen = returningOpen || Boolean(state.profile?.lastSyncAt);
+  if (quickOpen) document.documentElement.classList.add('returning-open');
   setActivePage("home");
   renderAll();
   const countdownTimer = setInterval(() => { if (interfaceVisible()) { updateCountdowns(); updateSyncMeta(); } },1000);
   const refreshTimer = setInterval(autoRefreshIfDue,15000);
   document.addEventListener('visibilitychange',() => { if (interfaceVisible()) { updateCountdowns(); autoRefreshIfDue(); } });
   window.addEventListener('pagehide',() => { clearInterval(countdownTimer); clearInterval(refreshTimer); });
+  if (quickOpen) {
+    await new Promise(resolve => setTimeout(resolve, Math.max(0, 220 - (Date.now() - openedAt))));
+    setStartupLoading(false);
+  }
   if (interfaceVisible()) {
     await syncActive(false);
     if (!state.items?.index || state.items?.schemaVersion !== 5) await syncCatalog();
   }
+  if (!quickOpen) setStartupLoading(false);
 })().catch(error => {
   renderAll();
   $("status").textContent = error.message || "Could not open Tenno Link. Reopen the extension.";
+  setStartupLoading(false);
 });

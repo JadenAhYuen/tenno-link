@@ -5,8 +5,8 @@
 html { width:760px; max-width:100%; }
 body { margin:0; background:var(--bg); color:var(--text); font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
 main { padding:24px; }
-button,input,select { font:inherit; color:inherit; }
-button,select,input { min-height:44px; border:1px solid var(--line); border-radius:10px; background:var(--panel); padding:9px 12px; }
+button,input,select,textarea { font:inherit; color:inherit; }
+button,select,input,textarea { min-height:44px; border:1px solid var(--line); border-radius:10px; background:var(--panel); padding:9px 12px; }
 button,summary { cursor:pointer; }
 button:hover { background:var(--selected); }
 button:disabled { opacity:.6; cursor:wait; }
@@ -25,7 +25,11 @@ small { font-size:13px; }
 .round { width:44px; font-size:24px; }
 .signal-mark,.gold-orbit,.copy-glyph,.pulse-dot { display:none; }
 .panel { padding:20px; background:var(--panel); border:1px solid var(--line); border-radius:16px; margin-bottom:16px; }
-.identity { display:flex; justify-content:space-between; align-items:center; gap:20px; border-left:4px solid var(--accent); }
+.identity { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) auto; align-items:center; gap:24px; border-left:4px solid var(--accent); }
+.profile-identity,.profile-status { min-width:0; }
+.profile-status { padding-left:22px; border-left:1px solid var(--line); }
+.profile-state { display:flex; align-items:center; gap:8px; margin-top:4px; font-size:13px; color:var(--text); }
+.profile-sync-age { margin-top:3px; font-size:12px; color:var(--muted); }
 .name { font-size:25px; font-weight:650; overflow-wrap:anywhere; }
 .profile-meta { font-size:12px; color:var(--muted); }
 .meta-sep { margin:0 6px; }
@@ -66,6 +70,14 @@ details[open]>summary { margin-bottom:12px; }
 .source-path { overflow-wrap:anywhere; font-size:12px; color:var(--muted); }
 .format,.toggles { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
 .prompt-shell select { width:100%; margin:8px 0; }
+.prompt-shell .option-panel { margin-top:18px; }
+.prompt-fields { display:grid; gap:10px; margin:14px 0; }
+.prompt-fields label { display:block; color:var(--muted); font-size:13px; }
+.prompt-fields input,.prompt-shell textarea { display:block; width:100%; margin-top:6px; box-sizing:border-box; }
+.prompt-shell textarea { resize:vertical; min-height:64px; }
+.prompt-preview { margin-top:16px; color:var(--muted); font-size:13px; }
+.prompt-preview summary { cursor:pointer; }
+.prompt-preview pre { white-space:pre-wrap; overflow-wrap:anywhere; max-height:220px; overflow:auto; color:var(--text); font:inherit; line-height:1.5; }
 .goal-form label { display:block; color:var(--muted); font-size:13px; margin-bottom:6px; }
 .goal-form>div { display:flex; gap:8px; }
 .goal-form input { flex:1; min-width:0; }
@@ -84,7 +96,7 @@ details[open]>summary { margin-bottom:12px; }
 footer { color:var(--muted); font-size:12px; padding:12px 0 0; overflow-wrap:anywhere; }
 .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--text); color:var(--bg); border-radius:12px; padding:12px 20px; display:none; }
 .toast.show { display:block; }
-@media(max-width:520px) { main { padding:14px; } .primary-nav button { flex-basis:29%; } .stats-grid,.equipment-controls,.career-grid { grid-template-columns:1fr; } .identity { gap:10px; } .name { font-size:21px; } .panel { padding:16px; } .item { flex-wrap:wrap; gap:4px; } .item span { text-align:left; } }
+@media(max-width:520px) { main { padding:14px; } .primary-nav button { flex-basis:29%; } .stats-grid,.equipment-controls,.career-grid { grid-template-columns:1fr; } .identity { grid-template-columns:minmax(0,1fr) auto; gap:10px; } .profile-status { grid-column:1/-1; grid-row:2; padding:8px 0 0; border-left:0; border-top:1px solid var(--line); } .mr { grid-column:2; grid-row:1; } .name { font-size:21px; } .panel { padding:16px; } .item { flex-wrap:wrap; gap:4px; } .item span { text-align:left; } }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }
 @media(prefers-contrast:more) { :root { --line:var(--text); } }
 @media(forced-colors:active) { button.active { outline:2px solid Highlight; } }
