@@ -37,6 +37,10 @@ async function main() {
     await page.waitForTimeout(100);
     assert.ok(page.frames().every(frame=>!frame.url().includes('/popup.html')),'closing should unload the interface');
     assert.equal(popupLoads.length,1,'closing should not trigger another load');
+    await page.locator('#tenno-link-overlay-host').evaluate(host=>host.shadowRoot.getElementById('launcher').click());
+    await page.waitForTimeout(100);
+    assert.ok(page.frames().some(frame=>frame.url().includes('/popup.html?overlay=1&returning=1')),'reopening should use the quick loading treatment');
+    await page.keyboard.press('Escape');
     console.log('overlay-lifecycle.cjs: launcher is idle; open loads and close unloads the interface');
   } finally { await browser.close(); }
 }

@@ -7,13 +7,13 @@
 - Test world-state sync
 - Test all tabs and copy actions
 - Confirm no cookies appear in exported JSON
-- Create a tagged GitHub release and attach the ZIP
+- Run `./release/build.ps1 -Zip`, inspect `release/tenno-link`, and attach the versioned ZIP to a tagged GitHub release
 
 ## Chrome Web Store
 
 - Use the Manifest V3 package
 - Complete Store Listing and Privacy tabs
-- Explain `cookies`, `storage`, and Warframe host permissions
+- Explain `cookies`, `storage`, `clipboardWrite`, `offscreen`, and host permissions
 - Provide privacy-policy URL
 - Upload screenshots and 128px icon
 - Submit for review

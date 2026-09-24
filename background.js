@@ -378,9 +378,49 @@ async function findGoalSources(name) {
   return goal;
 }
 
+let creatingClipboardDocument;
+let clipboardQueue = Promise.resolve();
+
+async function ensureClipboardDocument() {
+  const url = chrome.runtime.getURL('offscreen.html');
+  if (chrome.runtime.getContexts) {
+    const contexts = await chrome.runtime.getContexts({contextTypes:['OFFSCREEN_DOCUMENT'],documentUrls:[url]});
+    if (contexts.length) return;
+  }
+  if (!creatingClipboardDocument) {
+    creatingClipboardDocument = chrome.offscreen.createDocument({
+      url:'offscreen.html',
+      reasons:['CLIPBOARD'],
+      justification:'Copy the AI Bridge text selected by the player.'
+    }).finally(() => { creatingClipboardDocument = null; });
+  }
+  await creatingClipboardDocument;
+}
+
+function copyTextOffscreen(text) {
+  const request = clipboardQueue.catch(() => {}).then(async () => {
+    await ensureClipboardDocument();
+    try {
+      const result = await chrome.runtime.sendMessage({target:'offscreen',type:'COPY_TEXT_OFFSCREEN',text});
+      if (!result?.ok) throw new Error(result?.error || 'Clipboard write failed');
+      return {ok:true};
+    } finally {
+      await chrome.offscreen.closeDocument().catch(() => {});
+    }
+  });
+  clipboardQueue = request;
+  return request;
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.target === 'offscreen') return false;
   (async () => {
     try {
+      if (message?.type === 'COPY_TEXT') {
+        if (typeof message.text !== 'string') throw new Error('Nothing to copy');
+        sendResponse(await copyTextOffscreen(message.text));
+        return;
+      }
       if (message?.type === "GET_STATE") {
         const state = await getStore();
 

@@ -10,35 +10,31 @@
 </head>
 <body>
   <main>
-    <div class="ambient-field" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="ambient-field" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
     <header class="topbar">
       <div class="brand-icon">
         <img src="assets/tenno-link-logo-animated.svg" alt="Tenno Link logo">
       </div>
 
       <div class="brand">
-        <div class="eyebrow">TENNO PROFILE LINK</div>
+        <div class="eyebrow">YOUR WARFRAME AI BRIDGE</div>
         <h1>Tenno Link</h1>
-        <div class="brand-subline">
-          <span class="pulse-dot"></span>
-          <span id="linkState">Local link ready</span>
-        </div>
       </div>
 
       <button id="syncAll" class="round sync-button" title="Refresh profile and live events" aria-label="Refresh profile and live events">
-        <span>↻</span>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.7-4.2"/><path d="M5 3.8v4.2h4.2"/><path d="M4 13a8 8 0 0 0 14.7 4.2"/><path d="M19 20.2V16h-4.2"/></svg>
       </button>
     </header>
 
     <section class="identity panel hero-panel">
-      <div>
+      <div class="profile-identity">
         <div class="label">ACTIVE TENNO</div>
         <div id="name" class="name">Awaiting link…</div>
-        <div class="profile-meta">
-          <span id="syncAge">No sync yet</span>
-          <span class="meta-sep">•</span>
-          <span>Profile viewer</span>
-        </div>
+      </div>
+      <div class="profile-status">
+        <div class="label">PROFILE STATUS</div>
+        <div class="profile-state"><span class="pulse-dot" aria-hidden="true"></span><span id="linkState">Local link ready</span></div>
+        <div id="syncAge" class="profile-sync-age">No sync yet</div>
       </div>
       <div class="mr">
         <div class="label">MASTERY RANK</div>
@@ -49,11 +45,11 @@
 
     <nav id="nav" class="primary-nav" aria-label="Tenno Link sections">
       <button data-page="home" class="active" aria-current="page">Overview</button>
+      <button data-page="ai">AI Bridge</button>
       <button data-page="arsenal">Equipment</button>
       <button data-page="chart">Star Chart</button>
       <button data-page="progress">Standing</button>
       <button data-page="live">Live</button>
-      <button data-page="ai">Export</button>
     </nav>
     <section id="home" class="page active" aria-label="Overview"></section>
     <section id="arsenal" class="page" aria-label="Equipment"></section>
@@ -66,19 +62,43 @@
         <div class="section-title">
           <div>
             <span>AI BRIDGE</span>
-            <small>Prepare a focused Tenno package for any AI</small>
+            <small>Your account context, your goal, and a check against the current game</small>
           </div>
           <div class="signal-mark" aria-hidden="true">✦</div>
         </div>
 
-        <div class="prompt-shell">
-          <label class="label" for="promptSelect">PROMPT TEMPLATE</label>
-          <select id="promptSelect"></select>
-          <p id="promptDesc" class="muted"></p>
-        </div>
+        <details class="bridge-help">
+          <summary>How AI Bridge works <span aria-hidden="true">ⓘ</span></summary>
+          <div class="bridge-help-body">
+            <p>Choose a plan for what you want to do in Warframe. Add a specific item, goal, amount, or time limit so the advice fits your session. The description below the menu explains each plan.</p>
+            <p><strong>Include</strong> chooses what account and live game information to attach. <strong>Recommended</strong> keeps useful context readable; <strong>Compact</strong> shortens the data; <strong>Raw</strong> includes more detail for players who want to inspect it.</p>
+            <p><strong>Copy prompt + profile</strong> is the usual choice: paste it into an AI assistant of your choice. <strong>Copy prompt</strong> omits account data. <strong>Copy profile</strong> shares only the selected data. Preview before copying, especially if you plan to share it.</p>
+            <p>Tenno Link prepares text locally and does not contact an AI service. The receiving assistant should check current patch notes and sources, but its answer can still be wrong. Confirm builds, drops, and mission access in game.</p>
+          </div>
+        </details>
 
-        <div class="ai-options-grid">
-          <div class="option-panel">
+        <div class="prompt-shell">
+          <div class="prompt-choice">
+            <label class="label" for="promptSelect">PROMPT TEMPLATE</label>
+            <select id="promptSelect"></select>
+            <p id="promptDesc" class="muted"></p>
+          </div>
+          <div class="prompt-personalize">
+            <div id="promptFields" class="prompt-fields"></div>
+            <label class="label" for="promptNotes">ANY OTHER PREFERENCES</label>
+            <textarea id="promptNotes" rows="2" maxlength="500" placeholder="e.g. solo play, avoid spoilers, prefer short missions"></textarea>
+            <p class="muted">Your details stay in this open window until you copy them.</p>
+            <div class="option-panel">
+            <div class="label">EXPORT MODE</div>
+            <div class="format">
+              <button data-format="recommended" class="active">Recommended</button>
+              <button data-format="compact">Compact</button>
+              <button data-format="raw">Raw</button>
+            </div>
+            <p class="muted format-help">Recommended is easiest to read. Compact uses less text. Raw includes extra detail.</p>
+            </div>
+          </div>
+          <div class="option-panel prompt-includes">
             <div class="label">INCLUDE</div>
             <div class="toggles">
               <label><input type="checkbox" id="includeProfile" checked> <span>Profile</span></label>
@@ -86,16 +106,11 @@
               <label><input type="checkbox" id="includeStats" checked> <span>Career stats</span></label>
             </div>
           </div>
-
-          <div class="option-panel">
-            <div class="label">EXPORT MODE</div>
-            <div class="format">
-              <button data-format="recommended" class="active">Recommended</button>
-              <button data-format="compact">Compact</button>
-              <button data-format="raw">Raw</button>
-            </div>
-          </div>
         </div>
+
+        <p class="ai-freshness">Every prompt asks the AI to check <a href="https://www.warframe.com/en/patch-notes" target="_blank" rel="noopener noreferrer">patch notes</a>, the <a href="https://wiki.warframe.com/" target="_blank" rel="noopener noreferrer">Warframe Wiki</a>, and <a href="https://www.warframe.com/droptables" target="_blank" rel="noopener noreferrer">official drop tables</a> when relevant. If it cannot browse, it should label advice unverified.</p>
+
+        <details class="prompt-preview"><summary>Preview the prompt</summary><pre id="promptPreview"></pre></details>
 
         <div class="copy-grid">
           <button id="copyBoth" class="gold">
@@ -113,6 +128,11 @@
           </button>
 
         </div>
+        <div id="copyFallback" class="copy-fallback" hidden>
+          <label for="copyFallbackText">Clipboard blocked? Select and copy this text manually.</label>
+          <textarea id="copyFallbackText" rows="5" readonly></textarea>
+          <button id="selectCopyFallback" type="button">Select all text</button>
+        </div>
       </div>
     </section>
 
@@ -120,6 +140,14 @@
       <span id="status" role="status">Saved locally · Refreshes while open</span>
       <span class="footer-node"></span>
     </footer>
+
+    <div id="loadingVeil" class="loading-veil" role="status" aria-live="polite" aria-label="Loading Tenno Link">
+      <div class="loading-glass">
+        <div class="tenno-loader" aria-hidden="true"><span class="loader-core"></span></div>
+        <strong id="loadingTitle">Linking your profile</strong>
+        <small id="loadingDetail">Preparing your Tenno view…</small>
+      </div>
+    </div>
 
     <div id="toast" class="toast" role="status"></div>
   </main>

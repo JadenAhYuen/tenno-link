@@ -24,7 +24,7 @@ Overview also shows a short PC activity summary. In Live, enter the exact name o
 
 ## 🤖 4. Export for your AI
 
-Open **Export** and choose a prompt template.
+Tenno Link opens on **AI Bridge**. Choose a prompt template, enter a specific target such as materials to farm and desired quantities, and add any play preferences. Preview the finished prompt before copying it. The copied instructions ask your AI to check current patch notes and source dates; if it cannot browse, treat its answer as unverified.
 
 You can copy:
 
