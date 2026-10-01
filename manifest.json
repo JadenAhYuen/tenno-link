@@ -10,6 +10,13 @@
     "clipboardWrite",
     "offscreen"
   ],
+  "optional_permissions": ["scripting"],
+  "optional_host_permissions": [
+    "https://chatgpt.com/*",
+    "https://claude.ai/*",
+    "https://gemini.google.com/*",
+    "https://grok.com/*"
+  ],
   "host_permissions": [
     "https://*.warframe.com/*",
     "https://api.warframe.com/*",

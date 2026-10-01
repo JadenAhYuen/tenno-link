@@ -43,6 +43,11 @@ Tenno Link currently requests:
 - 🌐 **warframe.com host access** — profile linking.
 - 📡 **warframestat.us host access** — public world-state and maintained item/recipe metadata.
 
+AI provider buttons optionally request **scripting** and access to the selected
+ChatGPT, Claude, Gemini, or Grok website to fill its chat input. These permissions
+are requested when you choose a provider. Declining access uses copy + open;
+sending the request always remains your choice.
+
 Tenno Link does not send your Warframe login password or session cookies to a Tenno Link server.
 
 > 🛍️ **Planned stable installation:** Chrome Web Store for one-click install and automatic updates.

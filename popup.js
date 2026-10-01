@@ -22,6 +22,11 @@ let activeSyncing = false;
 let nextAutoAttemptAt = 0;
 let missionQuery = "";
 let onlyUnplayedMissions = false;
+let restoringDraft = false;
+let draftWrite = Promise.resolve();
+let onlyRecordedSources = false;
+let sampleMode = false;
+let stateBeforeSample = null;
 const categoryLabel = category => TennoCatalog.labels[category] || "Unclassified";
 function catalogIndex() { return state.items?.index || {}; }
 function itemImage(entry) {
@@ -178,7 +183,7 @@ function renderIdentity() {
 function renderHome() {
   const p = profile();
   if (!p) {
-    $("home").innerHTML = `<div class="panel empty"><h2>Your next mission starts here</h2><p>Sign in to <a href="https://www.warframe.com/" target="_blank" rel="noopener">warframe.com</a>, then use the round refresh button above.</p><p class="muted">Explore your career, equipment and standing here. AI Bridge can also prepare a question without account data.</p><button type="button" class="bridge-entry" data-open-ai>Explore AI Bridge</button></div>${activityPanel()}`;
+    $("home").innerHTML = `<div class="panel empty"><h2>Your next mission starts here</h2><ol><li>Sign in to <a href="https://www.warframe.com/" target="_blank" rel="noopener">warframe.com</a>.</li><li>Use the round refresh button above to load your profile.</li><li>Choose a farming goal, then plan your next session.</li></ol><p class="muted">AI Bridge can also prepare a question without account data.</p><button type="button" data-try-sample>Try sample data</button><button type="button" class="bridge-entry" data-open-ai>Explore AI Bridge</button></div>${activityPanel()}`;
     bindLiveShortcut();
     return;
   }
@@ -191,7 +196,8 @@ function renderHome() {
     return [slot, catalogIndex()[path]?.name || p.arsenal?.current?.[slot] || "—"];
   }));
   $("home").innerHTML = `
-    <div class="section-title"><div><h2>Your career, at a glance</h2><small>Lifetime records from the latest profile snapshot</small></div></div>
+    <div class="section-title"><div><h2>Your next session</h2><small>Choose a goal and take the next step</small></div></div>
+    ${sessionGoalPanel()}${nextMissionPanel()}${activityPanel()}${recentProgressPanel()}${freshnessPanel()}
     <div class="bridge-invitation"><div><strong>Need a plan for your next session?</strong><small>Choose a goal, then build a question with the account details you want to share.</small></div><button type="button" class="bridge-entry" data-open-ai>Open AI Bridge</button></div>
     <div class="stats-grid">
       ${metric("Missions completed", formatQuantity(s.missionsCompleted), "Successful mission completions recorded by the profile.")}
@@ -200,7 +206,7 @@ function renderHome() {
     </div>
     <div class="panel"><h2>Explore your equipment</h2><p>${formatQuantity(equipmentHistory().filter(row => row.isEquipment || row.profileEvidence).length)} equipment records are available. Search and sort Equipment to find your most-used gear and compare recorded kills or affinity.</p><p class="muted">Usage and affinity are historical; they do not prove current ownership or mastery completion.</p></div>
     <div class="panel"><h2>Profile loadout</h2><p class="muted">Equipment returned in this snapshot, not a complete inventory.</p><div class="career-grid">${Object.entries(current).map(([k,v]) => `<div class="loadout-card">${itemImage(catalogIndex()[p.arsenal?.[k === "warframe" ? "warframes" : k]?.[0]?.ItemType])}<div><small>${escapeHtml(k.charAt(0).toUpperCase()+k.slice(1))}</small><b>${escapeHtml(v)}</b></div></div>`).join("")}</div></div>
-    ${nextMissionPanel()}${activityPanel()}`;
+    `;
   document.querySelectorAll("[data-open-chart]").forEach(button => button.onclick = () => $("nav").querySelector('[data-page="chart"]').click());
   bindLiveShortcut();
   $("home").insertAdjacentHTML("beforeend", `<details class="panel"><summary>More career stats & how to read them</summary><div class="career-grid">
@@ -256,7 +262,7 @@ function renderMissionResults(data) {
 }
 
 async function syncCatalog(force = false) {
-  if (catalogSyncing) return;
+  if (sampleMode || catalogSyncing) return;
   catalogSyncing = true;
   renderChart();
   try {
@@ -264,6 +270,7 @@ async function syncCatalog(force = false) {
     if (!response?.ok) throw new Error(response?.error || "Could not update planet and equipment data.");
     const next = await chrome.runtime.sendMessage({type:"GET_STATE"});
     if (!next?.ok) throw new Error(next?.error || "Could not read saved data.");
+    if (sampleMode) return;
     state = next.state || {};
   } catch (error) { showToast(error.message); }
   finally { catalogSyncing = false; renderAll(); }
@@ -332,6 +339,25 @@ function timeLeft(expiry) {
   const seconds = secondsLeft % 60;
   if (days) return `${days}d ${hours % 24}h`;
   return hours ? `${hours}h ${String(minutes).padStart(2,'0')}m` : `${minutes}m ${String(seconds).padStart(2,'0')}s`;
+}
+
+function sessionGoalPanel() {
+  return `<div class="panel"><h2>Your current goal</h2>${state.goal ? `<p><strong>${escapeHtml(state.goal.name)}</strong></p><p class="muted">${state.goal.sources?.length || 0} published sources found. Ownership and access are unconfirmed.</p><button type="button" data-plan-goal>Plan this farm</button>` : '<p>Choose a blueprint, part, or mod to work toward.</p>'}<button type="button" data-open-goals>${state.goal ? 'Review sources' : 'Choose a farming goal'}</button></div>`;
+}
+
+function recentProgressPanel() {
+  const snapshots = state.progressHistory?.snapshots || [];
+  if (snapshots.length < 2) return '<div class="panel"><h2>Recent progress</h2><p class="muted">Changes appear after two different profile snapshots. Missing fields are not treated as zero.</p></div>';
+  const before = snapshots.at(-2), after = snapshots.at(-1);
+  const previous = new Set(before.missions);
+  const added = after.missions.filter(tag=>!previous.has(tag));
+  const changes = Object.entries(after.standing).filter(([tag,value])=>Object.hasOwn(before.standing,tag) && value !== before.standing[tag]);
+  return `<div class="panel"><h2>Recent progress</h2><p class="muted">Last recorded change: ${escapeHtml(new Date(after.at).toLocaleString())}</p><div class="list">${added.map(tag=>item(catalogIndex()[tag]?.name || tag,'New mission completion recorded')).join('')}${changes.map(([tag,value])=>item(tag,`Standing change: ${value-before.standing[tag]>0 ? '+' : ''}${formatQuantity(value-before.standing[tag])}`)).join('')}${!added.length && !changes.length ? '<p class="muted">No comparable additions in the latest change.</p>' : ''}</div><p class="muted">Profile evidence only; standing changes do not represent spendable balances.</p></div>`;
+}
+
+function freshnessPanel() {
+  const stamp = value => value ? escapeHtml(new Date(value).toLocaleString()) : 'Not loaded';
+  return `<details class="panel"><summary>Data freshness</summary><div class="list">${item('Profile',stamp(state.profile?.lastSyncAt))}${item('Live events · PC',stamp(state.world?.lastSyncAt))}${item('Item catalog',stamp(state.items?.lastSyncAt))}${item('Farming tables',stamp(state.goal?.checkedAt))}</div></details>`;
 }
 
 function plausibleExpiry(expiry, maxHours = 21 * 24) {
@@ -510,10 +536,19 @@ function goalPanel() {
   const image = goal && Object.values(catalogIndex()).find(entry => entry.name?.toLocaleLowerCase() === goal.name.toLocaleLowerCase());
   const chart = TennoProgression.chart(profile()?.progression?.missions,catalogIndex());
   const recorded = new Set(chart.planets.flatMap(planet => planet.nodes.filter(node => node.completed).map(node => `${node.name}, ${planet.name}`.toLocaleLowerCase())));
+  const sources = (goal?.sources || []).filter(row=>!onlyRecordedSources || recorded.has(row.source.toLocaleLowerCase()));
+  const groups = [['mission','Mission rewards'],['relic','Relic rewards'],['enemy','Enemy drops'],['other','Other sources']];
+  const sourceList = groups.map(([kind,title])=>{
+    const rows = sources.filter(row=>(row.kind || 'other') === kind);
+    return rows.length ? `<h3>${title}</h3><div class="list">${rows.map(row=>item(row.source,`${row.detail}${row.chance == null ? '' : ` · ${row.chance}% listed chance`}${recorded.has(row.source.toLocaleLowerCase()) ? ' · completion recorded in profile' : ''}`)).join('')}</div>` : '';
+  }).join('');
   return `<div class="panel"><div class="section-title"><div><h2>Pinned farming goal</h2><small>WFCD public drop tables · your chosen item</small></div></div>
     <form id="goalForm" class="goal-form"><label for="goalName">Blueprint, part, or mod name</label><div><input id="goalName" type="search" list="goalSuggestions" maxlength="120" minlength="2" required placeholder="e.g. Vitality" value="${escapeHtml(goal?.name || '')}"><button type="submit">Find sources</button></div><datalist id="goalSuggestions"></datalist></form>
     ${goal ? `<div class="goal-title">${itemImage(image)}<div><b>${escapeHtml(goal.name)}</b><small>Checked ${escapeHtml(new Date(goal.checkedAt).toLocaleString())}${goal.partial ? ' · some tables unavailable' : ''}</small></div><button id="clearGoal" type="button" class="quiet-action">Clear</button></div>
-    <div class="list">${goal.sources?.length ? goal.sources.map(row => item(row.source,`${row.detail}${row.chance == null ? '' : ` · ${row.chance}% listed chance`}${recorded.has(row.source.toLocaleLowerCase()) ? ' · completion recorded in profile' : ''}`)).join('') : '<p class="muted">No exact match in the checked tables. Try a specific part or blueprint name.</p>'}</div>
+    <button id="planGoal" type="button">Plan this farm in AI Bridge</button>
+    <label><input id="recordedSources" type="checkbox" ${onlyRecordedSources ? 'checked' : ''}> Only sources with recorded mission completion</label>
+    ${sourceList || `<p class="muted">${onlyRecordedSources ? 'No sources match your recorded completions. Turn off the filter to see other possible sources.' : 'No exact match in the checked tables. Try a specific part or blueprint name.'}</p>`}
+    <p class="muted"><a href="https://www.warframe.com/droptables" target="_blank" rel="noopener noreferrer">Official drop tables</a> · <a href="https://github.com/WFCD/warframe-drop-data" target="_blank" rel="noopener noreferrer">WFCD source data</a> · Up to 20 matching sources shown.</p>
     <p class="muted">Drop chances describe the listed reward table. Enemy table chances are conditional on an item or mod drop. Your ownership and access are not checked.</p>` : '<p class="muted">Pin a goal to see published mission, enemy, or relic sources. This does not check ownership.</p>'}
     <p id="goalStatus" class="muted" role="status"></p></div>`;
 }
@@ -534,6 +569,7 @@ function bindGoalActions() {
   };
   $("goalForm").onsubmit = async event => {
     event.preventDefault();
+    if (sampleMode) { showToast('Exit sample mode to search and save your own goal.'); return; }
     const name = $("goalName").value.trim();
     if (name.length < 2) return;
     $("goalStatus").textContent = 'Checking WFCD drop tables…';
@@ -544,17 +580,24 @@ function bindGoalActions() {
       if (!result?.ok) throw new Error(result?.error || 'Drop lookup failed.');
       state.goal = result.goal;
       renderLive();
+      renderHome();
+      updatePromptPreview();
     } catch (error) {
       $("goalStatus").textContent = error.message;
       button.disabled = false;
     }
   };
   if ($("clearGoal")) $("clearGoal").onclick = async () => {
+    if (sampleMode) { showToast('Exit sample mode to manage your own goal.'); return; }
     const result = await chrome.runtime.sendMessage({type:'CLEAR_GOAL'});
     if (!result?.ok) { $("goalStatus").textContent = result?.error || 'Could not clear goal.'; return; }
     state.goal = null;
     renderLive();
+    renderHome();
+    updatePromptPreview();
   };
+  if ($("planGoal")) $("planGoal").onclick = planPinnedGoal;
+  if ($("recordedSources")) $("recordedSources").onchange = event => { onlyRecordedSources = event.target.checked; renderLive(); };
 }
 
 function renderLive() {
@@ -682,11 +725,78 @@ function composedPrompt() {
 }
 
 function updatePromptPreview() {
-  $("promptPreview").textContent = composedPrompt();
+  $("promptPreview").textContent = combinedRequest();
+  if (!restoringDraft) saveBridgeDraft();
+}
+
+function combinedRequest() {
+  return `${composedPrompt()}\n\nTENNO LINK DATA\n===============\n\n${JSON.stringify(exportPackage(),null,format === 'compact' ? 0 : 2)}`;
+}
+
+function saveBridgeDraft() {
+  if (sampleMode) return;
+  const draft = {template:prompt.id,fields:Object.fromEntries(promptFieldValues),notes:$("promptNotes").value,
+    format,includeProfile:$("includeProfile").checked,includeLive:$("includeLive").checked,
+    includeStats:$("includeStats").checked,includeGoal:$("includeGoal").checked,hideIdentity:$("hideIdentity").checked};
+  state.bridgeDraft = draft;
+  draftWrite = draftWrite.catch(()=>{}).then(async () => {
+    const result = await chrome.runtime.sendMessage({type:'SAVE_BRIDGE_DRAFT',draft});
+    if (!result?.ok) throw new Error(result?.error || 'Draft could not be saved.');
+  }).catch(error=>showToast(error.message));
+}
+
+function restoreBridgeDraft(draft) {
+  restoringDraft = true;
+  promptFieldValues.clear();
+  for (const [key,value] of Object.entries(draft?.fields || {})) {
+    if (typeof value === 'string') promptFieldValues.set(key,value.slice(0,160));
+  }
+  prompt = PROMPTS.find(entry=>entry.id === draft?.template) || PROMPTS[0];
+  $("promptSelect").value = prompt.id;
+  $("promptDesc").textContent = prompt.description || '';
+  $("promptNotes").value = typeof draft?.notes === 'string' ? draft.notes.slice(0,500) : '';
+  format = ['recommended','compact','raw'].includes(draft?.format) ? draft.format : 'recommended';
+  for (const id of ['includeProfile','includeLive','includeStats','includeGoal','hideIdentity']) $(id).checked = draft?.[id] !== false;
+  document.querySelectorAll('.format button').forEach(button=>button.classList.toggle('active',button.dataset.format === format));
+  renderPromptFields();
+  restoringDraft = false;
+}
+
+function planPinnedGoal() {
+  if (!state.goal) return;
+  prompt = PROMPTS.find(entry=>entry.id === 'farm');
+  const target = prompt.fields?.[0];
+  if (target) promptFieldValues.set(`${prompt.id}:${target.id}`,state.goal.name);
+  $("promptSelect").value = prompt.id;
+  $("promptDesc").textContent = prompt.description;
+  renderPromptFields();
+  $("nav").querySelector('[data-page="ai"]').click();
+}
+
+async function openAIProvider(provider) {
+  const origins = {chatgpt:'https://chatgpt.com/*',claude:'https://claude.ai/*',gemini:'https://gemini.google.com/*',grok:'https://grok.com/*'};
+  if (!Object.hasOwn(origins,provider)) return;
+  // Request during the user's click, before clipboard awaits lose the gesture.
+  let autofill = false;
+  try { autofill = await chrome.permissions.request({permissions:['scripting'],origins:[origins[provider]]}); }
+  catch { /* Copy + open still works when optional permissions are unavailable. */ }
+  $("providerStatus").textContent = 'Copying your selected request…';
+  const text = combinedRequest();
+  const copied = await copy(text,'AI REQUEST COPIED');
+  if (!copied && !autofill) {
+    $("providerStatus").textContent = 'Copy the fallback text below, then press this provider button again.';
+    return;
+  }
+  try {
+    const result = await chrome.runtime.sendMessage({type:'OPEN_AI_PROVIDER',provider,autofill,text:autofill ? text : undefined});
+    if (!result?.ok) throw new Error(result?.error || 'Could not open AI website.');
+    $("providerStatus").textContent = autofill ? 'Opening your AI and filling its input. Review the request there before sending.' : 'Website access was not granted. Request copied; paste it into your AI chat and send when ready.';
+  } catch (error) { $("providerStatus").textContent = `${error.message} Your request is still on the clipboard.`; }
 }
 
 function exportPackage() {
   const sections = {};
+  if (sampleMode) sections.sampleData = 'Synthetic preview account; not the user’s account.';
   const profileState = state?.profile;
 
   if ($("includeProfile").checked && profileState) {
@@ -729,6 +839,19 @@ function exportPackage() {
     delete sections.playerProfile.Stats;
     if (sections.playerProfile.arsenal) delete sections.playerProfile.arsenal.weaponStats;
   }
+  if ($("hideIdentity").checked && sections.playerProfile) {
+    const redact = value => {
+      if (!value || typeof value !== 'object') return;
+      for (const key of Object.keys(value)) {
+        if (/^(displayName|playerName|playerId|accountId|_id|guildId|clanId|guildName|clanName)$/i.test(key)) delete value[key];
+        else redact(value[key]);
+      }
+    };
+    redact(sections.playerProfile);
+  }
+  if ($("includeGoal").checked && state.goal) sections.farmingGoal = structuredClone(state.goal);
+  sections.dataFreshness = {profile:state.profile?.lastSyncAt || null,liveWorldState:state.world?.lastSyncAt || null,
+    itemCatalog:state.items?.lastSyncAt || null,farmingSources:state.goal?.checkedAt || null,platform:'PC world state'};
   return sections;
 }
 
@@ -738,6 +861,7 @@ async function copy(text, message) {
     if (!result?.ok) throw new Error(result?.error || "Clipboard write failed");
     $("copyFallback").hidden = true;
     showToast(message);
+    return true;
   } catch {
     const field = document.createElement("textarea");
     field.value = text;
@@ -752,13 +876,14 @@ async function copy(text, message) {
     if (copied) {
       $("copyFallback").hidden = true;
       showToast(message);
-      return;
+      return true;
     }
     $("copyFallbackText").value = text;
     $("copyFallback").hidden = false;
     $("copyFallbackText").focus();
     $("copyFallbackText").select();
     showToast("Clipboard blocked. Select the text below and press Ctrl+C.");
+    return false;
   }
 }
 
@@ -779,12 +904,15 @@ function renderRefreshedState() {
   const activeId = document.activeElement?.id;
   const goalDraft = $("goalName")?.value;
   renderAll();
+  restoringDraft = true;
+  updatePromptPreview();
+  restoringDraft = false;
   if (goalDraft != null && $("goalName")) $("goalName").value = goalDraft;
   if (activeId && $(activeId)) $(activeId).focus({preventScroll:true});
 }
 
 async function syncActive(force = false, resources = {profile:true,world:true}) {
-  if (activeSyncing || !interfaceVisible()) return;
+  if (sampleMode || activeSyncing || !interfaceVisible()) return;
   activeSyncing = true;
   $("syncAll").disabled = true;
   $("syncAll").classList.add("is-refreshing");
@@ -794,9 +922,12 @@ async function syncActive(force = false, resources = {profile:true,world:true}) 
     if (!response?.ok) throw new Error(response?.error || "Sync failed. Try again.");
     const next = await chrome.runtime.sendMessage({ type: "GET_STATE" });
     if (!next?.ok) throw new Error(next?.error || "Could not load saved data. Reopen the extension.");
+    if (sampleMode) return;
     const previousProfileSync = state.profile?.lastSyncAt;
     const previousWorldSync = state.world?.lastSyncAt;
+    const previousAccount = state.progressHistory?.accountKey;
     state = next.state || {};
+    if (previousAccount && previousAccount !== state.progressHistory?.accountKey) restoreBridgeDraft(state.bridgeDraft);
     if (previousProfileSync !== state.profile?.lastSyncAt || previousWorldSync !== state.world?.lastSyncAt) renderRefreshedState();
     else updateSyncMeta();
     const failures = Object.entries(response.result || {}).filter(([,v]) => v?.error);
@@ -813,7 +944,7 @@ async function syncActive(force = false, resources = {profile:true,world:true}) 
 }
 
 function autoRefreshIfDue() {
-  if (!interfaceVisible() || activeSyncing || catalogSyncing || Date.now() < nextAutoAttemptAt) return;
+  if (sampleMode || !interfaceVisible() || activeSyncing || catalogSyncing || Date.now() < nextAutoAttemptAt) return;
   const due = section => !section?.nextAllowedSyncAt || Date.now() >= section.nextAllowedSyncAt;
   const resources = {profile:due(state.profile),world:due(state.world)};
   if (resources.profile || resources.world) void syncActive(false,resources);
@@ -836,6 +967,7 @@ function updateSyncMeta() {
 }
 
 function renderAll() {
+  $("sampleNotice").hidden = !sampleMode;
   renderIdentity();
   renderHome();
   renderArsenal();
@@ -850,6 +982,20 @@ function setActivePage(page) {
 }
 
 $("home").addEventListener("click", event => {
+  if (event.target.closest?.('[data-try-sample]')) {
+    stateBeforeSample = state;
+    sampleMode = true;
+    const sample = {identity:{displayName:'Sample Tenno',masteryRank:4},summary:{missionsCompleted:80,timePlayedSec:36000},arsenal:{},progression:{missions:[],affiliations:[]}};
+    state = {items:state.items,profile:{normalized:sample,recommended:sample,compact:sample,raw:sample},goal:{name:'Vitality',checkedAt:Date.now(),sources:[{source:'Sample mission',detail:'Illustrative source only; not verified drop data',kind:'mission'}]}};
+    renderAll();
+    restoringDraft = true; updatePromptPreview(); restoringDraft = false;
+  }
+  if (event.target.closest?.('[data-exit-sample]')) {
+    sampleMode = false; state = stateBeforeSample || {}; stateBeforeSample = null;
+    restoreBridgeDraft(state.bridgeDraft); renderAll();
+  }
+  if (event.target.closest?.('[data-plan-goal]')) planPinnedGoal();
+  if (event.target.closest?.('[data-open-goals]')) $("nav").querySelector('[data-page="live"]').click();
   if (event.target.closest?.("[data-open-ai]")) $("nav").querySelector('[data-page="ai"]').click();
 });
 
@@ -878,10 +1024,15 @@ document.querySelectorAll(".format button").forEach(button => {
 
     button.classList.add("active");
     format = button.dataset.format;
+    updatePromptPreview();
   };
 });
 
 $("syncAll").onclick = () => syncActive(true);
+$("exitSample").onclick = () => {
+  sampleMode = false; state = stateBeforeSample || {}; stateBeforeSample = null;
+  restoreBridgeDraft(state.bridgeDraft); renderAll();
+};
 
 $("copyPrompt").onclick = () =>
   copy(composedPrompt(), "PROMPT COPIED");
@@ -896,23 +1047,14 @@ $("copyProfile").onclick = () =>
     "PROFILE PACKAGE COPIED"
   );
 
-$("copyBoth").onclick = () =>
-  copy(
-    `${composedPrompt()}
-
-TENNO LINK DATA
-===============
-
-${JSON.stringify(
-      exportPackage(),
-      null,
-      format === "compact" ? 0 : 2
-    )}`,
-    "AI PACKAGE COPIED"
-  );
+$("copyBoth").onclick = () => copy(combinedRequest(),"AI PACKAGE COPIED");
+for (const id of ['includeProfile','includeLive','includeStats','includeGoal','hideIdentity']) $(id).onchange = updatePromptPreview;
+$("clearDraft").onclick = () => { restoreBridgeDraft(null); saveBridgeDraft(); showToast('Draft cleared'); };
+document.querySelectorAll('[data-ai-provider]').forEach(button=>button.onclick = () => openAIProvider(button.dataset.aiProvider));
 
 (async () => {
   const openedAt = Date.now();
+  restoringDraft = true;
   populatePrompts();
 
   const response = await chrome.runtime.sendMessage({
@@ -921,10 +1063,14 @@ ${JSON.stringify(
   if (!response?.ok) throw new Error(response?.error || "Could not read saved profile. Reopen Tenno Link.");
 
   state = response.state || {};
+  restoreBridgeDraft(state.bridgeDraft);
   const quickOpen = returningOpen || Boolean(state.profile?.lastSyncAt);
   if (quickOpen) document.documentElement.classList.add('returning-open');
   setActivePage("home");
   renderAll();
+  restoringDraft = true;
+  updatePromptPreview();
+  restoringDraft = false;
   const countdownTimer = setInterval(() => { if (interfaceVisible()) { updateCountdowns(); updateSyncMeta(); } },1000);
   const refreshTimer = setInterval(autoRefreshIfDue,15000);
   document.addEventListener('visibilitychange',() => { if (interfaceVisible()) { updateCountdowns(); autoRefreshIfDue(); } });

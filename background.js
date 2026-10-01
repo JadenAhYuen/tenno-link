@@ -1,4 +1,4 @@
-importScripts("catalog.js", "inventory.js", "farming.js");
+importScripts("catalog.js", "inventory.js", "farming.js", "ai-handoff.js");
 
 const PROFILE_ENDPOINT = "https://api.warframe.com/cdn/getProfileViewingData.php";
 const WORLDSTATE_ENDPOINT = "https://api.warframestat.us/pc?language=en";
@@ -9,6 +9,46 @@ const DROP_DATA_BASE = "https://raw.githubusercontent.com/WFCD/warframe-drop-dat
 const PROFILE_MIN_REFRESH_MS = 5 * 60 * 1000;
 const WORLDSTATE_MIN_REFRESH_MS = 60 * 1000;
 const ITEMS_REFRESH_MS = 24 * 60 * 60 * 1000;
+const AI_PROVIDERS = {chatgpt:'https://chatgpt.com/',claude:'https://claude.ai/new',gemini:'https://gemini.google.com/app',grok:'https://grok.com/'};
+const deliveringTabs = new Set();
+
+async function deliverAIRequest(tabId) {
+  if (deliveringTabs.has(tabId)) return;
+  deliveringTabs.add(tabId);
+  try { await deliverAIRequestOnce(tabId); }
+  finally { deliveringTabs.delete(tabId); }
+}
+
+async function deliverAIRequestOnce(tabId) {
+  const key = `aiHandoff:${tabId}`;
+  const pending = (await chrome.storage.session.get(key))[key];
+  if (!pending) return;
+  // Claim once before injection, so repeated tab updates cannot insert twice.
+  await chrome.storage.session.remove(key);
+  if (Date.now()-pending.createdAt > 120000) return;
+  let result;
+  try {
+    const results = await chrome.scripting.executeScript({target:{tabId},func:fillAIInput,
+      // Gemini's Quill instance is in the page context; Claude keeps its working path.
+      world:pending.provider === 'gemini' ? 'MAIN' : 'ISOLATED',
+      args:[pending.provider,pending.text,new URL(AI_PROVIDERS[pending.provider]).origin]});
+    result = results[0]?.result || {ok:false,error:'Automatic fill did not complete. Paste the copied request.'};
+  } catch {
+    result = {ok:false,error:'Automatic fill could not start. Check website access for Tenno Link, or paste the copied request.'};
+  }
+  try {
+    await chrome.scripting.executeScript({target:{tabId},func:(message)=>{
+      const notice = document.createElement('div');
+      notice.setAttribute('role','status');
+      notice.textContent = message;
+      Object.assign(notice.style,{position:'fixed',bottom:'20px',right:'20px',maxWidth:'380px',padding:'16px',background:'#19252b',color:'#eff5f6',border:'1px solid #7cdacf',borderRadius:'12px',zIndex:'2147483647',font:'14px/1.5 system-ui'});
+      const close = document.createElement('button'); close.textContent = 'Dismiss'; close.onclick = () => notice.remove();
+      notice.appendChild(document.createElement('br')); notice.appendChild(close); document.body.appendChild(notice);
+    },args:[result.ok ? 'Tenno Link filled your request. Review it, then press Send when ready.' : `Tenno Link: ${result.error}`]});
+  } catch { /* The tab may have closed or website access may have been removed. */ }
+}
+chrome.tabs?.onUpdated?.addListener((tabId,change)=>{ if (change.status === 'complete') deliverAIRequest(tabId).catch(()=>{}); });
+chrome.tabs?.onRemoved?.addListener(tabId=>{ chrome.storage.session.remove(`aiHandoff:${tabId}`).catch(()=>{}); });
 
 async function getGid() {
   for (const url of ["https://www.warframe.com/", "https://warframe.com/"]) {
@@ -266,7 +306,12 @@ async function syncProfile(force = false) {
     nextAllowedSyncAt: now + refreshMs
   };
 
-  await setStore({ profile: profileState });
+  const digest = await crypto.subtle.digest('SHA-256',new TextEncoder().encode(gid));
+  const accountKey = Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,'0')).join('');
+  const accountChanged = state.progressHistory?.accountKey && state.progressHistory.accountKey !== accountKey;
+  const rawResult = raw.Results?.[0] || {};
+  await setStore({profile:profileState,progressHistory:recordProgress(state.progressHistory,normalized,accountKey,now,{missions:Object.hasOwn(rawResult,'Missions'),standing:Object.hasOwn(rawResult,'Affiliations')}),
+    ...(accountChanged ? {goal:null,bridgeDraft:null} : {})});
 
   return { cached: false, profile: profileState };
 }
@@ -397,6 +442,16 @@ async function ensureClipboardDocument() {
   await creatingClipboardDocument;
 }
 
+function recordProgress(history,profile,accountKey,at,reported = {missions:true,standing:true}) {
+  const missions = (profile.progression?.missions || []).filter(row=>Number(row.Completes)>0).map(row=>row.Tag).filter(tag=>typeof tag === 'string');
+  const standing = Object.fromEntries((profile.progression?.affiliations || []).filter(row=>typeof row.Tag === 'string' && typeof row.Standing === 'number' && Number.isFinite(row.Standing)).map(row=>[row.Tag,row.Standing]));
+  const snapshots = history?.accountKey === accountKey && Array.isArray(history.snapshots) ? history.snapshots.slice(-29) : [];
+  const last = snapshots.at(-1);
+  const snapshot = {at,missions:[...new Set([...(last?.missions || []),...(reported.missions ? missions : [])])].sort(),standing:{...(last?.standing || {}),...(reported.standing ? standing : {})}};
+  if (last && JSON.stringify(last.missions) === JSON.stringify(snapshot.missions) && JSON.stringify(last.standing) === JSON.stringify(snapshot.standing)) return {accountKey,snapshots};
+  return {accountKey,snapshots:[...snapshots,snapshot]};
+}
+
 function copyTextOffscreen(text) {
   const request = clipboardQueue.catch(() => {}).then(async () => {
     await ensureClipboardDocument();
@@ -436,6 +491,32 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (message?.type === "CHECK_ACCOUNT") {
         const gid = await getGid();
         sendResponse({ ok: true, gidPreview: gid.slice(0, 6) + "…" });
+        return;
+      }
+
+      if (message?.type === "SAVE_BRIDGE_DRAFT") {
+        const draft = message.draft;
+        if (draft !== null && (!draft || typeof draft !== 'object' || JSON.stringify(draft).length > 20000)) throw new Error('Invalid AI Bridge draft.');
+        await setStore({bridgeDraft:draft});
+        sendResponse({ok:true});
+        return;
+      }
+
+      if (message?.type === "OPEN_AI_PROVIDER") {
+        const url = Object.hasOwn(AI_PROVIDERS,message.provider) ? AI_PROVIDERS[message.provider] : null;
+        if (!url) throw new Error('Unknown AI provider.');
+        if (message.autofill) {
+          if (typeof message.text !== 'string' || message.text.length > 2000000) throw new Error('AI request is too large. Use the clipboard copy instead.');
+          const allowed = await chrome.permissions.contains({permissions:['scripting'],origins:[`${new URL(url).origin}/*`]});
+          if (!allowed) throw new Error('Website access is not enabled. Use copy + open instead.');
+        }
+        const tab = await chrome.tabs.create({url});
+        if (message.autofill) {
+          await chrome.storage.session.set({[`aiHandoff:${tab.id}`]:{provider:message.provider,text:message.text,createdAt:Date.now()}});
+          const current = await chrome.tabs.get(tab.id);
+          if (current.status === 'complete') deliverAIRequest(tab.id).catch(()=>{});
+        }
+        sendResponse({ok:true});
         return;
       }
 

@@ -118,7 +118,13 @@ setImmediate(()=>{(async()=>{
   assert.ok(tailored.includes('https://www.warframe.com/en/patch-notes'));
   assert.ok(tailored.includes('https://wiki.warframe.com/'));
   assert.ok(tailored.includes('If you cannot browse or verify a claim'));
-  assert.equal(element('promptPreview').textContent,tailored);
+  assert.equal(element('promptPreview').textContent,vm.runInContext('combinedRequest()',context));
+  assert.ok(element('promptPreview').textContent.includes('TENNO LINK DATA'));
+  await vm.runInContext('draftWrite',context);
+  vm.runInContext(`state.profile.recommended.identity={displayName:'Private Tenno',masteryRank:4};`,context);
+  assert.equal(vm.runInContext('exportPackage().playerProfile.identity.displayName',context),undefined);
+  assert.equal(vm.runInContext('exportPackage().playerProfile.identity.masteryRank',context),4);
+  assert.equal(vm.runInContext('state.profile.recommended.identity.displayName',context),'Private Tenno');
   const calls=[];
   context.chrome.runtime.sendMessage=async message=>{
     calls.push(message);

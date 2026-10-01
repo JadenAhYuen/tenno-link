@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- Fix ChatGPT autofill for the newer mobile composer; wait for composer hydration and update Gemini through its page-owned Quill editor.
+
+- Lead Overview with a pinned goal, next missions, live activities, and recent recorded progress.
+- Save AI Bridge drafts locally and pass pinned farming goals directly into the planner.
+- Preview the complete request, hide account identity by default, and show source freshness.
+- Open ChatGPT, Claude, Gemini, or Grok and attempt to fill a new chat input after optional website permission; sending remains manual, with a clipboard fallback.
+- Group farming sources by type and filter sources with recorded mission completion.
+- Add a synthetic sample mode and retain up to 30 compact progress snapshots per linked account.
+
 ## 1.3.0 Preview
 
 - Balanced the header with a three-column profile card for name, sync status, and Mastery Rank.

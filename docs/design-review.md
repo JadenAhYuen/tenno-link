@@ -1,5 +1,61 @@
 # Player dashboard design review
 
+## October goal planning and AI handoff
+
+Overview now starts with the pinned farming goal, suggested missions, live activities,
+and recent recorded progress. Farming sources are grouped by type and can be filtered
+to missions with recorded completion. The planner receives the chosen goal and its
+published sources directly. A first-use checklist and synthetic sample mode provide
+a way to explore without linking an account.
+
+AI Bridge saves drafts locally, previews the full selected data package, hides known
+account identity fields by default, and provides a Clear draft action. Separate data
+timestamps describe profile, live events, item catalog, and farming-source freshness.
+Compact progress snapshots retain completion and standing evidence, preserve missing
+fields, and reset on a linked-account change.
+
+ChatGPT, Claude, Gemini, and Grok appear as logo-and-name cards. SVG marks are bundled
+locally from Lobe Icons with their MIT license, avoiding runtime image requests to AI
+providers. Four cards share a desktop row and become two columns on narrow screens.
+Keyboard focus, increased contrast, and reduced-motion rules apply.
+
+Provider buttons request optional access to the selected website, copy the prepared
+request as a fallback, open a new provider tab, and attempt to fill its visible input.
+They preserve existing input and never submit the request. Permission denial falls
+back to copy + open; expired queued requests are discarded. This is website automation,
+not an official chat-site integration.
+
+Validation: ten Node test files pass, JavaScript syntax checks and git diff whitespace
+checks pass, and local Chrome browser checks cover 760px/320px layouts, logo loading,
+draft restoration, export selection, sample mode, all four provider input fixtures,
+plain-text insertion, and existing-draft preservation. The handoff tests cover provider
+allowlists, permission gating, duplicate load events, request expiry, and payload cleanup.
+Desktop and narrow provider-card screenshots were visually inspected.
+
+Limits: signed-in production provider interfaces, installed-extension permission
+prompts, and authenticated account switching still need live checks. Provider website
+changes can require selector updates; the clipboard fallback remains available.
+
+### ChatGPT and Gemini autofill correction
+
+Live browser inspection found ChatGPT's anonymous composer uses
+`mobile-composer-prompt`, which the initial `prompt-textarea` selector missed.
+The integration now supports both and ignores hidden or inactive editors. It waits
+after focus and retries when hydration replaces the composer, then verifies the
+currently attached input rather than a stale node.
+
+Gemini's live input exposes a page-owned Quill editor. Its fill now runs in the main
+page context and updates that editor with a user-origin text change; a browser-editing
+fallback remains for variants without the editor handle. Claude keeps its existing
+isolated-context path. Injection failures now attempt to show an explanatory status
+instead of silently leaving the page empty.
+
+Direct live Chrome checks inserted synthetic drafts into ChatGPT and Gemini without
+submitting them. An anonymous headless ChatGPT check was blocked by a challenge page.
+Local regression checks cover the new textarea, its input event, hidden legacy inputs,
+focus-triggered replacement, Gemini's editor change, and its separate clipboard helper.
+Signed-in account variants and the installed extension still require user validation.
+
 ## Summary
 
 Tenno Link is a Chromium extension for players ranging from early progression to veteran accounts. Its job is to make a profile snapshot understandable without requiring an AI export. The revised design uses Apple's readability, hierarchy and accessibility principles, translated to web controls rather than native macOS conventions. Rating: **Good**, with live-extension validation still outstanding.
