@@ -51,6 +51,7 @@
       <button data-page="progress">Standing</button>
       <button data-page="live">Live</button>
     </nav>
+    <div id="sampleNotice" class="panel" hidden><strong>Sample mode · synthetic account data</strong><p class="muted">This preview does not reflect your account or current farming sources.</p><button id="exitSample" type="button">Exit sample mode</button></div>
     <section id="home" class="page active" aria-label="Overview"></section>
     <section id="arsenal" class="page" aria-label="Equipment"></section>
     <section id="chart" class="page" aria-label="Star Chart"></section>
@@ -73,7 +74,7 @@
             <p>Choose a plan for what you want to do in Warframe. Add a specific item, goal, amount, or time limit so the advice fits your session. The description below the menu explains each plan.</p>
             <p><strong>Include</strong> chooses what account and live game information to attach. <strong>Recommended</strong> keeps useful context readable; <strong>Compact</strong> shortens the data; <strong>Raw</strong> includes more detail for players who want to inspect it.</p>
             <p><strong>Copy prompt + profile</strong> is the usual choice: paste it into an AI assistant of your choice. <strong>Copy prompt</strong> omits account data. <strong>Copy profile</strong> shares only the selected data. Preview before copying, especially if you plan to share it.</p>
-            <p>Tenno Link prepares text locally and does not contact an AI service. The receiving assistant should check current patch notes and sources, but its answer can still be wrong. Confirm builds, drops, and mission access in game.</p>
+            <p>Tenno Link prepares text locally. Provider buttons open an external AI website and can fill the selected request there; review it before pressing Send. The receiving assistant should check current patch notes and sources, but its answer can still be wrong. Confirm builds, drops, and mission access in game.</p>
           </div>
         </details>
 
@@ -87,7 +88,8 @@
             <div id="promptFields" class="prompt-fields"></div>
             <label class="label" for="promptNotes">ANY OTHER PREFERENCES</label>
             <textarea id="promptNotes" rows="2" maxlength="500" placeholder="e.g. solo play, avoid spoilers, prefer short missions"></textarea>
-            <p class="muted">Your details stay in this open window until you copy them.</p>
+            <p class="muted">Your draft is saved locally for your next visit.</p>
+            <button id="clearDraft" type="button" class="quiet-action">Clear draft</button>
             <div class="option-panel">
             <div class="label">EXPORT MODE</div>
             <div class="format">
@@ -104,13 +106,27 @@
               <label><input type="checkbox" id="includeProfile" checked> <span>Profile</span></label>
               <label><input type="checkbox" id="includeLive" checked> <span>Live world state</span></label>
               <label><input type="checkbox" id="includeStats" checked> <span>Career stats</span></label>
+              <label><input type="checkbox" id="includeGoal" checked> <span>Pinned farming goal</span></label>
+              <label><input type="checkbox" id="hideIdentity" checked> <span>Hide account identity</span></label>
             </div>
           </div>
         </div>
 
         <p class="ai-freshness">Every prompt asks the AI to check <a href="https://www.warframe.com/en/patch-notes" target="_blank" rel="noopener noreferrer">patch notes</a>, the <a href="https://wiki.warframe.com/" target="_blank" rel="noopener noreferrer">Warframe Wiki</a>, and <a href="https://www.warframe.com/droptables" target="_blank" rel="noopener noreferrer">official drop tables</a> when relevant. If it cannot browse, it should label advice unverified.</p>
 
-        <details class="prompt-preview"><summary>Preview the prompt</summary><pre id="promptPreview"></pre></details>
+        <details class="prompt-preview"><summary>Preview prompt + selected data</summary><pre id="promptPreview"></pre></details>
+
+        <div class="option-panel">
+          <div class="label">CONTINUE IN YOUR AI</div>
+          <p class="muted">Open your AI and fill its input with the previewed request. Review it there and press Send yourself. Allow access to the selected website when prompted; sign-in may be required. A clipboard copy is kept as a fallback.</p>
+          <div class="provider-buttons" role="group" aria-label="Choose an AI to open and fill">
+            <button type="button" class="provider-card" data-ai-provider="chatgpt" title="Open ChatGPT and fill your request"><span class="provider-logo"><img src="assets/ai/chatgpt.svg" alt="" width="26" height="26"></span><span>ChatGPT</span></button>
+            <button type="button" class="provider-card" data-ai-provider="claude" title="Open Claude and fill your request"><span class="provider-logo"><img src="assets/ai/claude.svg" alt="" width="26" height="26"></span><span>Claude</span></button>
+            <button type="button" class="provider-card" data-ai-provider="gemini" title="Open Gemini and fill your request"><span class="provider-logo"><img src="assets/ai/gemini.svg" alt="" width="26" height="26"></span><span>Gemini</span></button>
+            <button type="button" class="provider-card" data-ai-provider="grok" title="Open Grok and fill your request"><span class="provider-logo"><img src="assets/ai/grok.svg" alt="" width="26" height="26"></span><span>Grok</span></button>
+          </div>
+          <p id="providerStatus" class="muted" role="status"></p>
+        </div>
 
         <div class="copy-grid">
           <button id="copyBoth" class="gold">

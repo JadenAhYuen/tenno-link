@@ -243,3 +243,13 @@ footer { display:flex; align-items:center; justify-content:space-between; gap:12
 @media(prefers-contrast:more),(forced-colors:active) { .primary-nav button[data-page="ai"]:not(.active)::before { display:none; } }
 @media(prefers-contrast:more) { :root { --panel:rgba(8,18,28,.97); --line:#bbd1d3; --muted:#d5e0e2; } .panel,.stat { backdrop-filter:none; -webkit-backdrop-filter:none; } }
 @media(forced-colors:active) { .primary-nav button.active { outline:2px solid Highlight; } .panel,.stat { backdrop-filter:none; -webkit-backdrop-filter:none; } }
+.provider-buttons { grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-top:14px; }
+.provider-buttons .provider-card { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; min-height:108px; padding:16px 8px; border:1px solid rgba(181,211,216,.23); border-radius:16px; background:linear-gradient(150deg,rgba(181,211,216,.09),rgba(12,27,37,.6)); color:var(--text); font-size:14px; font-weight:600; letter-spacing:.01em; box-shadow:inset 0 1px 0 rgba(255,255,255,.08); transition:background .18s,border-color .18s,transform .18s; }
+.provider-logo { display:grid; place-items:center; width:44px; height:44px; border-radius:13px; background:#f6f7fa; box-shadow:0 3px 12px rgba(0,0,0,.16); }
+.provider-logo img { display:block; width:26px; height:26px; object-fit:contain; }
+.provider-buttons .provider-card:hover { transform:translateY(-2px); border-color:var(--accent); background:linear-gradient(150deg,rgba(124,218,207,.16),rgba(12,27,37,.7)); }
+.provider-buttons .provider-card:active { transform:translateY(0); }
+.provider-buttons .provider-card:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+@media (max-width:520px) { .provider-buttons { grid-template-columns:repeat(2,minmax(0,1fr)); } .provider-buttons .provider-card { flex-direction:row; min-height:72px; padding:12px; gap:10px; } .provider-logo { width:36px; height:36px; border-radius:11px; } .provider-logo img { width:24px; height:24px; } }
+@media (prefers-reduced-motion:reduce) { .provider-buttons .provider-card { transition:none; } .provider-buttons .provider-card:hover { transform:none; } }
+@media (prefers-contrast:more) { .provider-buttons .provider-card { background:#19252b; border-color:var(--text); } }

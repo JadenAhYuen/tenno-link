@@ -38,7 +38,13 @@ Every AI Bridge prompt asks the receiving assistant to check recent [official pa
 
 <p align="center"><img src="docs/assets/screenshots/star-chart.gif" alt="Star Chart search and unplayed mission filter" width="680"></p>
 
-AI Bridge prepares text locally; Tenno Link does not require an AI API key or send your export to an AI service. Nothing is copied until you press a copy button. The previews above use synthetic sample data.
+[Watch the Star Chart search and filter in full-colour WebM](docs/assets/screenshots/mission-filter-banner.webm).
+
+AI Bridge prepares text locally and requires no AI API key. Copy actions place the selected text on your clipboard; provider buttons can also insert it into the chosen AI website. The previews above use synthetic sample data.
+
+AI Bridge also offers logo buttons for **ChatGPT**, **Claude**, **Gemini**, and **Grok**. Allow optional access to the provider you choose, and Tenno Link attempts to fill its new-chat input with the previewed request. You review it and press Send yourself. Existing input is preserved; signing in or a changed website interface may require pasting the clipboard copy instead. Entering text into an AI website is subject to that provider's privacy policy.
+
+Your AI Bridge draft is saved locally between visits, with a **Clear draft** action. The preview includes the complete selected data package, and account identity is hidden by default. A pinned farming goal can pass directly into Farming Planner with its published sources. Overview shows your goal, next missions, activity, data freshness, and changes between recorded profile snapshots. First-time players can use **Try sample data** without signing in.
 
 ## Install
 
@@ -64,5 +70,8 @@ Thanks to [Warframe Community Developers (WFCD)](https://github.com/WFCD) for th
 ## More information
 
 [Tutorial](docs/TUTORIAL.md) · [Changelog](CHANGELOG.md) · [License](LICENSE) · [Contributing](CONTRIBUTING.md)
+
+Source is available for noncommercial use. Selling Tenno Link, a modified copy,
+or access to either requires written permission from the relevant copyright holders.
 
 Copyright © 2026 Jaden Ah Yuen and Tenno Link contributors.

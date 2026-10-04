@@ -176,3 +176,8 @@ footer { color:var(--muted); font-size:12px; padding:12px 0 0; overflow-wrap:any
 .mission-facts .item b,.gear-facts .item b { color:var(--muted); font-size:12px; }
 .equipment-description { padding:10px 0; }
 .planet-row > summary > span:last-child { text-align:right; }
+/* Goal planning and provider handoff controls share the existing responsive layout. */
+.provider-buttons { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.provider-buttons button { white-space:normal; }
+.prompt-preview pre { max-height:360px; overflow:auto; white-space:pre-wrap; overflow-wrap:anywhere; }
+@media (max-width:420px) { .provider-buttons { grid-template-columns:1fr; } }

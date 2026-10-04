@@ -2,10 +2,10 @@ param([switch]$Zip)
 
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $output = Join-Path $PSScriptRoot 'tenno-link'
-$files = @('manifest.json', 'background.js', 'content.js', 'offscreen.html', 'offscreen.js', 'popup.html', 'popup.js', 'popup.css', 'visual.css', 'overlay-mode.css', 'prompts.js', 'catalog.js', 'progression.js', 'inventory.js', 'insights.js', 'farming.js')
-$assets = @('icon-16.png', 'icon-32.png', 'icon-48.png', 'icon-128.png', 'tenno-link-logo-animated.svg')
+$files = @('manifest.json', 'background.js', 'ai-handoff.js', 'content.js', 'offscreen.html', 'offscreen.js', 'popup.html', 'popup.js', 'popup.css', 'visual.css', 'overlay-mode.css', 'prompts.js', 'catalog.js', 'progression.js', 'inventory.js', 'insights.js', 'farming.js')
+$assets = @('icon-16.png', 'icon-32.png', 'icon-48.png', 'icon-128.png', 'tenno-link-logo-animated.svg', 'ai/chatgpt.svg', 'ai/claude.svg', 'ai/gemini.svg', 'ai/grok.svg', 'ai/LICENSE', 'ai/README.md')
 
-New-Item -ItemType Directory -Force -Path $output, (Join-Path $output 'assets') | Out-Null
+New-Item -ItemType Directory -Force -Path $output, (Join-Path $output 'assets'), (Join-Path $output 'assets/ai') | Out-Null
 foreach ($file in $files) { Copy-Item -LiteralPath (Join-Path $repo $file) -Destination (Join-Path $output $file) -Force }
 foreach ($asset in $assets) { Copy-Item -LiteralPath (Join-Path $repo "assets/$asset") -Destination (Join-Path $output "assets/$asset") -Force }
 
