@@ -14,6 +14,8 @@ const context = vm.createContext({console,URL,importScripts(){},chrome:{
   storage:{session:{get:async key=>({[key]:session[key]}),set:async values=>Object.assign(session,values),remove:async key=>{delete session[key];}}}
 }});
 vm.runInContext(fs.readFileSync('ai-handoff.js','utf8'),context);
+vm.runInContext(fs.readFileSync('cycles.js','utf8'),context);
+vm.runInContext(fs.readFileSync('live-timers.js','utf8'),context);
 vm.runInContext(fs.readFileSync('background.js','utf8'),context);
 const message = input => new Promise(resolve=>listener(input,{},resolve));
 (async()=>{

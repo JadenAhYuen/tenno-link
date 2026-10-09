@@ -25,3 +25,12 @@ if (process.argv[2]) {
  }
 }
 console.log('progression.test.cjs: completion evidence, duplicate tiers, unknown nodes and junctions passed');
+
+const accessIndex={Landscape:{category:'nodes',name:'Orb Vallis',systemName:'Venus'},Ordinary:{category:'nodes',name:'Venus mission',systemName:'Venus'}};
+assert.equal(TennoProgression.notificationAccess('vallisCycle',[{Tag:'Landscape',Completes:1}],accessIndex,true).warn,false);
+assert.equal(TennoProgression.notificationAccess('vallisCycle',[{Tag:'Ordinary',Completes:3}],accessIndex,true).warn,true);
+assert.equal(TennoProgression.notificationAccess('vallisCycle',[{Tag:'Landscape',Completes:0}],accessIndex,true).warn,true);
+assert.equal(TennoProgression.notificationAccess('vallisCycle',[{Tag:'Landscape',Completes:1}],accessIndex,false).warn,true);
+assert.equal(TennoProgression.notificationAccess('archonReset',[],{},true).warn,true);
+assert.match(TennoProgression.notificationAccess('archonReset',[],{},true).detail,/Veilbreaker/);
+assert.equal(TennoProgression.notificationAccess('vallisCycle',[],{},false).label,'Profile needed');

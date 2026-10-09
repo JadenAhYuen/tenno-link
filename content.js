@@ -5,6 +5,8 @@
   const popupUrl = chrome.runtime?.getURL?.('popup.html');
   const logoUrl = chrome.runtime?.getURL?.('assets/tenno-link-logo-animated.svg');
   if (!popupUrl || !logoUrl) return;
+  // Ensure background monitoring survives a lost alarm without loading the dashboard.
+  chrome.runtime.sendMessage?.({type:'ENSURE_CYCLE_MONITOR'}).catch(()=>{});
 
   const host = document.createElement('div');
   host.id = 'tenno-link-overlay-host';

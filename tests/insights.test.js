@@ -17,6 +17,8 @@ assert.equal(equipment(rows, {}, '/a/').length, 1);
 assert.equal(rows[0].name, undefined, 'Source data stays unchanged');
 const context = vm.createContext({chrome:{runtime:{onMessage:{addListener(){}}}},importScripts(){}});
 vm.runInContext(fs.readFileSync('inventory.js','utf8'), context);
+vm.runInContext(fs.readFileSync('cycles.js','utf8'),context);
+vm.runInContext(fs.readFileSync('live-timers.js','utf8'),context);
 vm.runInContext(fs.readFileSync('background.js','utf8'), context);
 for (const filename of process.argv.slice(2)) {
   context.input = JSON.parse(fs.readFileSync(filename,'utf8').replace(/^\uFEFF/,''));

@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Add six opt-in Live activity voice alerts: Baro arrival/departure warning, Sortie, Archon Hunt, Steel Path incursions and Nightwave weekly challenges.
+
+- Add Settings with background cycle notifications, optional two-second chime and 13 offline cephalon announcements.
+- Support the floating companion on the Warframe Wiki.
+- Consolidate legacy Earth alerts into Cetus / Plains of Eidolon after checking Update 38.5; preserve saved selections.
+- Validate public cycle phases/timestamps, suppress duplicate and stale alerts, and log recent triggers locally.
+- Make disabled audio fully silent and remove unused TTS permission.
+
+
+## Unreleased
+
+- Add six opt-in Live activity voice alerts: Baro arrival/departure warning, Sortie, Archon Hunt, Steel Path incursions and Nightwave weekly challenges.
+
 - Fix ChatGPT autofill for the newer mobile composer; wait for composer hydration and update Gemini through its page-owned Quill editor.
 
 - Lead Overview with a pinned goal, next missions, live activities, and recent recorded progress.
@@ -35,3 +48,12 @@
 - Added Overview, Progression, Arsenal, Resources and Live pages
 - Added selective AI export
 - Added Tenno Link icon set and branding
+
+- Notification settings now pair landscape hubs with their worlds and show profile mission completion evidence. Unconfirmed access requires an explicit Enable anyway action; missing history is never treated as proof that content is locked. Archon prerequisite reference: https://www.warframe.com/en/patch-notes/pc/32-0-0
+
+- Added a dedicated Farming tab with catalog-wide item suggestions, crafting recipes, ingredient lookups and acquisition links. Expanded source lookup to bounty, special reward, resource and syndicate tables; retained partial-data fallback and pinned goal sharing with AI Bridge.
+
+- Fixed farming lookups crashing on the live feed's keyed syndicate reward object, including Koumei Blueprint. Added regression coverage from public reward data and guarded optional array sections.
+- Added full phase lengths, next phases, world farming tips, and timing/reward guidance for all Live categories, with guide links.
+
+- Removed automatic player-profile polling and startup requests. Manual refresh now shares a durable minimum interval, deduplicates concurrent requests, respects Retry-After and pauses for at least one hour after HTTP 403/429. Added local status diagnostics and regression checks without issuing real profile requests.

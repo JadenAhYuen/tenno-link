@@ -1,0 +1,67 @@
+[
+  {
+    "key": "cetusCycle",
+    "phase": "day",
+    "text": "Operator. Cycle changed at Plains of Eidolon on Earth to day. Monitoring resumed."
+  },
+  {
+    "key": "cetusCycle",
+    "phase": "night",
+    "text": "Operator. Cycle changed at Plains of Eidolon on Earth to night. Monitoring resumed."
+  },
+  {
+    "key": "vallisCycle",
+    "phase": "warm",
+    "text": "Operator. Cycle changed at Orb Vallis on Venus to warm. Monitoring resumed."
+  },
+  {
+    "key": "vallisCycle",
+    "phase": "cold",
+    "text": "Operator. Cycle changed at Orb Vallis on Venus to cold. Monitoring resumed."
+  },
+  {
+    "key": "cambionCycle",
+    "phase": "fass",
+    "text": "Operator. Cycle changed at Cambion Drift on Deimos to fass. Monitoring resumed."
+  },
+  {
+    "key": "cambionCycle",
+    "phase": "vome",
+    "text": "Operator. Cycle changed at Cambion Drift on Deimos to vome. Monitoring resumed."
+  },
+  {
+    "key": "duviriCycle",
+    "phase": "anger",
+    "text": "Operator. Cycle changed at Duviri to anger. Monitoring resumed."
+  },
+  {
+    "key": "duviriCycle",
+    "phase": "envy",
+    "text": "Operator. Cycle changed at Duviri to envy. Monitoring resumed."
+  },
+  {
+    "key": "duviriCycle",
+    "phase": "fear",
+    "text": "Operator. Cycle changed at Duviri to fear. Monitoring resumed."
+  },
+  {
+    "key": "duviriCycle",
+    "phase": "sorrow",
+    "text": "Operator. Cycle changed at Duviri to sorrow. Monitoring resumed."
+  },
+  {
+    "key": "duviriCycle",
+    "phase": "joy",
+    "text": "Operator. Cycle changed at Duviri to joy. Monitoring resumed."
+  },
+  {
+    "key": "zarimanCycle",
+    "phase": "grineer",
+    "text": "Operator. Cycle changed at Zariman to grineer. Monitoring resumed."
+  },
+  {
+    "key": "zarimanCycle",
+    "phase": "corpus",
+    "text": "Operator. Cycle changed at Zariman to corpus. Monitoring resumed."
+  }
+]

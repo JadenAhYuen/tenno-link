@@ -41,3 +41,8 @@ if(process.argv[2]) {
   console.log(`Live catalog indexed: ${Object.keys(index).length} items/components`);
 }
 console.log('catalog.test.cjs: metadata precedence, profile joins and sample coverage passed');
+
+const farmingCatalog=build([{name:'Test Gun',uniqueName:'/Gun',category:'Primary',buildTime:3600,components:[{uniqueName:'/Recipes/TestBlueprint',itemCount:1},{uniqueName:'/Material',itemCount:25}]},{name:'Material',uniqueName:'/Material',category:'Resources',description:'Location: Earth'}]);
+assert.equal(farmingCatalog['/Gun'].components[0].name,'Test Gun Blueprint');
+assert.equal(farmingCatalog['/Gun'].components[1].name,'Material');
+assert.equal(farmingCatalog['/Material'].description,'Location: Earth');

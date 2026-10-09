@@ -410,11 +410,18 @@ function cycleStateIcon(state) {
     night:'<path d="M20 16.5A8.5 8.5 0 0 1 7.5 4 8.5 8.5 0 1 0 20 16.5z"/><path d="m17 4 .4 1.6L19 6l-1.6.4L17 8l-.4-1.6L15 6l1.6-.4z"/>',
     warm:'<path d="M12 3v11m-3 0a4 4 0 1 0 6 0V6a3 3 0 0 0-6 0z"/><path d="M12 13v5"/>',
     cold:'<path d="M12 2v20M4 6l16 12M20 6 4 18M9 4l3 3 3-3M9 20l3-3 3 3"/>',
+    joy:'<circle cx="12" cy="12" r="8"/><path d="M8 10h1m6 0h1M8 14q4 5 8 0"/>',
+    anger:'<circle cx="12" cy="12" r="8"/><path d="m7 9 3 2m7-2-3 2M8 17q4-5 8 0"/>',
+    envy:'<path d="M3 12q9-13 18 0-9 13-18 0z"/><circle cx="12" cy="12" r="3"/>',
+    fear:'<circle cx="12" cy="12" r="8"/><path d="m7 9 3-1m4 0 3 1"/><ellipse cx="12" cy="16" rx="2" ry="3"/>',
+    sorrow:'<path d="M12 3c-3 4-7 8-7 12a7 7 0 0 0 14 0c0-4-4-8-7-12zM8 15c0 2 1 3 3 3"/>',
+    grineer:'<path d="m12 3 8 4v6c0 4-4 7-8 8-4-1-8-4-8-8V7zM8 9h8v7H8zM10 9v7m4-7v7"/>',
+    corpus:'<path d="m12 3 8 5v8l-8 5-8-5V8zM4 8l8 5 8-5M12 13v8M8 6l8 5"/>',
     vome:'<path d="M4 18c2-8 7-13 16-14-1 9-6 14-14 16M7 17l9-9"/>',
     fass:'<path d="M12 3c3 4 5 7 5 11a5 5 0 0 1-10 0c0-4 2-7 5-11zM10 16c0 1 1 2 2 2"/>'
   };
   if (!paths[key]) return '';
-  return `<svg class="cycle-state-icon cycle-${key}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[key]}</svg>`;
+  return `<svg class="cycle-state-icon cycle-${key}" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[key]}</svg>`;
 }
 
 function liveRow(label, values, expiry, maxHours = 48, options = {}) {
@@ -422,7 +429,7 @@ function liveRow(label, values, expiry, maxHours = 48, options = {}) {
   const system = options.system;
   const heading = system && LIVE_SYSTEMS.includes(system) ? `<span class="live-entry-heading">${planetArt(system,0,true)}<b>${escapeHtml(label)}</b></span>` : `<b>${escapeHtml(label)}</b>`;
   const timer = plausibleExpiry(expiry,maxHours) ? `<span class="world-timer">${countdown(expiry)} left</span>` : '';
-  return `<div class="item live-entry">${heading}<span class="world-detail">${options.state ? cycleStateIcon(options.state) : ''}<span class="world-value">${escapeHtml(detail)}</span>${timer}</span></div>`;
+  return `<div class="item live-entry">${heading}<span class="world-detail">${options.state ? `<span class="world-phase">${cycleStateIcon(options.state)}<span class="world-value">${escapeHtml(detail)}</span></span>` : `<span class="world-value">${escapeHtml(detail)}</span>`}${timer}</span>${options.help || ''}</div>`;
 }
 
 function liveIcon(title) {
@@ -447,30 +454,48 @@ function liveIcon(title) {
 }
 
 const LIVE_TIPS = {
-  'World cycles':'Cycle timers are public PC estimates. Check the phase before starting a bounty or a time-sensitive farm.',
-  'Sortie':'Open each stage to check its mission type and modifier before choosing a loadout.',
-  'Archon Hunt':'The three stages share a weekly target. Check the mission sequence before starting.',
-  'Current events':'Event details can change with game updates. Open the event in game before committing to a reward plan.',
-  'Alerts':'Alerts expire quickly. Check the mission and reward in game before joining.',
-  'Void fissures':'Match the fissure tier to the relic you want to open, then check mission type and time left.',
-  'Steel Path fissures':'Steel Path fissures need Steel Path access. This public list cannot confirm your unlocks.',
-  'Void storms':'Void storms are Railjack fissures. Bring a relic for the listed tier and check your Railjack access.',
-  'Vendors & weekly':'Baro arrival and Steel Path offerings are public rotations. A timer does not confirm that you own the required currency.',
-  'Steel Path incursions':'Incursions rotate daily. If mission details are absent here, inspect the current node in game.',
-  'Nightwave challenges':'Choose challenges that fit your current session. Progress is not read from this public feed.',
-  'Arbitration':'Arbitrations rotate hourly. The public node does not confirm your eligibility.',
-  'Invasions':'Check both sides and their rewards before choosing a faction in game.',
-  "Darvo's deal":'Stock can change before your next refresh. Confirm the current price in game.',
-  'News':'Open the official post for details and patch changes before following a build or farming guide.'
+  'World cycles': ['Full phase lengths are shown beneath each world; countdowns show the time remaining.', 'These are separate schedules. Cetus night and Cambion Vome share a boundary; Orb Vallis, Duviri and Zariman have their own rotations.', 'World_State'],
+  'Sortie': ['A daily set of three missions, with a reward after completing the full set.', 'Check each stage modifier before choosing equipment. Replaying a completed Sortie does not award another daily reward; the timer marks the next set.', 'Sortie'],
+  'Archon Hunt': ['Three missions per weekly Hunt; completion awards an Archon Shard and a reward from the Hunt pool.', 'Requires Veilbreaker. Rewards are available once per weekly Hunt. Check the featured equipment bonuses and prepare for restricted revives.', 'Archon_Hunt'],
+  'Current events': ['Event deadlines and objectives vary; the countdown uses the published event expiry.', 'Read the event description for its currency, reward shop and participation requirements. Public progress is community progress, not your personal completion.', 'Event'],
+  'Alerts': ['Alerts offer a specific mission and reward for a limited window.', 'Check the node, faction and reward before joining. An alert disappearing from the list is not proof that you completed it.', 'Alert'],
+  'Void fissures': ['Equip a relic matching the fissure tier and collect 10 Reactant to open it.', 'In endless fissures, another relic can be opened at each reward interval. Refinement affects the relic reward odds; the countdown is fissure availability, not mission duration.', 'Void_Fissure'],
+  'Steel Path fissures': ['Relic opening on Steel Path: match the tier, collect 10 Reactant and complete the objective.', 'Requires Steel Path access and a loadout for tougher enemies. Steel Path fissures also let you combine relic farming with Steel Essence farming.', 'Void_Fissure'],
+  'Void storms': ['Railjack relic missions: match the relic tier and collect Reactant to open it.', 'Prepare for both Railjack and ground objectives. The listed expiry is the window for that storm, not a deadline for your mission run.', 'Void_Storm'],
+  'Vendors & weekly': ['Baro normally visits every two weeks for 48 hours; his wares use Ducats and Credits.', 'Teshin has a weekly rotating Steel Path offering bought with Steel Essence. Circuit reward choices rotate weekly; they are separate from the two-hour Duviri Spiral.', 'Baro_Ki%27Teer'],
+  'Steel Path incursions': ['Five missions rotate daily; each awards an additional 5 Steel Essence on its first completion.', 'That is 25 Steel Essence from the daily set before other drops. Requires Steel Path access; repeat runs do not repeat the Incursion bonus.', 'The_Steel_Path'],
+  'Nightwave challenges': ['Acts include Daily, Weekly and Elite Weekly challenges, each with its own expiry.', 'The challenge timer is not the Nightwave season end. Check the Nightwave menu for personal progress, recovered Acts and current Cred offerings.', 'Nightwave'],
+  'Arbitration': ['An endless mission rotates hourly; the timer marks when the next mission becomes available.', 'Check your Arbitration eligibility with the Arbiters of Hexis. Bring survivability and watch for Arbitration Shield Drones; normal self-revives are restricted.', 'Arbitrations'],
+  'Invasions': ['Complete three missions for your chosen side on a node to qualify for its battle pay.', 'Compare both rewards before choosing a side. Invasions end according to faction progress, so there is no fixed duration; battle pay arrives after resolution.', 'Invasion'],
+  "Darvo's deal": ['A discounted Platinum purchase with limited shared stock.', 'Check the original price, sale price and sold count. Stock can run out before the countdown ends; a deal is a purchase, not a farming reward.', 'Darvo'],
+  'News': ['Official announcements can explain event dates, rewards and gameplay changes.', 'A post date is a publication date, not an event countdown. Open the official announcement for the current rules.', 'WARFRAME']
 };
+function liveInformation(title) {
+  const info=LIVE_TIPS[title];
+  if (!info) return '';
+  return `<div class="live-information"><p>${escapeHtml(info[0])}</p><details class="live-tip"><summary>Timing &amp; useful facts</summary><p>${escapeHtml(info[1])}</p><a href="https://wiki.warframe.com/w/${info[2]}" target="_blank" rel="noopener noreferrer">Read the guide</a></details></div>`;
+}
+const CYCLE_FACTS = {
+  cetusCycle:{lengths:{day:'100 minutes',night:'50 minutes'},next:{day:'night',night:'day'},summary:'Day lasts 100 minutes; night lasts 50 minutes. Eidolon hunts take place at night. Fish availability also depends on the time of day.',guide:'Plains_of_Eidolon'},
+  vallisCycle:{lengths:{warm:'6 minutes 40 seconds',cold:'20 minutes'},next:{warm:'cold',cold:'warm'},summary:'Warm lasts 6 minutes 40 seconds; cold lasts 20 minutes. Weather affects which servofish appear, so prepare bait before the short warm window.',guide:'Orb_Vallis'},
+  cambionCycle:{lengths:{fass:'100 minutes',vome:'50 minutes'},next:{fass:'vome',vome:'fass'},summary:'Fass lasts 100 minutes; Vome lasts 50 minutes. The cycle affects fish availability; Fass and Vome Residue can be used as fishing bait.',guide:'Cambion_Drift'},
+  duviriCycle:{lengths:{joy:'2 hours',anger:'2 hours',envy:'2 hours',sorrow:'2 hours',fear:'2 hours'},next:{joy:'anger',anger:'envy',envy:'sorrow',sorrow:'fear',fear:'joy'},summary:'Each Spiral lasts 2 hours: Joy, Anger, Envy, Sorrow, then Fear. The Spiral changes the landscape and story; weekly Circuit rewards follow a separate schedule.',guide:'Duviri'},
+  zarimanCycle:{lengths:{grineer:'2 hours 30 minutes',corpus:'2 hours 30 minutes'},next:{grineer:'corpus',corpus:'grineer'},summary:'Grineer and Corpus phases each last 2 hours 30 minutes. Check Quinn for the current bounty objectives and prepare your loadout for the active faction.',guide:'Zariman_Ten_Zero'}
+};
+function cycleInformation(key,phase) {
+  const info=CYCLE_FACTS[key];
+  if (!info) return '';
+  return `<div class="cycle-information"><p>${info.lengths[phase] ? `<strong>Full phase: ${escapeHtml(info.lengths[phase])}</strong> · Next: ${escapeHtml(info.next[phase])}` : 'Phase unavailable; refresh Live for the current timer.'}</p><details class="live-tip"><summary>Cycle facts &amp; farming tips</summary><p>${escapeHtml(info.summary)}</p><a href="https://wiki.warframe.com/w/${info.guide}" target="_blank" rel="noopener noreferrer">Read the world guide</a></details></div>`;
+}
 
 function liveGroup(title, rows, open = false) {
   if (!rows.length) return '';
-  return `<details class="panel live-group" data-live-group${open ? ' open' : ''}><summary>${liveIcon(title)}<span class="live-group-title">${escapeHtml(title)}</span><small>${rows.length} ${rows.length === 1 ? 'entry' : 'entries'}</small><svg class="live-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 4 6 6-6 6"/></svg></summary><div class="live-group-content"><div class="list world-list">${rows.join('')}</div>${LIVE_TIPS[title] ? `<details class="live-tip"><summary>Tenno tip</summary><p>${escapeHtml(LIVE_TIPS[title])}</p></details>` : ''}</div></details>`;
+  return `<details class="panel live-group" data-live-group${open ? ' open' : ''}><summary>${liveIcon(title)}<span class="live-group-title">${escapeHtml(title)}</span><small>${rows.length} ${rows.length === 1 ? 'entry' : 'entries'}</small><svg class="live-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 4 6 6-6 6"/></svg></summary><div class="live-group-content"><div class="list world-list">${rows.join('')}</div>${liveInformation(title)}</div></details>`;
 }
 
 function bindLiveActions() {
   const root = $('live');
+  root.querySelectorAll('[data-live-notifications]').forEach(button=>button.onclick=()=>$('openSettings').click());
   root.querySelectorAll('[data-live-expand]').forEach(button => button.onclick = () => {
     const expand = button.dataset.liveExpand === 'all';
     root.querySelectorAll('[data-live-group]').forEach(group => { group.open = expand; });
@@ -490,18 +515,106 @@ function sortieRows(sortie, maxHours = 48) {
     ...stages.map((stage,index) => liveRow(`Stage ${index+1}`,[stage.missionType,stage.node ? displayWorldNode(stage.node) : '',stage.modifier,stage.modifierDescription,stage.enemy],null,48,{system:worldLocationSystem(stage.node)}))];
 }
 
+function hasNotificationSelections(prefs) { return Object.values(prefs.cycles).some(Boolean) || Object.values(prefs.events).some(Boolean); }
+function notificationAccess(key) {
+  return TennoProgression.notificationAccess(key,profile()?.progression?.missions || [],catalogIndex(),!!profile() && !sampleMode);
+}
+function notificationAccessMarkup(key) {
+  const access=notificationAccess(key);
+  return `<div class="notification-access"><small><strong>${escapeHtml(access.label)}</strong> · ${escapeHtml(access.detail)}</small><div id="access-warning-${key}" class="notification-access-warning" hidden role="status"><p>Access could not be confirmed. You may receive announcements for an activity you cannot reach.</p><button type="button" data-access-enable="${key}">Enable anyway</button> <button type="button" data-access-cancel="${key}">Cancel</button></div></div>`;
+}
+function cycleNotificationControls() {
+  const prefs=TennoCycles.preferences(state.cycleNotifications);
+  return `<div class="settings-heading"><div><span class="eyebrow">YOUR COMPANION</span><h2 tabindex="-1" id="settingsTitle">Settings</h2><p class="muted">Choose the moments your companion announces.</p></div></div>
+    <div class="panel cycle-notifications"><h3>Live notifications</h3>
+    <p>API-confirmed PC cycle changes and timed activities, even with the dashboard closed. Chrome must be running. Monitoring stays active with the panel closed, including while browsing warframe.com or the Warframe Wiki.</p>
+    <label class="setting-toggle"><span><strong>Enable notifications</strong><small>Choose worlds and Live activities below.</small></span><input id="cycle-enabled" type="checkbox" data-cycle-pref="enabled" ${prefs.enabled ? 'checked':''}></label>
+    <fieldset class="notification-options" ${prefs.enabled ? '':'disabled'}><legend>Audio and worlds</legend>
+    <label class="setting-toggle"><span><strong>Cephalon announcements</strong><small>An original companion voice names the world, planet and new phase. Turn this on to hear speech after the chime.</small></span><input id="cycle-speech" type="checkbox" data-cycle-pref="speech" ${prefs.speech ? 'checked':''}></label>
+    <label class="setting-toggle"><span><strong>Transmission chime</strong><small>A two-second metallic signal before speech, or a chime on its own.</small></span><input id="cycle-sound" type="checkbox" data-cycle-pref="sound" ${prefs.sound ? 'checked':''}></label>
+    <label class="volume-setting" for="cycle-volume">Audio volume <output id="cycleVolumeValue">${Math.round(prefs.volume*100)}%</output><input id="cycle-volume" type="range" min="0" max="1" step="0.1" value="${prefs.volume}" data-cycle-pref="volume"></label>
+    <h4>Worlds to follow</h4><p class="muted">Access checks use your synced mission history. Planet completion alone does not prove access to a landscape or quest activity.</p>
+    ${TennoCycles.definitions.map(row=>`<div class="cycle-notification-row"><label for="notify-${row.key}"><input id="notify-${row.key}" type="checkbox" data-cycle-key="${row.key}" ${prefs.cycles[row.key] ? 'checked':''}><span><strong>${row.name}</strong><small>${row.name === row.planet ? 'World cycle':row.planet}</small></span></label>${notificationAccessMarkup(row.key)}</div>`).join('')}
+    <h4>Useful Live activity timers</h4><p class="muted">Optional alerts for limited visits and reward rotations. These announce availability, not whether you have completed the activity.</p>
+    ${TennoLiveTimers.definitions.map(row=>`<div class="cycle-notification-row"><label for="notify-${row.key}"><input id="notify-${row.key}" type="checkbox" data-live-event-key="${row.key}" ${prefs.events[row.key] ? 'checked':''}><span><strong>${row.name}</strong><small>${row.help}</small></span></label>${notificationAccessMarkup(row.key)}</div>`).join('')}
+    </fieldset>
+    <p class="notification-note">First check establishes the phase. Sleep, network delays and system settings can delay alerts. Cetus and Cambion Drift can change together; each selected world gets its own alert.</p>
+    <div class="notification-save" id="cycleNotificationStatus" role="status">${prefs.enabled ? (hasNotificationSelections(prefs) ? 'Notifications enabled for selected worlds and activities.':'Select a world or Live activity to start notifications.'):'Notifications are off.'}</div>
+    </div><div class="panel notification-preview"><h3>Preview the transmission</h3><p class="muted">Try the chime and voice before enabling alerts. Preview uses a sample phase or event.</p><label for="cyclePreviewWorld">Alert <select id="cyclePreviewWorld">${TennoCycles.definitions.map(row=>`<option value="${row.key}">${row.location}</option>`).join('')}${TennoLiveTimers.definitions.map(row=>`<option value="${row.key}">${row.name}</option>`).join('')}</select></label><div><button type="button" data-cycle-speech-preview="selected">Preview announcement</button><button type="button" data-cycle-preview="selected">Preview chime</button></div></div>`;
+}
+function profileConnectionStatus() {
+  const p=state.profile || {};
+  const history=state.profileRequestHistory || [];
+  const cooldown=p.nextAllowedSyncAt > Date.now() ? `Next profile request after ${escapeHtml(new Date(p.nextAllowedSyncAt).toLocaleString())}.` : 'Use Refresh when you want a new profile snapshot.';
+  return `<div class="panel" id="profileConnectionState"><h3>Profile connection</h3><p class="muted">Profile sync is manual. Opening this panel and cycle monitoring make no profile requests. Manual requests share a 15-minute minimum interval; HTTP 403 or 429 pauses them for at least one hour.</p><p>${cooldown}</p><p class="muted">Last profile HTTP status: ${escapeHtml(p.lastHttpStatus ?? 'Not recorded')} · ${history.length} recent request attempts recorded locally.</p>${history.length ? `<details><summary>Recent profile requests</summary><div class="list">${history.slice().reverse().map(row=>item(new Date(row.at).toLocaleString(),row.status)).join('')}</div></details>`:''}</div>`;
+}
+function cycleAlertHistory() {
+  const history=state.cycleNotificationHistory || [];
+  return `<div class="panel"><h3>Recent alerts</h3><p class="muted">${history.length ? 'Latest detected changes and the audio used.':'No alerts recorded yet. Previews are not recorded.'}</p>${history.map(entry=>`<div class="cycle-notification-row"><strong>${escapeHtml(entry.location)} · ${escapeHtml(entry.phase)}</strong><small>${escapeHtml(new Date(entry.at).toLocaleString())} · ${escapeHtml(entry.audio)} · ${escapeHtml(entry.status)}${entry.error ? ` · ${escapeHtml(entry.error)}`:''}</small></div>`).join('')}</div>`;
+}
+function renderSettings() {
+  if (document.body.dataset.page === 'settings' && $('settings').innerHTML) {
+    const connection=$('profileConnectionState');
+    if (connection) connection.outerHTML=profileConnectionStatus();
+    return;
+  }
+  $('settings').innerHTML=profileConnectionStatus()+cycleNotificationControls()+cycleAlertHistory();
+}
+
+let cyclePreferenceWrite=Promise.resolve();
+$("settings").addEventListener('change',event=>{
+  const pref=event.target.dataset.cyclePref,key=event.target.dataset.cycleKey,eventKey=event.target.dataset.liveEventKey;
+  if (!pref && !key && !eventKey) return;
+  const alertKey=key || eventKey;
+  if (alertKey && event.target.checked && notificationAccess(alertKey).warn && event.target.dataset.accessOverride !== 'true') {
+    event.target.checked=false;
+    $(`access-warning-${alertKey}`).hidden=false;
+    $(`access-warning-${alertKey}`).querySelector('button')?.focus();
+    return;
+  }
+  if (alertKey) { delete event.target.dataset.accessOverride; $(`access-warning-${alertKey}`).hidden=true; }
+  const preferences=TennoCycles.preferences(state.cycleNotifications);
+  if (key) preferences.cycles[key]=event.target.checked;
+  else if (eventKey) preferences.events[eventKey]=event.target.checked;
+  else preferences[pref]=pref === 'volume' ? Number(event.target.value) : pref === 'voicePack' ? event.target.value : event.target.checked;
+  state.cycleNotifications=preferences;
+  if (pref === 'enabled') $('settings').querySelector('.notification-options').disabled=!preferences.enabled;
+  if (pref === 'volume') $('cycleVolumeValue').textContent=`${Math.round(preferences.volume*100)}%`;
+  $('cycleNotificationStatus').textContent='Saving…';
+  cyclePreferenceWrite=cyclePreferenceWrite.catch(()=>{}).then(async()=>{
+    const response=await chrome.runtime.sendMessage({type:'SAVE_CYCLE_NOTIFICATIONS',preferences});
+    const status=$('cycleNotificationStatus');
+    if (status) status.textContent=response?.ok ? (!preferences.enabled ? 'Notifications are off.' : hasNotificationSelections(preferences) ? 'Notification preferences saved.' : 'Select a world or Live activity to start notifications.') : response?.error || 'Could not save preferences.';
+  }).catch(error=>{ $('cycleNotificationStatus').textContent=error.message || 'Could not save preferences. Try again.'; });
+});
+$("settings").addEventListener('click',async event=>{
+  const accessButton=event.target.closest?.('[data-access-enable], [data-access-cancel]');
+  if (accessButton) {
+    const key=accessButton.dataset.accessEnable || accessButton.dataset.accessCancel;
+    $(`access-warning-${key}`).hidden=true;
+    const checkbox=$(`notify-${key}`);
+    if (accessButton.dataset.accessEnable) {
+      checkbox.dataset.accessOverride='true'; checkbox.checked=true;
+      checkbox.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+    checkbox.focus(); return;
+  }
+  const button=event.target.closest?.('[data-cycle-preview], [data-cycle-speech-preview]');
+  if (!button) return;
+  button.disabled=true;
+  try {
+    const previewKey=$('cyclePreviewWorld').value;
+    const isEvent=TennoLiveTimers.definitions.some(row=>row.key === previewKey);
+    const response=await chrome.runtime.sendMessage({type:button.dataset.cycleSpeechPreview ? (isEvent ? 'PREVIEW_LIVE_TIMER_SPEECH':'PREVIEW_CYCLE_SPEECH'):'PREVIEW_CYCLE_SOUND',key:button.dataset.cycleSpeechPreview ? previewKey:'cetusCycle',volume:TennoCycles.preferences(state.cycleNotifications).volume,voicePack:TennoCycles.preferences(state.cycleNotifications).voicePack});
+    if (!response?.ok) showToast(response?.error || 'Audio preview failed');
+  } catch (error) { showToast(error.message || 'Audio preview failed'); } finally { button.disabled=false; }
+});
+
 function cycleRows(w) {
-  const cycles = [
-    ['Earth','Earth',w.earthCycle,typeof w.earthCycle?.isDay === 'boolean' ? (w.earthCycle.isDay ? 'Day' : 'Night') : ''],
-    ['Plains of Eidolon','Earth',w.cetusCycle,typeof w.cetusCycle?.isDay === 'boolean' ? (w.cetusCycle.isDay ? 'Day' : 'Night') : ''],
-    ['Orb Vallis','Venus',w.vallisCycle,typeof w.vallisCycle?.isWarm === 'boolean' ? (w.vallisCycle.isWarm ? 'Warm' : 'Cold') : ''],
-    ['Cambion Drift','Deimos',w.cambionCycle,w.cambionCycle?.active],
-    ['Duviri','Duviri',w.duviriCycle,w.duviriCycle?.state],
-    ['Zariman','Zariman',w.zarimanCycle,w.zarimanCycle?.state]
-  ];
-  return cycles.filter(([, ,cycle]) => cycle).map(([name,system,cycle,fallback]) => {
-    const current = cycle.state || cycle.active || fallback;
-    return liveRow(name,[current],cycle.expiry || cycle.next,12,{system,state:current});
+  const snapshot=TennoCycles.snapshot(w);
+  return TennoCycles.definitions.filter(({key})=>w[key]).map(({key,name,planet})=>{
+    const cycle=snapshot[key];
+    return liveRow(name,[cycle?.phase || 'Phase unavailable'],cycle?.expiry ? new Date(cycle.expiry).toISOString() : null,12,{system:planet,state:cycle?.phase,help:cycleInformation(key,cycle?.phase)});
   });
 }
 
@@ -542,24 +655,41 @@ function goalPanel() {
     const rows = sources.filter(row=>(row.kind || 'other') === kind);
     return rows.length ? `<h3>${title}</h3><div class="list">${rows.map(row=>item(row.source,`${row.detail}${row.chance == null ? '' : ` · ${row.chance}% listed chance`}${recorded.has(row.source.toLocaleLowerCase()) ? ' · completion recorded in profile' : ''}`)).join('')}</div>` : '';
   }).join('');
-  return `<div class="panel"><div class="section-title"><div><h2>Pinned farming goal</h2><small>WFCD public drop tables · your chosen item</small></div></div>
-    <form id="goalForm" class="goal-form"><label for="goalName">Blueprint, part, or mod name</label><div><input id="goalName" type="search" list="goalSuggestions" maxlength="120" minlength="2" required placeholder="e.g. Vitality" value="${escapeHtml(goal?.name || '')}"><button type="submit">Find sources</button></div><datalist id="goalSuggestions"></datalist></form>
-    ${goal ? `<div class="goal-title">${itemImage(image)}<div><b>${escapeHtml(goal.name)}</b><small>Checked ${escapeHtml(new Date(goal.checkedAt).toLocaleString())}${goal.partial ? ' · some tables unavailable' : ''}</small></div><button id="clearGoal" type="button" class="quiet-action">Clear</button></div>
+  return `<div class="panel"><div class="section-title"><div><h2>Farming</h2><small>Find equipment, mods, blueprints and crafting materials</small></div></div>
+    <form id="goalForm" class="goal-form"><label for="goalName">Search any item</label><div><input id="goalName" type="search" list="goalSuggestions" maxlength="120" minlength="2" required placeholder="e.g. Acceltra, Vitality, Polymer Bundle" value="${escapeHtml(goal?.name || '')}"><button type="submit">Find sources</button></div><datalist id="goalSuggestions"></datalist></form>
+    ${goal ? `<div class="goal-title">${itemImage(image)}<div><small>Pinned farming goal</small><b>${escapeHtml(goal.name)}</b><small>Checked ${escapeHtml(new Date(goal.checkedAt).toLocaleString())}${goal.partial ? ' · some tables unavailable' : ''}</small></div><button id="clearGoal" type="button" class="quiet-action">Clear</button></div>
     <button id="planGoal" type="button">Plan this farm in AI Bridge</button>
     <label><input id="recordedSources" type="checkbox" ${onlyRecordedSources ? 'checked' : ''}> Only sources with recorded mission completion</label>
-    ${sourceList || `<p class="muted">${onlyRecordedSources ? 'No sources match your recorded completions. Turn off the filter to see other possible sources.' : 'No exact match in the checked tables. Try a specific part or blueprint name.'}</p>`}
+    ${goalAcquisition(goal)}
+    ${sourceList || `<p class="muted">${onlyRecordedSources ? 'No sources match your recorded completions. Turn off the filter to see other possible sources.' : 'No direct drop source listed in the checked tables. Check the recipe and Wiki guide for other acquisition methods.'}</p>`}
     <p class="muted"><a href="https://www.warframe.com/droptables" target="_blank" rel="noopener noreferrer">Official drop tables</a> · <a href="https://github.com/WFCD/warframe-drop-data" target="_blank" rel="noopener noreferrer">WFCD source data</a> · Up to 20 matching sources shown.</p>
-    <p class="muted">Drop chances describe the listed reward table. Enemy table chances are conditional on an item or mod drop. Your ownership and access are not checked.</p>` : '<p class="muted">Pin a goal to see published mission, enemy, or relic sources. This does not check ownership.</p>'}
+    <p class="muted">Drop chances describe the listed reward table. Enemy table chances are conditional on an item or mod drop. Your ownership and access are not checked.</p>` : '<p class="muted">Search an item to pin it as your goal and see recipes, mission rewards, relics and enemy drops.</p>'}
     <p id="goalStatus" class="muted" role="status"></p></div>`;
 }
 
+function goalAcquisition(goal) {
+  const entry=goal.entry || Object.values(catalogIndex()).find(row=>row.name?.toLowerCase() === goal.name.toLowerCase());
+  const wiki=`https://wiki.warframe.com/w/${encodeURIComponent(goal.name.replace(/ /g,'_'))}`;
+  const parts=goal.components || entry?.components || [];
+  return `<div class="farming-acquisition">${entry?.description ? `<p>${escapeHtml(entry.description)}</p>` : ''}
+    ${parts.length ? `<h3>Crafting recipe</h3><p class="muted">${entry?.buildPrice != null ? `${formatQuantity(entry.buildPrice)} Credits · `:''}${entry?.buildTime ? `${fmtHours(entry.buildTime)} build time`:''}</p><div class="list">${parts.map(part=>`<div class="item"><button type="button" class="farming-component" data-farm-item="${escapeHtml(part.name)}">${escapeHtml(part.name)}</button><span>× ${escapeHtml(part.itemCount ?? '?')}</span></div>${(part.sources || []).map(source=>`<p class="muted">${escapeHtml(source.source)} · ${escapeHtml(source.detail)}${source.chance != null ? ` · ${source.chance}% listed chance`:''}</p>`).join('')}`).join('')}</div>`:''}
+    ${entry?.marketCost != null ? `<p>Market purchase: ${escapeHtml(entry.marketCost)} Platinum (catalog listing).</p>`:''}
+    <p><a href="${wiki}" target="_blank" rel="noopener noreferrer">Open ${escapeHtml(goal.name)} acquisition guide on the Wiki</a></p></div>`;
+}
+function renderFarming() { $('farming').innerHTML=goalPanel(); bindGoalActions(); }
+$('farming').addEventListener('click',event=>{
+  const button=event.target.closest?.('[data-farm-item]');
+  if (!button) return;
+  $('goalName').value=button.dataset.farmItem;
+  $('goalForm').requestSubmit();
+});
 function bindGoalActions() {
   const suggestions = $("goalSuggestions");
   $("goalName").oninput = () => {
     const query = $("goalName").value.trim().toLocaleLowerCase();
     if (query.length < 2) { suggestions.replaceChildren(); return; }
     const names = [...new Set(Object.values(catalogIndex())
-      .filter(entry => ['blueprints','parts','mods'].includes(entry.category) && entry.name?.toLocaleLowerCase().includes(query))
+      .filter(entry => !['nodes','enemies','quests'].includes(entry.category) && entry.name?.toLocaleLowerCase().includes(query))
       .map(entry => entry.name))].slice(0,15);
     suggestions.replaceChildren(...names.map(name => {
       const option = document.createElement('option');
@@ -579,7 +709,7 @@ function bindGoalActions() {
       const result = await chrome.runtime.sendMessage({type:'FIND_GOAL_SOURCES',name});
       if (!result?.ok) throw new Error(result?.error || 'Drop lookup failed.');
       state.goal = result.goal;
-      renderLive();
+      renderFarming();
       renderHome();
       updatePromptPreview();
     } catch (error) {
@@ -592,20 +722,19 @@ function bindGoalActions() {
     const result = await chrome.runtime.sendMessage({type:'CLEAR_GOAL'});
     if (!result?.ok) { $("goalStatus").textContent = result?.error || 'Could not clear goal.'; return; }
     state.goal = null;
-    renderLive();
+    renderFarming();
     renderHome();
     updatePromptPreview();
   };
   if ($("planGoal")) $("planGoal").onclick = planPinnedGoal;
-  if ($("recordedSources")) $("recordedSources").onchange = event => { onlyRecordedSources = event.target.checked; renderLive(); };
+  if ($("recordedSources")) $("recordedSources").onchange = event => { onlyRecordedSources = event.target.checked; renderFarming(); };
 }
 
 function renderLive() {
   const w = world();
 
   if (!w) {
-    $("live").innerHTML = `<div class="panel"><p class="muted">Live data not loaded yet. Refresh to sync PC world state.</p></div>${goalPanel()}`;
-    bindGoalActions();
+    $("live").innerHTML = `<div class="panel"><p class="muted">Live data not loaded yet. Refresh to sync PC world state.</p></div>`;
     return;
   }
 
@@ -633,7 +762,8 @@ function renderLive() {
   ],deal.expiry,48));
 
   $("live").innerHTML = `<div class="live-brief"><div><small>PUBLIC PC WORLD STATE</small><h2>Origin System now</h2><p>Explore current rotations and mission details. Account access and completion are checked in game.</p></div><span class="live-beacon" aria-hidden="true"></span></div>
-    <div class="live-tools"><span>Fetched ${escapeHtml(state.world?.lastSyncAt ? new Date(state.world.lastSyncAt).toLocaleString() : 'at an unknown time')}</span><div><button type="button" data-live-expand="all">Expand all</button><button type="button" data-live-expand="none">Collapse all</button></div></div>
+    <div class="live-tools"><span>Fetched ${escapeHtml(state.world?.lastSyncAt ? new Date(state.world.lastSyncAt).toLocaleString() : 'at an unknown time')}</span><div><button type="button" data-live-notifications>Notification settings</button><button type="button" data-live-expand="all">Expand all</button><button type="button" data-live-expand="none">Collapse all</button></div></div>
+
     ${liveGroup('World cycles',cycleRows(w),true)}
     ${liveGroup('Sortie',sortieRows(w.sortie),true)}
     ${liveGroup('Archon Hunt',sortieRows(w.archonHunt,8*24),true)}
@@ -653,9 +783,7 @@ function renderLive() {
     ${liveGroup('Arbitration',w.arbitration && (plausibleExpiry(w.arbitration.expiry,2) || w.arbitration.missionType) ? [liveMission(w.arbitration,w.arbitration.missionType || 'Current mission')] : [])}
     ${liveGroup('Invasions',invasionRows)}
     ${liveGroup("Darvo's deal",dealRows)}
-    ${liveGroup('News',newsRows)}
-    ${goalPanel()}`;
-  bindGoalActions();
+    ${liveGroup('News',newsRows)}`;
   bindLiveActions();
 }
 
@@ -931,7 +1059,7 @@ async function syncActive(force = false, resources = {profile:true,world:true}) 
     if (previousProfileSync !== state.profile?.lastSyncAt || previousWorldSync !== state.world?.lastSyncAt) renderRefreshedState();
     else updateSyncMeta();
     const failures = Object.entries(response.result || {}).filter(([,v]) => v?.error);
-    $("status").textContent = failures.length ? failures.map(([key,v]) => `${key}: ${v.error}`).join(" · ") : "Profile and events up to date";
+    $("status").textContent = failures.length ? failures.map(([key,v]) => `${key}: ${v.error}`).join(" · ") : (force ? "Profile and live events checked." : "Live events updated. Profile sync is manual.");
     nextAutoAttemptAt = failures.length ? Date.now() + 60_000 : 0;
   } catch (error) {
     $("status").textContent = error.message;
@@ -946,7 +1074,7 @@ async function syncActive(force = false, resources = {profile:true,world:true}) 
 function autoRefreshIfDue() {
   if (sampleMode || !interfaceVisible() || activeSyncing || catalogSyncing || Date.now() < nextAutoAttemptAt) return;
   const due = section => !section?.nextAllowedSyncAt || Date.now() >= section.nextAllowedSyncAt;
-  const resources = {profile:due(state.profile),world:due(state.world)};
+  const resources = {profile:false,world:due(state.world)};
   if (resources.profile || resources.world) void syncActive(false,resources);
 }
 
@@ -974,6 +1102,8 @@ function renderAll() {
   renderProgress();
   renderChart();
   renderLive();
+  renderFarming();
+  renderSettings();
   updateSyncMeta();
 }
 
@@ -995,14 +1125,14 @@ $("home").addEventListener("click", event => {
     restoreBridgeDraft(state.bridgeDraft); renderAll();
   }
   if (event.target.closest?.('[data-plan-goal]')) planPinnedGoal();
-  if (event.target.closest?.('[data-open-goals]')) $("nav").querySelector('[data-page="live"]').click();
+  if (event.target.closest?.('[data-open-goals]')) $("nav").querySelector('[data-page="farming"]').click();
   if (event.target.closest?.("[data-open-ai]")) $("nav").querySelector('[data-page="ai"]').click();
 });
 
-document.querySelectorAll("#nav button").forEach(button => {
+document.querySelectorAll("#nav button, #openSettings").forEach(button => {
   button.onclick = () => {
     document
-      .querySelectorAll("#nav button")
+      .querySelectorAll("#nav button, #openSettings")
       .forEach(entry => { entry.classList.remove("active"); entry.removeAttribute("aria-current"); });
 
     document
@@ -1013,6 +1143,7 @@ document.querySelectorAll("#nav button").forEach(button => {
     button.setAttribute("aria-current", "page");
     $(button.dataset.page).classList.add("active");
     setActivePage(button.dataset.page);
+    if (button.dataset.page === 'settings') { $('settings').innerHTML=profileConnectionStatus()+cycleNotificationControls()+cycleAlertHistory(); $('settingsTitle').focus({preventScroll:true}); }
   };
 });
 
@@ -1080,8 +1211,8 @@ document.querySelectorAll('[data-ai-provider]').forEach(button=>button.onclick =
     setStartupLoading(false);
   }
   if (interfaceVisible()) {
-    await syncActive(false);
-    if (!state.items?.index || state.items?.schemaVersion !== 5) await syncCatalog();
+    await syncActive(false,{profile:false,world:true});
+    if (!state.items?.index || state.items?.schemaVersion !== 6) await syncCatalog();
   }
   if (!quickOpen) setStartupLoading(false);
 })().catch(error => {

@@ -1,0 +1,48 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const context=vm.createContext({});
+for(const file of ['cycles.js','live-timers.js'])vm.runInContext(fs.readFileSync(file,'utf8'),context);
+const timers=context.TennoLiveTimers,now=Date.now(),iso=time=>new Date(time).toISOString();
+const rotation=(start,end)=>({activation:iso(start),expiry:iso(end)});
+const beforeWorld={sortie:rotation(now-60000,now+60000),archonHunt:rotation(now-60000,now+60000),steelPath:{incursions:rotation(now-60000,now+60000)},nightwave:{expiry:iso(now+365*86400000),activeChallenges:[{...rotation(now-60000,now+60000),isDaily:false},{...rotation(now-60000,now+86400000),isDaily:true}]},voidTrader:{...rotation(now+60000,now+2*86400000),active:false,location:'Test Relay (Saturn)'}};
+const before=timers.snapshot(beforeWorld,now);
+assert.equal(timers.changes(null,before,now).length,0);
+assert.equal(before.nightwaveReset.expiry,now+60000,'weekly Acts drive the timer, not daily Acts or the season');
+const afterWorld={...beforeWorld,sortie:rotation(now+60000,now+86400000),archonHunt:rotation(now+60000,now+7*86400000),steelPath:{incursions:rotation(now+60000,now+86400000)},nightwave:{activeChallenges:[{...rotation(now+60000,now+7*86400000),isDaily:false}]},voidTrader:{...beforeWorld.voidTrader,active:true}};
+const after=timers.snapshot(afterWorld,now+61000);
+assert.equal(timers.changes(before,after,now+61000).length,5,'arrival and four rotations alert');
+assert.equal(timers.changes(after,after,now+61000).length,0);
+assert.equal(timers.changes(before,after,now+600000).length,0,'no stale catch-up burst');
+assert.equal(timers.changes(after,before,now+61000).length,0);
+assert.equal(timers.snapshot({sortie:rotation(now+60000,now+86400000)},now).sortieReset,undefined,'future rotation is silent');
+const expiry=now+3600000;
+const visit={voidTrader:{...rotation(now-3600000,expiry),active:true,location:'Test Relay'}};
+const preWarning=timers.snapshot(visit,expiry-31*60000),warning=timers.snapshot(visit,expiry-29*60000);
+assert.equal(timers.changes(preWarning,warning,expiry-29*60000)[0].key,'baroDeparture');
+assert.equal(timers.changes(warning,warning,expiry-29*60000).length,0);
+assert.equal(timers.changes(null,warning,expiry-29*60000).length,0,'opening in the warning window is silent');
+assert.equal(timers.changes(preWarning,timers.snapshot(visit,expiry-20*60000),expiry-20*60000).length,0,'old reminder is skipped');
+assert.equal(timers.merge(after,before).sortieReset.expiry,after.sortieReset.expiry);
+assert.equal(timers.merge(after,{baroArrival:{...after.baroArrival,active:false}}).baroArrival.active,true,'same-visit API corrections cannot replay arrival');
+assert.equal(Object.values(context.TennoCycles.preferences().events).some(Boolean),false);
+for(const row of JSON.parse(fs.readFileSync('assets/voice/cephalon/events.json','utf8'))){assert.equal(fs.readFileSync(timers.clip(row.key)).toString('ascii',0,4),'RIFF');}
+assert.equal(timers.clip('../../bad'),null);
+let saved={cycleNotifications:{enabled:true,sound:true,speech:true,events:Object.fromEntries(timers.definitions.map(row=>[row.key,true]))}},notifications=[],audio=[],listener,created=0;
+let clockNow=now;
+class TestDate extends Date{static now(){return clockNow;}}
+context.chrome={runtime:{onMessage:{addListener(fn){listener=fn;}},getURL:p=>p,getContexts:async()=>[],sendMessage:async message=>{audio.push(message);return {ok:true};}},storage:{local:{get:async()=>({tennoLinkState:structuredClone(saved)}),set:async value=>{saved=structuredClone(value.tennoLinkState);}}},notifications:{create:async(id,options)=>notifications.push({id,options})},alarms:{onAlarm:{addListener(){}},create:async()=>{created++;},clear:async()=>{}},offscreen:{createDocument:async()=>{},closeDocument:async()=>{}}};
+Object.assign(context,{Date:TestDate,importScripts(){},console});
+vm.runInContext(fs.readFileSync('background.js','utf8'),context);
+(async()=>{
+ await vm.runInContext('configureCycleAlarm()',context);assert.equal(created,1,'event-only preferences schedule background polling');
+ context.worldInput=beforeWorld;await vm.runInContext('processCycleChanges(worldInput)',context);assert.equal(notifications.length,0);
+ clockNow=now+61000;context.worldInput=afterWorld;
+ await vm.runInContext('Promise.all([processCycleChanges(worldInput),processCycleChanges(worldInput)])',context);
+ assert.equal(notifications.length,5);assert.equal(audio.length,5);assert.ok(audio.every(row=>row.type==='PLAY_LIVE_TIMER_VOICE' && row.chime===true));
+ assert.ok(notifications.find(row=>row.id==='live-timer-baroArrival').options.message.includes('Test Relay (Saturn)'));
+ assert.equal(saved.cycleNotificationHistory[0].status,'delivered');
+ const preview=await new Promise(resolve=>listener({type:'PREVIEW_LIVE_TIMER_SPEECH',key:'archonReset',volume:0.2},null,resolve));
+ assert.equal(preview.ok,true);assert.equal(audio.at(-1).key,'archonReset');assert.equal(audio.at(-1).volume,0.2);
+ saved.cycleNotifications.enabled=false;clockNow=now+86401000;
+ context.worldInput={sortie:rotation(now+86400000,now+2*86400000)};await vm.runInContext('processCycleChanges(worldInput)',context);assert.equal(notifications.length,5);
+ console.log('live-timers.test.cjs: six events, weekly Acts, reminders, opt-in monitoring and queued speech passed');
+})().catch(error=>{console.error(error);process.exitCode=1;});

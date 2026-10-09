@@ -1,0 +1,38 @@
+[
+  {
+    "key": "baroArrival",
+    "name": "Baro Ki'Teer arrives",
+    "help": "Hear when a new visit begins. Relay details appear in the desktop alert.",
+    "text": "Operator. Baro Ki'Teer has arrived. His wares await at the relay. Consult live activities for the location."
+  },
+  {
+    "key": "baroDeparture",
+    "name": "Baro leaves in 30 minutes",
+    "help": "One reminder near the end of his visit.",
+    "text": "Operator. Baro Ki'Teer departs in approximately thirty minutes. Review his wares before the transmission ends."
+  },
+  {
+    "key": "sortieReset",
+    "name": "New daily Sortie",
+    "help": "Hear when a new Sortie rotation is confirmed by the API.",
+    "text": "Operator. A new daily Sortie is available. Review the missions and modifiers in live activities."
+  },
+  {
+    "key": "archonReset",
+    "name": "New weekly Archon Hunt",
+    "help": "Hear when a new Archon Hunt rotation is available.",
+    "text": "Operator. A new weekly Archon Hunt is available. Prepare your arsenal and review the hunt in live activities."
+  },
+  {
+    "key": "incursionReset",
+    "name": "Steel Path incursions refresh",
+    "help": "Hear when the daily incursion timer rolls over.",
+    "text": "Operator. The daily Steel Path incursion rotation has refreshed. Check navigation for the available missions."
+  },
+  {
+    "key": "nightwaveReset",
+    "name": "Nightwave weekly challenges refresh",
+    "help": "Tracks weekly Acts, rather than the Nightwave season timer.",
+    "text": "Operator. Nightwave weekly challenges have refreshed. Review the new acts and plan your standing."
+  }
+]

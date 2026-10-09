@@ -4,10 +4,12 @@ const vm = require('node:vm');
 let saved = {};
 let writes = 0;
 let onMessage;
-const context = vm.createContext({importScripts(){},AbortSignal:{timeout:()=>undefined},fetch:async url=>({ok:true,json:async()=>({source:url})}),TennoFarming:{find:(name,datasets)=>[{source:'Test node',chance:10,detail:'Mission reward',kind:'mission'}]},TennoInventory:{build:()=>({items:[],availability:{materials:'unavailable'}}),readiness:()=>[]},chrome:{runtime:{onMessage:{addListener(listener){onMessage=listener;}}},storage:{local:{
+const context = vm.createContext({importScripts(){},AbortSignal:{timeout:()=>undefined},fetch:async url=>({ok:true,json:async()=>({source:url})}),TennoFarming:{acquisition:(name,datasets)=>({entry:null,components:[],sources:[{source:'Test node',chance:10,detail:'Mission reward',kind:'mission'}]}),find:(name,datasets)=>[{source:'Test node',chance:10,detail:'Mission reward',kind:'mission'}]},TennoInventory:{build:()=>({items:[],availability:{materials:'unavailable'}}),readiness:()=>[]},chrome:{runtime:{onMessage:{addListener(listener){onMessage=listener;}}},storage:{local:{
   get:async()=>({tennoLinkState:structuredClone(saved)}),
   set:async value=>{ await new Promise(resolve=>setImmediate(resolve)); saved=structuredClone(value.tennoLinkState); writes++; }
 }}}});
+vm.runInContext(fs.readFileSync('cycles.js','utf8'),context);
+vm.runInContext(fs.readFileSync('live-timers.js','utf8'),context);
 vm.runInContext(fs.readFileSync('background.js','utf8'),context);
 (async()=>{
   await vm.runInContext('Promise.all([setStore({profile:{}}),setStore({world:{}}),setStore({items:{names:{test:"Test"}}})])',context);
@@ -32,7 +34,15 @@ vm.runInContext(fs.readFileSync('background.js','utf8'),context);
   assert.equal(found.ok,true);
   assert.equal(saved.goal.name,'Vitality');
   assert.equal(saved.goal.sources[0].source,'Test node');
-  assert.equal(saved.goal.partial,false);
+  assert.equal(saved.goal.partial,true);
+  let fullTableRequests=0;
+  context.fetch=async()=>{fullTableRequests++;return {ok:true,json:async()=>({missionRewards:{},relics:[]})};};
+  const full=await new Promise(resolve=>onMessage({type:'FIND_GOAL_SOURCES',name:'Test item'},null,resolve));
+  assert.equal(full.ok,true);
+  assert.equal(full.goal.partial,false);
+  await new Promise(resolve=>onMessage({type:'FIND_GOAL_SOURCES',name:'Another item'},null,resolve));
+  assert.equal(fullTableRequests,1,'ingredient lookups reuse complete drop tables');
+
   const cleared = await new Promise(resolve=>onMessage({type:'CLEAR_GOAL'},null,resolve));
   assert.equal(cleared.ok,true);
   assert.equal(saved.goal,null);

@@ -27,5 +27,30 @@
     return {planets,junctions,completed:matched.size,total:planets.reduce((sum,p)=>sum+p.nodes.length,0),
       unmatched:[...completed].filter(tag=>!matched.has(tag) && !junctionTags.has(tag)).sort()};
   }
-  globalThis.TennoProgression = {chart};
+  // Public mission history is evidence of a visit, never an authoritative unlock list.
+  function notificationAccess(key, missions = [], index = {}, hasProfile = false) {
+    const targets = {
+      cetusCycle:['Plains of Eidolon'], vallisCycle:['Orb Vallis'],
+      cambionCycle:['Cambion Drift'], zarimanCycle:['Chrysalith'], duviriCycle:['Duviri']
+    };
+    const names = targets[key] || [];
+    const completed = new Set(missions.filter(row=>typeof row?.Tag === 'string' && Number.isFinite(Number(row.Completes)) && Number(row.Completes)>0).map(row=>row.Tag));
+    const match = Object.entries(index).find(([tag,node])=>completed.has(tag) && node.category === 'nodes' && names.some(name=>String(node.name).toLowerCase() === name.toLowerCase()));
+    if (hasProfile && match) return {warn:false,label:'Completion recorded',detail:`Your profile records a completion at ${match[1].name}. This is historical evidence, not a live unlock check.`};
+    const hints = {
+      archonReset:'Archon Hunts require completing Veilbreaker.',
+      incursionReset:'Check that Steel Path is unlocked in your Navigation menu.',
+      sortieReset:'Check that Sorties are available in your Navigation menu.',
+      baroArrival:'Check that you can reach the relay shown in Live activities.',
+      baroDeparture:'Check that you can reach the relay shown in Live activities.',
+      nightwaveReset:'Check Nightwave availability in your Orbiter.',
+      duviriCycle:'Check that Duviri is available in your Navigation menu.',
+      zarimanCycle:'Check that the Chrysalith and Zariman missions are available.',
+      vallisCycle:'Check that you can enter Orb Vallis from Fortuna on Venus.',
+      cambionCycle:'Check that you can enter Cambion Drift from the Necralisk on Deimos.',
+      cetusCycle:'Check that you can enter the Plains of Eidolon from Cetus on Earth.'
+    };
+    return {warn:true,label:hasProfile ? 'Access unconfirmed':'Profile needed',detail:`${hasProfile ? 'The public profile does not confirm access. Missing completion records do not mean locked.' : 'Sync your own profile to check recorded completions.'} ${hints[key] || ''}`};
+  }
+  globalThis.TennoProgression = {chart,notificationAccess};
 })();

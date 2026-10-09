@@ -21,11 +21,11 @@ Tenno Link does not collect or upload:
 
 Profile data is fetched directly from Digital Extremes and cached locally in Chrome extension storage.
 
-On `warframe.com`, the floating button opens the extension's own interface in a separate frame. Profile data is rendered in that extension frame, not copied into the website's document. The website sees the launcher and frame container.
+On `warframe.com` and `wiki.warframe.com`, the floating button opens the extension's own interface in a separate frame. Profile data is rendered in that extension frame, not copied into the website's document. The website sees the launcher and frame container.
 
 Live world-state information is fetched from the public WarframeStat.us API.
 
-The floating launcher by itself does not request profile or world-state data. Refresh checks run only while the Tenno Link interface is open in a visible tab; closing the floating interface unloads its frame. Event countdowns update from cached expiry times without another API request each second.
+The floating launcher by itself does not request profile or world-state data. Refresh checks run only while the Tenno Link interface is open in a visible tab; closing the floating interface unloads its frame. Event countdowns update from cached expiry times without another API request each second. If you enable cycle notifications and select a cycle, Chrome also checks public PC world state once per minute in the background. Notification preferences and last observed phases are stored locally. These checks do not request account data. The original transmission chime plays locally through a temporary hidden extension document. Optional spoken cycle announcements use bundled local WAV clips only; no remote voice service is used. Only the public location and phase are spoken, without profile data.
 
 Farming goal searches download public WFCD drop tables from GitHub. The name you enter is matched locally; it is not placed in the download URL. Tenno Link stores your chosen name and matching sources in Chrome extension storage, not the full drop tables.
 
@@ -51,3 +51,9 @@ Sample mode uses synthetic account data in memory and pauses refreshes. Sample d
 ## Item pictures and Star Chart
 
 Public item definitions come from api.warframestat.us. Item pictures load directly from cdn.warframestat.us, without a referrer or profile payload. Like other remote images, the CDN receives the requesting IP address and the requested image name. Profile interpretation and mission matching happen locally.
+
+Cycle alerts retain the latest 10 detected transitions locally, including the public world, phase, time, audio mode and delivery status. Previews are not recorded. The launcher restores missing background alarms without opening the dashboard or fetching account data. Transitions older than five minutes after sleep or downtime are skipped.
+
+Optional Live activity alerts share the public world-state polling and local alert history. Six additional bundled clips announce Baro visits and daily/weekly activity rotations. No personal completion, unlock or reward-claim status is inferred. Event selections are saved locally; no additional permissions or remote voice service are needed.
+
+Player profile requests are manual and rate limited across panels. Up to 20 local profile request timestamps and HTTP statuses are retained for diagnostics; that history does not contain account identifiers, cookies or request URLs. Automatic Live refresh and cycle monitoring do not call the player profile endpoint.

@@ -8,7 +8,7 @@ Tenno Link is an independent Chrome extension built around **AI Bridge**. Choose
 
 <p align="center"><img src="docs/assets/screenshots/tenno-link-banner.gif" alt="Tenno Link overview, Star Chart, and AI Bridge preview" width="100%"></p>
 
-The floating **Tenno Link** button opens the companion while you browse warframe.com. This local website preview shows where the button appears; the account shown in the animations is sample data.
+The floating **Tenno Link** button opens the companion while you browse warframe.com or wiki.warframe.com. This local website preview shows where the button appears; the account shown in the animations is sample data.
 
 <p align="center"><img src="docs/assets/screenshots/website-floating-button.png" alt="Local website preview with the Tenno Link floating button at the bottom right" width="100%"></p>
 
@@ -17,6 +17,7 @@ The floating **Tenno Link** button opens the companion while you browse warframe
 - **Plan with AI Bridge:** Choose from 12 focused plans, add a goal or quantity, preview the prompt, and copy only the profile sections you choose.
 - **Understand your account:** See Mastery Rank, career stats, equipment history, standing, and recorded mission completions.
 - **Explore the Origin System:** Search Star Chart nodes and filter missions without a recorded completion. Check access in game before planning a route.
+- **Hear cycle changes:** Open **Settings** with the cogwheel beside Refresh. Enable notifications, choose your worlds, and adjust volume. **Cephalon announcements** uses an original bundled voice that names the world, planet and new phase. **Transmission chime** adds a two-second metallic signal before speech or plays on its own when announcements are off. New notification settings default to spoken announcements; existing audio choices are preserved. Preview either while alerts are off. Alerts use API-confirmed PC phases; Chrome must be running, and sleep or network delays can postpone delivery. Reload the extension after updating to grant notification permissions.
 - **Follow live activities:** See current PC world events and pin an item to look up possible farming sources.
 
 ## AI advice that checks the current game
@@ -75,3 +76,15 @@ Source is available for noncommercial use. Selling Tenno Link, a modified copy,
 or access to either requires written permission from the relevant copyright holders.
 
 Copyright © 2026 Jaden Ah Yuen and Tenno Link contributors.
+
+Cycle speech also offers **Cephalon companion**, a bundled original metallic voice pack with 13 offline announcements. Use it in **Settings → Cycle notifications**, then **Preview announcement**. It is inspired by shipboard assistants and does not use Ordis recordings.
+
+Cycle monitoring runs with the companion closed. The floating launcher is available on both [warframe.com](https://www.warframe.com/) and the [Warframe Wiki](https://wiki.warframe.com/). Settings shows the latest 10 cycle alerts with their audio mode and delivery status; stale transitions after sleep are skipped. After updating, reload the extension and refresh existing website tabs.
+
+**Useful Live timer announcements:** Settings also offers opt-in Baro arrival and 30-minute departure warnings, daily Sortie and Steel Path incursion refreshes, weekly Archon Hunts, and Nightwave weekly challenge refreshes. They share the cephalon voice, chime and volume controls. Use **Notification settings** in Live to find them, and select any event in the audio preview. These report public availability, not your completion or eligibility.
+
+Notification settings show mission completion evidence for landscape access. The public profile is not an authoritative unlock list: missing records, quest gates, relay access and Steel Path access remain unconfirmed. Enabling an unconfirmed alert requires **Enable anyway**; existing selections stay enabled. Sample data never confirms real player access. Reopen Settings after syncing to refresh evidence.
+
+The **Farming** tab holds your pinned goal and searches the item catalog across weapons, Warframes, mods, blueprints, parts and materials. It shows catalog recipes, clickable ingredients, listed drop sources (including bounty stages and rotations), vendor costs where published, and a Wiki guide link. Sources are public possibilities, not account ownership or guaranteed availability; missing acquisition data is explicitly shown. Full drop data is cached for ten minutes while the background worker is active, with individual-table fallback.
+
+**Profile request protection:** Player profiles are synced only by manually pressing Refresh. Opening the dashboard, visible-panel refresh and cycle alarms never request profiles. Manual requests share a minimum 15-minute interval across panels and worker restarts. HTTP 403 or 429 pauses profile requests for at least one hour, honoring a longer Retry-After header; Refresh cannot bypass the pause. Live world-state monitoring uses the separate WFCD endpoint. Settings shows the last profile HTTP status and up to 20 local request attempts without identifiers or request URLs. These intervals are conservative extension choices, not a published guarantee from Digital Extremes.

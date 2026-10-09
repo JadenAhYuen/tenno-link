@@ -5,15 +5,44 @@ const elements = new Map();
 const handlers = {};
 const countdownElements = [];
 const element = id => {
-  if (!elements.has(id)) elements.set(id,{value:'',checked:true,textContent:'',innerHTML:'',classList:{add(){},remove(){}},addEventListener(){},setAttribute(){},insertAdjacentHTML(){},appendChild(){},replaceChildren(){},querySelector:()=>({disabled:false}),querySelectorAll:()=>[],focus(){},select(){},setSelectionRange(){}});
+  if (!elements.has(id)) elements.set(id,{value:'',checked:true,textContent:'',innerHTML:'',classList:{add(){},remove(){}},dataset:{},addEventListener(type,handler){this.listeners ||= {}; this.listeners[type]=handler;},setAttribute(){},insertAdjacentHTML(){},appendChild(){},replaceChildren(){},querySelector:()=>({disabled:false,focus(){}}),querySelectorAll:()=>[],focus(){},select(){},setSelectionRange(){}});
   return elements.get(id);
 };
 const context = vm.createContext({console,structuredClone,setTimeout,clearTimeout,setInterval:()=>1,clearInterval(){},
   document:{visibilityState:'visible',addEventListener(type,handler){handlers[type]=handler;},getElementById:element,querySelectorAll:selector=>selector==='[data-countdown]'?countdownElements:[],createElement:()=>({dataset:{},style:{},appendChild(){},setAttribute(){},select(){},remove(){}}),execCommand:()=>false,body:{dataset:{},appendChild(){}}},window:{addEventListener(){}},
   chrome:{runtime:{sendMessage:async()=>({ok:true,state:{}})}},navigator:{clipboard:{writeText:async()=>{}}}
 });
-for (const file of ['prompts.js','catalog.js','progression.js','inventory.js','insights.js','popup.js']) vm.runInContext(fs.readFileSync(file,'utf8'),context);
+for (const file of ['prompts.js','catalog.js','progression.js','inventory.js','insights.js','cycles.js','live-timers.js','popup.js']) vm.runInContext(fs.readFileSync(file,'utf8'),context);
 setImmediate(()=>{(async()=>{
+  assert.ok(element('settings').innerHTML.includes('Cephalon announcements'));
+  for (const phase of ['day','night','warm','cold','fass','vome','anger','envy','fear','sorrow','joy','grineer','corpus']) {
+    const icon=vm.runInContext(`cycleStateIcon('${phase}')`,context);
+    assert.ok(icon.includes(`cycle-${phase}`),`${phase} has vector artwork`);
+    assert.ok(icon.includes('viewBox="0 0 24 24"'));
+    const row=vm.runInContext(`liveRow('World',['${phase}'],null,12,{state:'${phase}'})`,context);
+    assert.ok(row.includes('class="world-phase"'),'phase and icon wrap together');
+  }
+
+  assert.ok(element('settings').innerHTML.includes('Enable anyway'));
+  assert.ok(element('settings').innerHTML.includes('Fortuna / Orb Vallis'));
+  assert.ok(element('settings').innerHTML.includes('Necralisk / Cambion Drift'));
+  assert.ok(element('settings').innerHTML.includes('Chrysalith on Zariman'));
+  const toggle=element('notify-vallisCycle');
+  toggle.dataset={cycleKey:'vallisCycle'}; toggle.checked=true;
+  element('settings').listeners.change({target:toggle});
+  assert.equal(toggle.checked,false,'unconfirmed access does not save or enable accidentally');
+  assert.equal(element('access-warning-vallisCycle').hidden,false);
+  toggle.dataset.accessOverride='true'; toggle.checked=true;
+  element('settings').listeners.change({target:toggle});
+  assert.equal(vm.runInContext('state.cycleNotifications.cycles.vallisCycle',context),true,'explicit override enables alert');
+  assert.equal(element('access-warning-vallisCycle').hidden,true);
+
+  assert.ok(element('settings').innerHTML.includes('Nightwave weekly challenges refresh'));
+  assert.ok(element('settings').innerHTML.includes('Baro leaves in 30 minutes'));
+  assert.ok(element('settings').innerHTML.includes('data-live-event-key'));
+  assert.ok(element('settings').innerHTML.includes('Cambion Drift on Deimos'));
+  assert.ok(!element('live').innerHTML.includes('cycleNotificationStatus'));
+  assert.ok(!element('settings').innerHTML.includes('planet tones'));
   const failedImage = {hidden:false,matches:selector=>selector === '.item-art img'};
   handlers.error({target:failedImage});
   assert.equal(failedImage.hidden,true);
@@ -23,7 +52,8 @@ setImmediate(()=>{(async()=>{
   vm.runInContext(`state={profile:{normalized:{identity:{displayName:'Test'},summary:{missionsCompleted:0},arsenal:{weaponStats:[{type:'<img src=x onerror=alert(1)>',equipTime:60}]},progression:{affiliations:[]}}}}; includeOtherCombat=true; renderAll();`,context);
   assert.ok(element('home').innerHTML.includes('Not reported'));
   assert.ok(element('home').innerHTML.includes('Live in the Origin System'));
-  assert.ok(element('live').innerHTML.includes('Pinned farming goal'));
+  assert.ok(element('farming').innerHTML.includes('Search any item'));
+  assert.ok(!element('live').innerHTML.includes('goalForm'));
   assert.match(vm.runInContext('timeLeft(new Date(Date.now()+61000).toISOString())',context),/^1m 0[0-2]s$/);
   assert.match(vm.runInContext('timeLeft(new Date(Date.now()+8*86400000).toISOString())',context),/^8d 0h$/);
   assert.equal(vm.runInContext('timeLeft(new Date(Date.now()+30*86400000).toISOString())',context),'time unavailable');
@@ -39,7 +69,13 @@ setImmediate(()=>{(async()=>{
     ? {ok:true,goal:{name:'Vitality',checkedAt:Date.now(),sources:[{source:'Mantle, Earth',detail:'Mission reward',chance:10.84}],partial:false}}
     : {ok:true,state:{}};
   await element('goalForm').onsubmit({preventDefault(){}});
-  assert.ok(element('live').innerHTML.includes('Mantle, Earth'));
+  assert.ok(element('farming').innerHTML.includes('Mantle, Earth'));
+  const acquisitionHtml=vm.runInContext(`goalAcquisition({name:'Test Gun',entry:{buildPrice:15000,buildTime:3600,description:'A test weapon'},components:[{name:'Test Gun Blueprint',itemCount:1,sources:[{source:'Ur, Uranus',detail:'Disruption reward',chance:1.25}]}]})`,context);
+  assert.ok(acquisitionHtml.includes('Crafting recipe'));
+  assert.ok(acquisitionHtml.includes('data-farm-item="Test Gun Blueprint"'));
+  assert.ok(acquisitionHtml.includes('Ur, Uranus'));
+  assert.ok(acquisitionHtml.includes('15,000 Credits'));
+
   vm.runInContext(`state.world={raw:{nightwave:{activeChallenges:Array(10),expiry:new Date(Date.now()+165*86400000).toISOString()},arbitration:{node:'SolNode000',expiry:new Date(Date.now()+100*365*86400000).toISOString()},steelPath:{currentReward:{name:'50,000 Kuva'}}},lastSyncAt:Date.now()}; renderLive();`,context);
   assert.ok(element('live').innerHTML.includes('Nightwave challenges'));
   assert.ok(element('live').innerHTML.includes('10 active'));
@@ -56,7 +92,20 @@ setImmediate(()=>{(async()=>{
     steelPath:{currentReward:{name:'50,000 Kuva'},incursions:{expiry:new Date(Date.now()+43200000).toISOString()}},
     dailyDeals:[{item:'Greater Vazarin Lens',salePrice:20,originalPrice:40,sold:0,total:50,expiry:new Date(Date.now()+3600000).toISOString()}]
   },lastSyncAt:Date.now()}; renderLive();`,context);
-  assert.ok(element('live').innerHTML.includes('Plains of Eidolon'));
+  assert.ok(element('live').innerHTML.includes('Cetus / Plains of Eidolon'));
+  assert.ok(element('live').innerHTML.includes('Full phase: 50 minutes'));
+  assert.ok(element('live').innerHTML.includes('Timing &amp; useful facts'));
+  assert.ok(vm.runInContext("cycleInformation('cambionCycle','vome')",context).includes('Full phase: 50 minutes'));
+  assert.ok(vm.runInContext("cycleInformation('vallisCycle','warm')",context).includes('6 minutes 40 seconds'));
+  assert.ok(vm.runInContext("cycleInformation('zarimanCycle','corpus')",context).includes('2 hours 30 minutes'));
+  assert.ok(vm.runInContext("cycleInformation('duviriCycle','sorrow')",context).includes('Next: fear'));
+  assert.ok(!vm.runInContext("cycleInformation('cetusCycle',undefined)",context).includes('Next: undefined'));
+  for (const title of ['World cycles','Sortie','Archon Hunt','Current events','Alerts','Void fissures','Steel Path fissures','Void storms','Vendors & weekly','Steel Path incursions','Nightwave challenges','Arbitration','Invasions',"Darvo's deal",'News']) {
+    context.liveTitle=title;
+    assert.ok(vm.runInContext('liveInformation(liveTitle)',context).includes('Read the guide'),title+' has helpful facts and a guide');
+  }
+
+  assert.equal(vm.runInContext('cycleRows({earthCycle:{state:"night",expiry:new Date(Date.now()+60000).toISOString()}}).length',context),0,'legacy Earth cycle is hidden');
   assert.ok(element('live').innerHTML.includes('cycle-night'));
   assert.ok(element('live').innerHTML.includes('alt="" aria-hidden="true"'));
   assert.equal(vm.runInContext("worldLocationSystem('Pago, Kuva Fortress')",context),'Kuva Fortress');
@@ -70,7 +119,7 @@ setImmediate(()=>{(async()=>{
   assert.ok(element('live').innerHTML.includes('Greater Vazarin Lens'));
   assert.ok(element('live').innerHTML.includes('data-live-expand="all"'));
   assert.ok(element('live').innerHTML.includes('class="live-chevron"'));
-  assert.ok(element('live').innerHTML.includes('Tenno tip'));
+  assert.ok(element('live').innerHTML.includes('Timing &amp; useful facts'));
   assert.ok(!element('home').innerHTML.includes('Cipher success'));
   const mission=vm.runInContext(`missionCard({name:'Apollodorus',missionType:'MT_SURVIVAL',minEnemyLevel:6,maxEnemyLevel:11,faction:'FC_GRINEER',tileset:'ShipTileset',masteryReq:5,questReqs:['ExampleQuest'],completed:true})`,context);
   assert.ok(mission.includes('Enemy level'));
@@ -136,9 +185,12 @@ setImmediate(()=>{(async()=>{
   await new Promise(setImmediate);
   assert.equal(calls[0].type,'SYNC_ACTIVE');
   assert.equal(calls[0].force,false);
-  assert.equal(calls[0].profile,true);
+  assert.equal(calls[0].profile,false,'automatic polling never requests the player profile');
   assert.equal(calls[0].world,true);
   calls.length=0;
+  vm.runInContext('state.profile.nextAllowedSyncAt=0; autoRefreshIfDue()',context);
+  await new Promise(setImmediate);
+  assert.equal(calls.length,0,'an expired profile alone cannot trigger automatic sync');
   vm.runInContext('state.world.nextAllowedSyncAt=0; autoRefreshIfDue()',context);
   await new Promise(setImmediate);
   assert.equal(calls[0].profile,false,'world refresh should not request a fresh profile');

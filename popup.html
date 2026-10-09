@@ -21,7 +21,10 @@
         <h1>Tenno Link</h1>
       </div>
 
-      <button id="syncAll" class="round sync-button" title="Refresh profile and live events" aria-label="Refresh profile and live events">
+      <button id="openSettings" data-page="settings" class="round settings-button" type="button" title="Settings" aria-label="Open settings" aria-controls="settings">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="m10 3-1 3-3 1-2 3 2 2-1 3 3 2 3-1 2 2 3-1 1-3 3-2-1-3-3-1-1-3z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+      <button id="syncAll" class="round sync-button" title="Manually refresh profile and live events" aria-label="Manually refresh profile and live events">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.7-4.2"/><path d="M5 3.8v4.2h4.2"/><path d="M4 13a8 8 0 0 0 14.7 4.2"/><path d="M19 20.2V16h-4.2"/></svg>
       </button>
     </header>
@@ -50,13 +53,16 @@
       <button data-page="chart">Star Chart</button>
       <button data-page="progress">Standing</button>
       <button data-page="live">Live</button>
+      <button data-page="farming">Farming</button>
     </nav>
     <div id="sampleNotice" class="panel" hidden><strong>Sample mode · synthetic account data</strong><p class="muted">This preview does not reflect your account or current farming sources.</p><button id="exitSample" type="button">Exit sample mode</button></div>
     <section id="home" class="page active" aria-label="Overview"></section>
     <section id="arsenal" class="page" aria-label="Equipment"></section>
     <section id="chart" class="page" aria-label="Star Chart"></section>
     <section id="progress" class="page" aria-label="Standing"></section>
+    <section id="settings" class="page" aria-label="Settings"></section>
     <section id="live" class="page" aria-label="Live"></section>
+    <section id="farming" class="page" aria-label="Farming"></section>
 
     <section id="ai" class="page">
       <div class="panel ai-panel">
@@ -153,7 +159,7 @@
     </section>
 
     <footer>
-      <span id="status" role="status">Saved locally · Refreshes while open</span>
+      <span id="status" role="status">Profile sync is manual · Live events refresh while open</span>
       <span class="footer-node"></span>
     </footer>
 
@@ -173,6 +179,8 @@
   <script src="progression.js"></script>
   <script src="inventory.js"></script>
   <script src="insights.js"></script>
+  <script src="cycles.js"></script>
+  <script src="live-timers.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

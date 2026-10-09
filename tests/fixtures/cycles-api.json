@@ -1,0 +1,73 @@
+{
+  "capturedAt": "2026-10-04T11:14:36.5591458+00:00",
+  "world": {
+    "cetusCycle": {
+      "id": "cetusCycle1791116700000",
+      "activation": "2026-10-04T10:45:00Z",
+      "expiry": "2026-10-04T12:25:00Z",
+      "isDay": true,
+      "state": "day",
+      "timeLeft": "1h 11m 0s",
+      "isCetus": true
+    },
+    "vallisCycle": {
+      "id": "vallisCycle1791111600000",
+      "activation": "2026-10-04T11:00:00Z",
+      "expiry": "2026-10-04T11:20:08Z",
+      "isWarm": false,
+      "state": "cold"
+    },
+    "cambionCycle": {
+      "id": "cambionCycle1791116700000",
+      "activation": "2026-10-04T10:45:00Z",
+      "expiry": "2026-10-04T12:25:00Z",
+      "timeLeft": "1h 11m 0s",
+      "state": "fass"
+    },
+    "duviriCycle": {
+      "id": "duviriCyclesorrow1791115200000",
+      "activation": "2026-10-04T10:00:00Z",
+      "expiry": "2026-10-04T12:00:00Z",
+      "state": "sorrow",
+      "choices": [
+        {
+          "category": "normal",
+          "categoryKey": "EXC_NORMAL",
+          "choices": [
+            "Ash",
+            "Frost",
+            "Nyx"
+          ]
+        },
+        {
+          "category": "hard",
+          "categoryKey": "EXC_HARD",
+          "choices": [
+            "Torid",
+            "DualToxocyst",
+            "DualIchor",
+            "Miter",
+            "Atomos"
+          ]
+        }
+      ]
+    },
+    "zarimanCycle": {
+      "id": "zarimanCycle1791119700000",
+      "activation": "2026-10-04T10:45:00Z",
+      "expiry": "2026-10-04T13:15:00Z",
+      "isCorpus": true,
+      "state": "corpus",
+      "timeLeft": "2h 55s"
+    },
+    "earthCycle": {
+      "id": "earthCycle1791115200000",
+      "activation": "2026-10-04T08:00:00.368Z",
+      "expiry": "2026-10-04T12:00:00.368Z",
+      "isDay": true,
+      "state": "day",
+      "timeLeft": "46m 0s"
+    }
+  },
+  "source": "https://api.warframestat.us/pc?language=en"
+}

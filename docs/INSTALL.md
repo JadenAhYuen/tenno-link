@@ -39,8 +39,10 @@ Tenno Link currently requests:
 - 🍪 **cookies** — reads the Warframe `gid` used to request profile-view data.
 - 💾 **storage** — caches normalized profile and public world-state data locally.
 - 📋 **clipboardWrite** — copies the AI prompt/profile package when you explicitly click a copy action.
-- 🗂️ **offscreen** — opens a temporary hidden extension document to complete that copy action when the floating panel is restricted by the website.
-- 🌐 **warframe.com host access** — profile linking.
+- 🗂️ **offscreen** — opens a temporary hidden extension document to copy text and play the local chime and announcement pack.
+- ⏱️ **alarms** — checks selected public cycles once per minute with the panel closed.
+- 🔔 **notifications** — displays cycle-change alerts; audio is controlled in Settings.
+- 🌐 **warframe.com host access** — profile linking and the floating companion on the official website and wiki.warframe.com.
 - 📡 **warframestat.us host access** — public world-state and maintained item/recipe metadata.
 
 AI provider buttons optionally request **scripting** and access to the selected
@@ -51,3 +53,5 @@ sending the request always remains your choice.
 Tenno Link does not send your Warframe login password or session cookies to a Tenno Link server.
 
 > 🛍️ **Planned stable installation:** Chrome Web Store for one-click install and automatic updates.
+
+After reloading an update, refresh existing Warframe and Wiki tabs to load the updated companion. Open the cogwheel **Settings** to enable notifications and select worlds. Earth forest missions and Cetus / Plains of Eidolon share one cycle; old Earth selections migrate to the combined entry.

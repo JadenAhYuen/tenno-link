@@ -181,3 +181,33 @@ footer { color:var(--muted); font-size:12px; padding:12px 0 0; overflow-wrap:any
 .provider-buttons button { white-space:normal; }
 .prompt-preview pre { max-height:360px; overflow:auto; white-space:pre-wrap; overflow-wrap:anywhere; }
 @media (max-width:420px) { .provider-buttons { grid-template-columns:1fr; } }
+
+.settings-button {display:grid; place-items:center; flex-shrink:0; padding:9px;}
+.settings-button.active {background:var(--selected); border-color:var(--accent); color:var(--accent);}
+.settings-heading {margin-bottom:20px;}
+.settings-heading h2 {font-size:24px; margin-top:4px;}
+.cycle-notifications h3,.notification-preview h3 {margin:0 0 8px;}
+.cycle-notifications p {color:var(--muted); font-size:13px;}
+.setting-toggle {display:flex; align-items:center; justify-content:space-between; gap:20px; padding:16px 0; border-bottom:1px solid var(--line); cursor:pointer;}
+.setting-toggle small,.cycle-notification-row small {display:block; color:var(--muted); font-size:12px; margin-top:3px;}
+.setting-toggle input,.cycle-notification-row input {min-height:20px; width:20px; flex-shrink:0; accent-color:var(--accent);}
+.notification-options {border:0; padding:0; margin:16px 0; min-width:0;}
+.notification-options legend {font-size:12px; color:var(--muted);}
+.notification-options:disabled {opacity:.5;}
+.volume-setting {display:grid; grid-template-columns:1fr auto; gap:10px; margin:20px 0;}
+.volume-setting input {grid-column:1/-1; width:100%; padding:0; accent-color:var(--accent);}
+.cycle-notification-row {border-top:1px solid var(--line);}
+.cycle-notification-row label {display:flex; align-items:center; gap:12px; cursor:pointer; padding:12px 0;}
+.notification-save {font-size:13px; color:var(--accent); min-height:24px;}
+.notification-preview label {display:flex; align-items:center; gap:12px; margin:16px 0;}
+.notification-preview select {flex:1; min-width:0;}
+.notification-preview > div {display:flex; flex-wrap:wrap; gap:10px;}
+
+@media(max-width:380px) { .topbar {gap:8px;} .topbar .brand .eyebrow {font-size:8px; letter-spacing:.03em;} .topbar h1 {font-size:20px;} .topbar .brand-icon img {width:32px; height:32px;} }
+
+.notification-access { padding: 0 12px 12px 34px; color: var(--muted); }
+.notification-access-warning { margin-top: 8px; padding: 12px; border: 1px solid var(--accent); border-radius: 8px; }
+.notification-access-warning p { margin-top: 0; }
+
+.farming-component { text-align:left; color:var(--accent); }
+.farming-acquisition { margin:16px 0; }

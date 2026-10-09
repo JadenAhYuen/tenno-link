@@ -59,6 +59,8 @@
           if (item[key] != null) entry[key] = item[key];
         }
       }
+      for (const key of ['description','wikiaUrl','buildPrice','buildTime','buildQuantity','marketCost']) if (item[key] != null) entry[key]=item[key];
+      if (Array.isArray(item.drops)) entry.drops=item.drops;
       index[item.uniqueName] = entry;
     }
     // Recipe-only components (including blueprints) also need canonical names.
@@ -69,6 +71,17 @@
       const partCategory = category(part);
       index[part.uniqueName] = {name:blueprint ? `${parent.name} Blueprint` : genericPart ? `${parent.name} ${part.name}` : part.name,
         category:blueprint ? 'blueprints' : partCategory === 'other' ? 'parts' : partCategory,imageName:part.imageName || null};
+    }
+    for (const parent of rows) {
+      const entry=index[parent.uniqueName];
+      if (!entry || !Array.isArray(parent.components)) continue;
+      entry.components=parent.components.filter(part=>part?.uniqueName).map(part=>({
+        uniqueName:part.uniqueName,
+        name:index[part.uniqueName]?.name || (part.name === 'Blueprint' || (!part.name && /Blueprint(?:Item)?$/i.test(part.uniqueName)) ? `${parent.name} Blueprint` : part.name) || 'Unresolved component',
+        itemCount:part.itemCount,
+        drops:Array.isArray(part.drops) ? part.drops : []
+      }));
+      for (const part of entry.components) if (!index[part.uniqueName] && part.name !== 'Unresolved component') index[part.uniqueName]={name:part.name,category:part.name.endsWith(' Blueprint') ? 'blueprints':'parts',drops:part.drops};
     }
     return index;
   }
